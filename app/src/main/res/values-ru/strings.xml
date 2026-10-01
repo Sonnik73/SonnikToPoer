@@ -225,4 +225,23 @@
     <string name="plateau_sessions">Тренировок без роста: %d</string>
     <string name="plateau_hint">Если столько тренировок подряд ни один показатель (вес, повторения, время, дистанция) не вырос, у упражнения появится подсказка, как увеличить нагрузку.</string>
     <string name="notifications_needed">Разрешите уведомления, чтобы таймер отдыха срабатывал при заблокированном экране</string>
+
+    <string name="watch_title">Данные с часов</string>
+    <string name="watch_hint">Внесите показатели тренировки со смарт-часов. Все поля необязательные.</string>
+    <string name="watch_max_hr">Максимальный пульс, уд/мин</string>
+    <string name="watch_avg_hr">Средний пульс, уд/мин</string>
+    <string name="watch_duration">Время тренировки</string>
+    <string name="watch_hours">ч</string>
+    <string name="watch_minutes">мин</string>
+    <string name="watch_calories">Сожжено, ккал</string>
+    <string name="watch_save_finish">Сохранить и завершить</string>
+    <string name="watch_skip_finish">Завершить без данных</string>
+    <string name="watch_line_empty">⌚ Данные с часов: не внесены</string>
+    <string name="watch_max_hr_short">❤ макс %d</string>
+    <string name="watch_avg_hr_short">ср %d</string>
+    <string name="watch_duration_short">⏱ %s</string>
+    <string name="watch_calories_short">🔥 %d ккал</string>
+    <string name="stat_calories">Сожжено, ккал</string>
+    <string name="stat_avg_duration">Средняя длительность</string>
+    <string name="stat_avg_max_hr">Средний макс. пульс</string>
 </resources>

@@ -162,6 +162,9 @@ interface AppDao {
     @Query("SELECT startedAt FROM workouts ORDER BY startedAt")
     fun observeWorkoutDates(): Flow<List<Long>>
 
+    @Query("SELECT * FROM workouts ORDER BY startedAt")
+    fun observeWorkouts(): Flow<List<WorkoutEntity>>
+
     @Query("SELECT DISTINCT we.exerciseId FROM workout_exercises we JOIN sets s ON s.workoutExerciseId = we.id")
     fun observeExerciseIdsWithSets(): Flow<List<String>>
 

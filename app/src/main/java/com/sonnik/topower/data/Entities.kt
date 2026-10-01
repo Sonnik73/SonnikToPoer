@@ -50,7 +50,15 @@ data class WorkoutEntity(
     val bodyWeight: Double? = null,
     val note: String = "",
     val updatedAt: Long = now(),
-)
+    /** Данные со смарт-часов, вносятся вручную после тренировки. */
+    val maxHeartRate: Int? = null,
+    val avgHeartRate: Int? = null,
+    val watchDurationSec: Int? = null,
+    val calories: Int? = null,
+) {
+    val hasWatchData: Boolean
+        get() = maxHeartRate != null || avgHeartRate != null || watchDurationSec != null || calories != null
+}
 
 @Serializable
 @Entity(

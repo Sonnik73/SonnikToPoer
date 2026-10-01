@@ -31,6 +31,7 @@ import com.sonnik.topower.ui.common.SectionCard
 import com.sonnik.topower.ui.common.SectionTitle
 import com.sonnik.topower.ui.common.StatRow
 import com.sonnik.topower.ui.common.kg
+import com.sonnik.topower.ui.workout.formatHoursMinutes
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -41,6 +42,7 @@ fun StatsScreen(openExercise: (String) -> Unit) {
     val dates by remember { repo.dao.observeWorkoutDates() }.collectAsStateWithLifecycle(initialValue = null)
     val sets by remember { repo.dao.observeAllSets() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val bodyWeights by remember { repo.dao.observeBodyWeights() }.collectAsStateWithLifecycle(initialValue = emptyList())
+    val workouts by remember { repo.dao.observeWorkouts() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val exercises by remember { repo.dao.observeExercises(includeArchived = true) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -80,6 +82,21 @@ fun StatsScreen(openExercise: (String) -> Unit) {
                     stringResource(R.string.stat_total_sets) to overall.totalSets.toString(),
                     stringResource(R.string.stat_tonnage) to formatNumber(overall.totalTonnage, 0),
                 )
+            }
+            // Данные со смарт-часов: сумма ккал, средняя длительность и средний максимальный пульс.
+            val calories = workouts.mapNotNull { it.calories }
+            val durations = workouts.mapNotNull { it.watchDurationSec }
+            val maxHrs = workouts.mapNotNull { it.maxHeartRate }
+            if (calories.isNotEmpty() || durations.isNotEmpty() || maxHrs.isNotEmpty()) {
+                item {
+                    StatRow(
+                        stringResource(R.string.stat_calories) to (if (calories.isEmpty()) "—" else calories.sum().toString()),
+                        stringResource(R.string.stat_avg_duration) to
+                            (if (durations.isEmpty()) "—" else formatHoursMinutes(durations.average().toInt())),
+                        stringResource(R.string.stat_avg_max_hr) to
+                            (if (maxHrs.isEmpty()) "—" else maxHrs.average().toInt().toString()),
+                    )
+                }
             }
             if (overall.totalDistanceKm > 0 || overall.totalDurationSec > 0) {
                 item {

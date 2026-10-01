@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -124,11 +125,10 @@ private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
     var saveTemplate by remember { mutableStateOf(false) }
     val savedMsg = stringResource(R.string.template_saved)
 
+    var finishing by remember { mutableStateOf(false) }
+    val restTimer = LocalRestTimer.current
     if (workout.finishedAt == null) {
-        TextButton(onClick = {
-            repo.launch { finishWorkout(workout) }
-            onBack()
-        }) {
+        TextButton(onClick = { finishing = true }) {
             Icon(Icons.Filled.Check, contentDescription = null)
             Spacer(Modifier.width(4.dp))
             Text(stringResource(R.string.finish_workout))
@@ -167,6 +167,23 @@ private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
             onDismiss = { confirmDelete = false },
         )
     }
+    if (finishing) {
+        WatchDataDialog(
+            workout = workout,
+            finishing = true,
+            onSave = { v ->
+                restTimer.stop()
+                repo.launch { finishWorkout(workout.withWatch(v)) }
+                onBack()
+            },
+            onSkip = {
+                restTimer.stop()
+                repo.launch { finishWorkout(workout) }
+                onBack()
+            },
+            onDismiss = { finishing = false },
+        )
+    }
     if (saveTemplate) {
         TextInputDialog(
             title = stringResource(R.string.save_as_template),
@@ -196,6 +213,7 @@ private fun WorkoutContent(
     var picking by remember { mutableStateOf(false) }
     var setDialog by remember { mutableStateOf<SetDialogState?>(null) }
     var removing by remember { mutableStateOf<WorkoutExerciseFull?>(null) }
+    var editingWatch by remember { mutableStateOf(false) }
 
     val allEquipment by remember { repo.dao.observeEquipment(includeArchived = true) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
@@ -248,6 +266,20 @@ private fun WorkoutContent(
                     label = stringResource(R.string.body_weight_label),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { editingWatch = true }
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        watchSummary(workout)?.let { "⌚ $it" } ?: stringResource(R.string.watch_line_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.watch_title))
+                }
             }
         }
 
@@ -369,6 +401,16 @@ private fun WorkoutContent(
         )
     }
 
+    if (editingWatch) {
+        WatchDataDialog(
+            workout = workout,
+            finishing = false,
+            onSave = { v -> repo.launch { updateWorkout(latestWorkout.withWatch(v)) } },
+            onSkip = {},
+            onDismiss = { editingWatch = false },
+        )
+    }
+
     removing?.let { entry ->
         ConfirmDialog(
             title = stringResource(R.string.remove_from_workout) + "?",
@@ -481,3 +523,10 @@ private fun ExerciseCard(
         }
     }
 }
+
+private fun WorkoutEntity.withWatch(v: WatchValues) = copy(
+    maxHeartRate = v.maxHeartRate,
+    avgHeartRate = v.avgHeartRate,
+    watchDurationSec = v.durationSec,
+    calories = v.calories,
+)

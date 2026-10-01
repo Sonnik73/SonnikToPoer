@@ -41,6 +41,32 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate3To4AddsWatchData() {
+        createDatabase(3).apply {
+            execSQL("INSERT INTO workouts (id, startedAt, finishedAt, bodyWeight, note, updatedAt) VALUES ('w1', 1, 2, 80.0, '', 1)")
+            close()
+        }
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(*MIGRATIONS)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            runBlocking {
+                val workout = db.dao().allWorkouts().single()
+                assertEquals(80.0, workout.bodyWeight!!, 1e-9)
+                assertNull(workout.maxHeartRate)
+                assertFalse(workout.hasWatchData)
+                db.dao().upsertWorkout(workout.copy(maxHeartRate = 165, watchDurationSec = 4320, calories = 540))
+                val updated = db.dao().allWorkouts().single()
+                assertEquals(165, updated.maxHeartRate)
+                assertEquals(540, updated.calories)
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun migrate2To3AddsRestTime() {
         createDatabase(2).apply {
             execSQL(

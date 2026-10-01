@@ -29,6 +29,7 @@ import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.common.formatDateTime
+import com.sonnik.topower.ui.workout.watchSummary
 
 @Composable
 fun HistoryScreen(openWorkout: (String) -> Unit) {
@@ -80,6 +81,7 @@ private fun WorkoutCard(summary: WorkoutSummary, onClick: () -> Unit) {
                 stringResource(R.string.exercises_and_sets, summary.exerciseCount, summary.setCount),
             ).joinToString(" · ")
             Text(details, style = MaterialTheme.typography.bodyMedium)
+            watchSummary(w)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             summary.exerciseNames?.let {
                 Text(
                     it,

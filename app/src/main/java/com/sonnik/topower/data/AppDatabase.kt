@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TemplateExerciseEntity::class,
         EquipmentEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -58,4 +58,14 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
-val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+/** v4: данные со смарт-часов у тренировки. */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `workouts` ADD COLUMN `maxHeartRate` INTEGER")
+        db.execSQL("ALTER TABLE `workouts` ADD COLUMN `avgHeartRate` INTEGER")
+        db.execSQL("ALTER TABLE `workouts` ADD COLUMN `watchDurationSec` INTEGER")
+        db.execSQL("ALTER TABLE `workouts` ADD COLUMN `calories` INTEGER")
+    }
+}
+
+val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
