@@ -160,7 +160,7 @@ private fun RecoveryLegend(idle: Color) {
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Brush.horizontalGradient(RecoveryStops.map { it.first to it.second }.toTypedArray()))
+                    .background(Brush.horizontalGradient(*RecoveryStops.toTypedArray()))
             )
             Row(Modifier.fillMaxWidth()) {
                 Text(
