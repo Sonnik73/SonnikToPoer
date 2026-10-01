@@ -40,10 +40,6 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
 
-      - name: Print Room schemas
-        if: always() && github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
-        run: find app/schemas -name '5.json' -print -exec cat {} \;
-
       - name: Commit UI screenshots
         if: always() && github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
         run: |
