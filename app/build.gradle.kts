@@ -93,3 +93,8 @@ dependencies {
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
 }
+
+// Зависший тест не должен держать сборку бесконечно.
+tasks.withType<Test>().configureEach {
+    timeout.set(java.time.Duration.ofMinutes(8))
+}

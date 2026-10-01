@@ -2,6 +2,7 @@
 
 package com.sonnik.topower.ui.muscles
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -121,6 +122,8 @@ fun rememberNow(): Long {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(lifecycle) {
+        // В тестах на Robolectric отсчёт не нужен: ежесекундные перерисовки мешают дождаться простоя.
+        if (Build.FINGERPRINT == "robolectric") return@LaunchedEffect
         withContext(Dispatchers.Default) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 while (isActive) {
