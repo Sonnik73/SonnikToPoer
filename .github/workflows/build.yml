@@ -40,6 +40,9 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
 
+      - name: Print Room schemas
+        run: find app/schemas -name '*.json' -print -exec cat {} \;
+
       - name: Rename APK
         run: |
           mkdir -p dist
