@@ -35,7 +35,7 @@ fun HistoryScreen(openWorkout: (String) -> Unit) {
     val repo = LocalRepository.current
     val workouts by remember { repo.dao.observeWorkoutSummaries() }.collectAsStateWithLifecycle(initialValue = null)
 
-    ScreenScaffold(title = stringResource(R.string.nav_history)) { padding ->
+    ScreenScaffold(title = stringResource(R.string.nav_history), showSettings = true) { padding ->
         val list = workouts
         when {
             list == null -> Unit

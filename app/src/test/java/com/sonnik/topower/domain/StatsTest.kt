@@ -18,7 +18,8 @@ class StatsTest {
         sec: Int? = null,
         km: Double? = null,
         warmup: Boolean = false,
-    ) = SetRecord(workout, date, body, useBody, reps, weight, sec, km, warmup)
+        pair: Boolean = false,
+    ) = SetRecord(workout, date, body, useBody, reps, weight, sec, km, warmup, pair)
 
     private val bench = ExerciseConfig(trackReps = true, trackWeight = true, trackTime = false, trackDistance = false, useBodyWeight = false)
     private val pullUps = ExerciseConfig(trackReps = true, trackWeight = true, trackTime = false, trackDistance = false, useBodyWeight = true)
@@ -64,6 +65,16 @@ class StatsTest {
         val weight = stats.metrics.first { it.metric == Metric.WEIGHT }
         assertEquals(80.0, weight.first.value, 1e-9)
         assertEquals(91.0, weight.best.value, 1e-9)
+    }
+
+    @Test
+    fun pairDoublesVolumeButNotWeight() {
+        val records = listOf(set("a", 1, reps = 10, weight = 10.0, pair = true))
+        val stats = computeExerciseStats(records, bench)!!
+        assertEquals(10.0, stats.metrics.first { it.metric == Metric.WEIGHT }.best.value, 1e-9)
+        assertEquals(200.0, stats.metrics.first { it.metric == Metric.VOLUME }.best.value, 1e-9)
+        val overall = computeOverallStats(listOf(1L), records, LocalDate.of(2026, 10, 1), ZoneOffset.UTC)
+        assertEquals(200.0, overall.totalTonnage, 1e-9)
     }
 
     @Test

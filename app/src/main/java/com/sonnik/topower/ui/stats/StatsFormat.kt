@@ -23,6 +23,7 @@ fun SetWithContext.toRecord() = SetRecord(
     durationSec = set.durationSec,
     distanceKm = set.distanceKm,
     isWarmup = set.isWarmup,
+    pair = set.pair,
 )
 
 fun ExerciseEntity.config() = ExerciseConfig(
@@ -65,6 +66,7 @@ fun formatRecord(record: SetRecord, exercise: ExerciseEntity): String = formatSe
         durationSec = record.durationSec,
         distanceKm = record.distanceKm,
         isWarmup = record.isWarmup,
+        pair = record.pair,
     ),
     exercise,
     record.bodyWeight,

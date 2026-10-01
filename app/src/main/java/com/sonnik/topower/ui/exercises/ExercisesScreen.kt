@@ -33,7 +33,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.data.ExerciseEntity
+import com.sonnik.topower.ui.inventory.equipmentTypeLabel
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ConfirmDialog
 import com.sonnik.topower.ui.common.EmptyState
@@ -46,6 +48,7 @@ fun trackedSummary(e: ExerciseEntity): String = buildList {
     if (e.trackWeight) add(stringResource(R.string.track_weight))
     if (e.trackTime) add(stringResource(R.string.track_time))
     if (e.trackDistance) add(stringResource(R.string.track_distance))
+    EquipmentType.of(e.equipmentType)?.let { add(equipmentTypeLabel(it)) }
 }.joinToString(", ")
 
 @Composable
@@ -64,6 +67,7 @@ fun ExercisesScreen(openStats: (String) -> Unit) {
 
     ScreenScaffold(
         title = stringResource(R.string.nav_exercises),
+        showSettings = true,
         actions = {
             Box {
                 IconButton(onClick = { menuOpen = true }) {

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseFull
@@ -173,6 +174,10 @@ private fun WorkoutContent(
     var setDialog by remember { mutableStateOf<SetDialogState?>(null) }
     var removing by remember { mutableStateOf<WorkoutExerciseFull?>(null) }
 
+    val allEquipment by remember { repo.dao.observeEquipment(includeArchived = true) }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val equipmentById = allEquipment.associateBy { it.id }
+
     // Подходы прошлой тренировки по каждому упражнению — для подсказки и автозаполнения.
     var previous by remember { mutableStateOf<Map<String, List<SetEntity>>>(emptyMap()) }
     val exerciseIds = items.map { it.exercise.id }.distinct()
@@ -220,6 +225,7 @@ private fun WorkoutContent(
             ExerciseCard(
                 entry = entry,
                 bodyWeight = workout.bodyWeight,
+                equipment = equipmentById,
                 previous = previous[entry.exercise.id].orEmpty(),
                 isFirst = entry == items.first(),
                 isLast = entry == items.last(),
@@ -272,6 +278,9 @@ private fun WorkoutContent(
             isNew = state.set == null,
             prefill = prefill,
             bodyWeight = workout.bodyWeight,
+            equipment = allEquipment.filter {
+                !it.archived && it.type == state.item.exercise.equipmentType
+            },
             onSave = { values ->
                 val base = state.set ?: SetEntity(workoutExerciseId = state.item.item.id, position = -1)
                 repo.launch {
@@ -282,6 +291,10 @@ private fun WorkoutContent(
                             durationSec = values.durationSec,
                             distanceKm = values.distanceKm,
                             isWarmup = values.isWarmup,
+                            equipmentId = values.equipmentId,
+                            equipment2Id = values.equipment2Id,
+                            pair = values.pair,
+                            bandMin = values.bandMin,
                         )
                     )
                 }
@@ -305,6 +318,7 @@ private fun WorkoutContent(
 private fun ExerciseCard(
     entry: WorkoutExerciseFull,
     bodyWeight: Double?,
+    equipment: Map<String, EquipmentEntity>,
     previous: List<SetEntity>,
     isFirst: Boolean,
     isLast: Boolean,
@@ -363,7 +377,7 @@ private fun ExerciseCard(
             }
 
             if (previous.isNotEmpty()) {
-                val text = previous.map { formatSet(it, exercise, null) }.joinToString("; ")
+                val text = previous.map { formatSet(it, exercise, null, equipment) }.joinToString("; ")
                 Text(
                     stringResource(R.string.previous_time, text),
                     style = MaterialTheme.typography.bodySmall,
@@ -386,7 +400,7 @@ private fun ExerciseCard(
                         color = if (set.isWarmup) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
                     )
-                    Text(formatSet(set, exercise, bodyWeight), style = MaterialTheme.typography.bodyLarge)
+                    Text(formatSet(set, exercise, bodyWeight, equipment), style = MaterialTheme.typography.bodyLarge)
                 }
             }
 

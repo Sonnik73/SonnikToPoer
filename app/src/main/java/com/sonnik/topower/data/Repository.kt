@@ -36,6 +36,23 @@ class Repository(
         }
     }
 
+    // ---- Инвентарь ----
+
+    suspend fun saveEquipment(item: EquipmentEntity) {
+        dao.upsertEquipment(item.copy(name = item.name.trim(), updatedAt = now()))
+    }
+
+    /** Удаляет предмет, если он не встречается в подходах, иначе отправляет в архив. */
+    suspend fun deleteOrArchiveEquipment(item: EquipmentEntity): Boolean {
+        return if (dao.equipmentUsageCount(item.id) > 0) {
+            dao.upsertEquipment(item.copy(archived = true, updatedAt = now()))
+            false
+        } else {
+            dao.deleteEquipment(item.id)
+            true
+        }
+    }
+
     // ---- Тренировки ----
 
     suspend fun startWorkout(templateId: String?): String = db.withTransaction {
@@ -176,6 +193,7 @@ class Repository(
                 sets = dao.allSets(),
                 templates = dao.allTemplates(),
                 templateExercises = dao.allTemplateExercises(),
+                equipment = dao.allEquipment(),
             )
         )
     }
@@ -190,6 +208,8 @@ class Repository(
             dao.clearTemplateExercises()
             dao.clearTemplates()
             dao.clearExercises()
+            dao.clearEquipment()
+            dao.insertEquipment(backup.equipment)
             dao.insertExercises(backup.exercises)
             dao.insertWorkouts(backup.workouts)
             dao.insertWorkoutExercises(backup.workoutExercises)

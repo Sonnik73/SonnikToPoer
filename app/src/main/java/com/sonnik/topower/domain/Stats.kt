@@ -29,6 +29,8 @@ data class SetRecord(
     val durationSec: Int?,
     val distanceKm: Double?,
     val isWarmup: Boolean,
+    /** Пара снарядов (2 × вес): для объёма и тоннажа вес удваивается. */
+    val pair: Boolean = false,
 )
 
 enum class Metric { WEIGHT, REPS, E1RM, VOLUME, TIME, DISTANCE }
@@ -40,6 +42,9 @@ fun effectiveWeight(r: SetRecord): Double? =
     } else {
         r.weight
     }
+
+/** Количество снарядов в подходе: 2 для пары гантелей/гирь. */
+fun implements(r: SetRecord): Int = if (r.pair) 2 else 1
 
 /** Оценка разового максимума по формуле Эпли. */
 fun estimatedOneRepMax(weight: Double, reps: Int): Double? = when {
@@ -70,7 +75,7 @@ fun setValue(r: SetRecord, metric: Metric): Double? = when (metric) {
     Metric.VOLUME -> {
         val w = effectiveWeight(r)
         val reps = r.reps
-        if (w != null && reps != null) w * reps else null
+        if (w != null && reps != null) w * reps * implements(r) else null
     }
     Metric.TIME -> r.durationSec?.toDouble()
     Metric.DISTANCE -> r.distanceKm
@@ -182,7 +187,7 @@ fun computeOverallStats(
     val tonnage = working.sumOf { r ->
         val w = effectiveWeight(r)
         val reps = r.reps
-        if (w != null && reps != null) w * reps else 0.0
+        if (w != null && reps != null) w * reps * implements(r) else 0.0
     }
     val weekly = (weeks - 1 downTo 0).map { back ->
         val start = thisWeek.minusWeeks(back.toLong())

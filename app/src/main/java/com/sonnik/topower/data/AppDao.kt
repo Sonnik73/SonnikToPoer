@@ -34,6 +34,20 @@ interface AppDao {
     @Query("SELECT DISTINCT category FROM exercises WHERE category != '' ORDER BY category COLLATE NOCASE")
     fun observeCategories(): Flow<List<String>>
 
+    // ---- Инвентарь ----
+
+    @Query("SELECT * FROM equipment WHERE archived = 0 OR :includeArchived ORDER BY type, COALESCE(weight, maxResistance, 0), name COLLATE NOCASE")
+    fun observeEquipment(includeArchived: Boolean): Flow<List<EquipmentEntity>>
+
+    @Upsert
+    suspend fun upsertEquipment(item: EquipmentEntity)
+
+    @Query("DELETE FROM equipment WHERE id = :id")
+    suspend fun deleteEquipment(id: String)
+
+    @Query("SELECT COUNT(*) FROM sets WHERE equipmentId = :id OR equipment2Id = :id")
+    suspend fun equipmentUsageCount(id: String): Int
+
     // ---- Тренировки ----
 
     @Query(
@@ -180,6 +194,7 @@ interface AppDao {
     @Query("SELECT * FROM sets") suspend fun allSets(): List<SetEntity>
     @Query("SELECT * FROM templates") suspend fun allTemplates(): List<TemplateEntity>
     @Query("SELECT * FROM template_exercises") suspend fun allTemplateExercises(): List<TemplateExerciseEntity>
+    @Query("SELECT * FROM equipment") suspend fun allEquipment(): List<EquipmentEntity>
 
     @Insert suspend fun insertExercises(items: List<ExerciseEntity>)
     @Insert suspend fun insertWorkouts(items: List<WorkoutEntity>)
@@ -187,6 +202,7 @@ interface AppDao {
     @Insert suspend fun insertSets(items: List<SetEntity>)
     @Insert suspend fun insertTemplates(items: List<TemplateEntity>)
     @Insert suspend fun insertTemplateExercises(items: List<TemplateExerciseEntity>)
+    @Insert suspend fun insertEquipment(items: List<EquipmentEntity>)
 
     @Query("DELETE FROM sets") suspend fun clearSets()
     @Query("DELETE FROM workout_exercises") suspend fun clearWorkoutExercises()
@@ -194,4 +210,5 @@ interface AppDao {
     @Query("DELETE FROM template_exercises") suspend fun clearTemplateExercises()
     @Query("DELETE FROM templates") suspend fun clearTemplates()
     @Query("DELETE FROM exercises") suspend fun clearExercises()
+    @Query("DELETE FROM equipment") suspend fun clearEquipment()
 }

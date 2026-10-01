@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onBack: () -> Unit) {
     val repo = LocalRepository.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -69,7 +69,7 @@ fun SettingsScreen() {
         if (uri != null) pendingImport = uri
     }
 
-    ScreenScaffold(title = stringResource(R.string.nav_settings)) { padding ->
+    ScreenScaffold(title = stringResource(R.string.nav_settings), onBack = onBack) { padding ->
         Column(
             Modifier
                 .fillMaxSize()

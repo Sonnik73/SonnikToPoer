@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
@@ -42,20 +44,31 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
+import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.domain.formatDuration
 import com.sonnik.topower.domain.formatNumber
+import com.sonnik.topower.ui.inventory.equipmentName
+import com.sonnik.topower.ui.inventory.rangeKg
+import kotlin.math.abs
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** Экран со своей верхней панелью. Отступы системных панелей берёт на себя внешний Scaffold. */
+/** Открывает настройки; задаётся в корне навигации. */
+val LocalOpenSettings = staticCompositionLocalOf<() -> Unit> { {} }
+
+/**
+ * Экран со своей верхней панелью. Отступы системных панелей берёт на себя внешний Scaffold.
+ * [showSettings] добавляет кнопку настроек — на экранах вкладок.
+ */
 @Composable
 fun ScreenScaffold(
     title: String,
     onBack: (() -> Unit)? = null,
+    showSettings: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -72,7 +85,15 @@ fun ScreenScaffold(
                         }
                     }
                 },
-                actions = actions,
+                actions = {
+                    actions()
+                    if (showSettings) {
+                        val openSettings = LocalOpenSettings.current
+                        IconButton(onClick = openSettings) {
+                            Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
+                        }
+                    }
+                },
             )
         },
         floatingActionButton = floatingActionButton,
@@ -228,28 +249,54 @@ fun formatShortDate(millis: Long): String =
 fun kg(value: Double): String = stringResource(R.string.fmt_kg, formatNumber(value))
 
 /**
- * Текст подхода, например «60 кг × 10», «СВ+10 кг × 8 (90 кг)», «1:30», «5 км».
- * [bodyWeight] — вес тела на тренировке, нужен для упражнений с учётом собственного веса.
+ * Текст подхода, например «60 кг × 10», «2 × 10 кг · 12 повт.», «СВ+10 кг × 8 (90 кг)»,
+ * «Красная+Синяя 18–39 кг × 12», «1:30», «5 км».
+ * [bodyWeight] — вес тела на тренировке, нужен для упражнений с учётом собственного веса;
+ * [equipment] — инвентарь по id, чтобы показать названия резин.
  */
 @Composable
-fun formatSet(set: SetEntity, exercise: ExerciseEntity, bodyWeight: Double?): String {
+fun formatSet(
+    set: SetEntity,
+    exercise: ExerciseEntity,
+    bodyWeight: Double?,
+    equipment: Map<String, EquipmentEntity> = emptyMap(),
+): String {
     val parts = mutableListOf<String>()
+    val weight = set.weight
+    val bandMin = set.bandMin
+    val bandText: String? = if (bandMin != null && weight != null) {
+        val names = listOfNotNull(set.equipmentId, set.equipment2Id)
+            .mapNotNull { equipment[it] }
+            .map { equipmentName(it) }
+            .joinToString("+")
+        val range = rangeKg(bandMin, abs(weight))
+        if (names.isEmpty()) range else "$names $range"
+    } else {
+        null
+    }
     val load: String? = when {
         exercise.useBodyWeight -> {
-            val extra = set.weight ?: 0.0
+            val extra = weight ?: 0.0
             val bw = stringResource(R.string.fmt_bodyweight)
             val base = when {
+                bandText != null -> if (extra < 0) "$bw − $bandText" else "$bw + $bandText"
                 extra > 0 -> "$bw+${kg(extra)}"
                 extra < 0 -> "$bw−${kg(-extra)}"
                 else -> bw
             }
             if (bodyWeight != null) "$base (${kg(bodyWeight + extra)})" else base
         }
-        exercise.trackWeight && set.weight != null -> kg(set.weight)
+        bandText != null -> bandText
+        weight != null && (exercise.trackWeight || exercise.equipmentType != null) ->
+            if (set.pair) "2 × ${kg(weight)}" else kg(weight)
         else -> null
     }
     val reps = set.reps
     when {
+        load != null && reps != null && set.pair -> {
+            parts += load
+            parts += stringResource(R.string.fmt_reps, reps.toString())
+        }
         load != null && reps != null -> parts += "$load × $reps"
         load != null -> parts += load
         reps != null -> parts += stringResource(R.string.fmt_reps, reps.toString())

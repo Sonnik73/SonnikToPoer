@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 const val BACKUP_APP_ID = "SonnikToPower"
-const val BACKUP_FORMAT_VERSION = 1
+const val BACKUP_FORMAT_VERSION = 2
 
 @Serializable
 data class BackupFile(
@@ -17,6 +17,7 @@ data class BackupFile(
     val sets: List<SetEntity> = emptyList(),
     val templates: List<TemplateEntity> = emptyList(),
     val templateExercises: List<TemplateExerciseEntity> = emptyList(),
+    val equipment: List<EquipmentEntity> = emptyList(),
 )
 
 class InvalidBackupException(message: String) : Exception(message)

@@ -63,7 +63,7 @@ fun WorkoutHomeScreen(
         scope.launch { openWorkout(repo.startWorkout(templateId)) }
     }
 
-    ScreenScaffold(title = stringResource(R.string.nav_workout)) { padding ->
+    ScreenScaffold(title = stringResource(R.string.nav_workout), showSettings = true) { padding ->
         LazyColumn(
             Modifier
                 .fillMaxSize()

@@ -1,5 +1,6 @@
 package com.sonnik.topower.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -15,6 +16,8 @@ fun now(): Long = System.currentTimeMillis()
 /**
  * Упражнение из справочника. Набор измеряемых параметров задаётся флагами track*,
  * useBodyWeight означает, что рабочий вес = вес тела + дополнительный вес.
+ * equipmentType — тип инвентаря ([EquipmentType]), из которого выбирается снаряд в подходе;
+ * bandAssist — резина помогает (её сопротивление вычитается из веса тела).
  */
 @Serializable
 @Entity(tableName = "exercises")
@@ -31,6 +34,9 @@ data class ExerciseEntity(
     val archived: Boolean = false,
     val createdAt: Long = now(),
     val updatedAt: Long = now(),
+    val equipmentType: String? = null,
+    @ColumnInfo(defaultValue = "0")
+    val bandAssist: Boolean = false,
 )
 
 @Serializable
@@ -96,6 +102,14 @@ data class SetEntity(
     val isWarmup: Boolean = false,
     val createdAt: Long = now(),
     val updatedAt: Long = now(),
+    /** Выбранный снаряд (гантель, резина…) и вторая резина, если их две. */
+    val equipmentId: String? = null,
+    val equipment2Id: String? = null,
+    /** Пара одинаковых снарядов: weight — вес одного, записывается как «2 × 10 кг». */
+    @ColumnInfo(defaultValue = "0")
+    val pair: Boolean = false,
+    /** Для резины: суммарное минимальное сопротивление; в weight — пиковое (максимальное). */
+    val bandMin: Double? = null,
 )
 
 @Serializable
@@ -134,6 +148,39 @@ data class TemplateExerciseEntity(
     val plannedSets: Int = 3,
     val updatedAt: Long = now(),
 )
+
+enum class EquipmentType {
+    DUMBBELL, KETTLEBELL, BARBELL, BAND, EXPANDER, WEIGHT_VEST, OTHER;
+
+    val isBand: Boolean get() = this == BAND
+    /** Снаряды, которые обычно берут парой. */
+    val canPair: Boolean get() = this == DUMBBELL || this == KETTLEBELL
+
+    companion object {
+        fun of(name: String?): EquipmentType? = entries.firstOrNull { it.name == name }
+    }
+}
+
+/** Предмет инвентаря: у обычного снаряда — вес, у резины — сопротивление «от–до» и цвет. */
+@Serializable
+@Entity(tableName = "equipment")
+data class EquipmentEntity(
+    @PrimaryKey val id: String = newId(),
+    val name: String = "",
+    val type: String,
+    val weight: Double? = null,
+    val minResistance: Double? = null,
+    val maxResistance: Double? = null,
+    val color: Long? = null,
+    val archived: Boolean = false,
+    val createdAt: Long = now(),
+    val updatedAt: Long = now(),
+) {
+    val equipmentType: EquipmentType get() = EquipmentType.of(type) ?: EquipmentType.OTHER
+
+    /** Значение для сортировки: вес или пиковое сопротивление. */
+    val load: Double get() = weight ?: maxResistance ?: 0.0
+}
 
 // ---- Результаты запросов ----
 

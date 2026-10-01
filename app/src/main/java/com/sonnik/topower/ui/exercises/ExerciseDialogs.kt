@@ -1,8 +1,12 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.sonnik.topower.ui.exercises
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -16,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +41,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.data.ExerciseEntity
+import com.sonnik.topower.ui.inventory.equipmentTypeLabel
 import com.sonnik.topower.ui.LocalRepository
 
 @Composable
@@ -72,6 +79,8 @@ fun ExerciseEditDialog(
     var time by rememberSaveable { mutableStateOf(initial?.trackTime ?: false) }
     var distance by rememberSaveable { mutableStateOf(initial?.trackDistance ?: false) }
     var bodyWeight by rememberSaveable { mutableStateOf(initial?.useBodyWeight ?: false) }
+    var equipmentType by rememberSaveable { mutableStateOf(EquipmentType.of(initial?.equipmentType)) }
+    var bandAssist by rememberSaveable { mutableStateOf(initial?.bandAssist ?: false) }
     var showErrors by rememberSaveable { mutableStateOf(false) }
 
     val nameError = name.isBlank()
@@ -125,6 +134,29 @@ fun ExerciseEditDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                Text(stringResource(R.string.exercise_equipment), style = MaterialTheme.typography.titleSmall)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = equipmentType == null,
+                        onClick = { equipmentType = null },
+                        label = { Text(stringResource(R.string.equipment_none)) },
+                    )
+                    EquipmentType.entries.forEach { t ->
+                        FilterChip(
+                            selected = equipmentType == t,
+                            onClick = {
+                                equipmentType = t
+                                // Снаряд задаёт нагрузку, поэтому вес в подходе нужен.
+                                weight = true
+                            },
+                            label = { Text(equipmentTypeLabel(t)) },
+                        )
+                    }
+                }
+                if (equipmentType == EquipmentType.BAND && bodyWeight) {
+                    CheckRow(bandAssist, stringResource(R.string.band_assist), { bandAssist = it })
+                }
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
@@ -152,6 +184,8 @@ fun ExerciseEditDialog(
                     trackTime = time,
                     trackDistance = distance,
                     useBodyWeight = bodyWeight,
+                    equipmentType = equipmentType?.name,
+                    bandAssist = equipmentType == EquipmentType.BAND && bodyWeight && bandAssist,
                 )
                 repo.launch {
                     saveExercise(exercise)

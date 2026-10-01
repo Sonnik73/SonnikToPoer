@@ -1,24 +1,32 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.sonnik.topower.ui.workout
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
+import com.sonnik.topower.data.EquipmentEntity
+import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.domain.formatNumber
@@ -26,6 +34,9 @@ import com.sonnik.topower.domain.parseDecimal
 import com.sonnik.topower.domain.parseInt
 import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.ui.exercises.CheckRow
+import com.sonnik.topower.ui.inventory.ColorDot
+import com.sonnik.topower.ui.inventory.equipmentChipLabel
+import com.sonnik.topower.ui.inventory.rangeKg
 
 data class SetValues(
     val reps: Int?,
@@ -33,11 +44,18 @@ data class SetValues(
     val durationSec: Int?,
     val distanceKm: Double?,
     val isWarmup: Boolean,
+    val equipmentId: String? = null,
+    val equipment2Id: String? = null,
+    val pair: Boolean = false,
+    val bandMin: Double? = null,
 )
+
+private const val MAX_BANDS = 2
 
 /**
  * Ввод подхода. Показываются только поля, которые измеряются в упражнении.
  * [prefill] — подход, значениями которого заполняется форма.
+ * [equipment] — инвентарь того типа, что указан в упражнении: выбирается одним нажатием.
  */
 @Composable
 fun SetDialog(
@@ -46,29 +64,71 @@ fun SetDialog(
     isNew: Boolean,
     prefill: SetEntity?,
     bodyWeight: Double?,
+    equipment: List<EquipmentEntity>,
     onSave: (SetValues) -> Unit,
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
-    val showWeight = exercise.trackWeight || exercise.useBodyWeight
+    val equipmentType = EquipmentType.of(exercise.equipmentType)
+    val isBand = equipmentType?.isBand == true
+    val byId = equipment.associateBy { it.id }
+    val showWeight = exercise.trackWeight || exercise.useBodyWeight || equipmentType != null
+
     var reps by rememberSaveable { mutableStateOf(prefill?.reps?.toString().orEmpty()) }
-    var weight by rememberSaveable { mutableStateOf(prefill?.weight?.let(::formatNumber).orEmpty()) }
+    var weight by rememberSaveable {
+        mutableStateOf(prefill?.takeIf { it.bandMin == null }?.weight?.let(::formatNumber).orEmpty())
+    }
     var minutes by rememberSaveable { mutableStateOf(prefill?.durationSec?.let { (it / 60).toString() }.orEmpty()) }
     var seconds by rememberSaveable { mutableStateOf(prefill?.durationSec?.let { (it % 60).toString() }.orEmpty()) }
     var distance by rememberSaveable { mutableStateOf(prefill?.distanceKm?.let(::formatNumber).orEmpty()) }
     var warmup by rememberSaveable { mutableStateOf(if (isNew) false else prefill?.isWarmup ?: false) }
+    var selected by remember {
+        mutableStateOf(listOfNotNull(prefill?.equipmentId, prefill?.equipment2Id).filter { it in byId })
+    }
+    var pair by rememberSaveable { mutableStateOf(prefill?.pair ?: false) }
     var showError by rememberSaveable { mutableStateOf(false) }
+
+    val selectedBands = if (isBand) selected.mapNotNull { byId[it] } else emptyList()
+    val bandMin = selectedBands.sumOf { it.minResistance ?: 0.0 }
+    val bandMax = selectedBands.sumOf { it.maxResistance ?: 0.0 }
+    val usesBands = selectedBands.isNotEmpty()
+
+    fun select(item: EquipmentEntity) {
+        if (isBand) {
+            selected = when {
+                item.id in selected -> selected - item.id
+                selected.size >= MAX_BANDS -> selected.drop(1) + item.id
+                else -> selected + item.id
+            }
+        } else if (item.id in selected) {
+            selected = emptyList()
+        } else {
+            selected = listOf(item.id)
+            item.weight?.let { weight = formatNumber(it) }
+        }
+    }
 
     fun collect(): SetValues {
         val min = parseInt(minutes)
         val sec = parseInt(seconds)
         val duration = if (min == null && sec == null) null else (min ?: 0) * 60 + (sec ?: 0)
+        val manualWeight = parseDecimal(weight)
+        // Обычный снаряд остаётся привязанным, только если вес не меняли вручную.
+        val single = selected.firstOrNull()?.let { byId[it] }?.takeIf { !isBand && it.weight == manualWeight }
         return SetValues(
             reps = if (exercise.trackReps) parseInt(reps) else null,
-            weight = if (showWeight) parseDecimal(weight) else null,
+            weight = when {
+                !showWeight -> null
+                usesBands -> if (exercise.bandAssist) -bandMax else bandMax
+                else -> manualWeight
+            },
             durationSec = if (exercise.trackTime) duration else null,
             distanceKm = if (exercise.trackDistance) parseDecimal(distance) else null,
             isWarmup = warmup,
+            equipmentId = if (usesBands) selected[0] else single?.id,
+            equipment2Id = if (usesBands) selected.getOrNull(1) else null,
+            pair = equipmentType?.canPair == true && pair,
+            bandMin = if (usesBands) bandMin else null,
         )
     }
 
@@ -85,6 +145,46 @@ fun SetDialog(
                 Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                if (equipmentType != null) {
+                    if (equipment.isEmpty()) {
+                        Text(
+                            stringResource(R.string.no_equipment_of_type),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            equipment.forEach { item ->
+                                FilterChip(
+                                    selected = item.id in selected,
+                                    onClick = { select(item) },
+                                    label = { Text(equipmentChipLabel(item)) },
+                                    leadingIcon = if (item.color != null) {
+                                        { ColorDot(item.color) }
+                                    } else {
+                                        null
+                                    },
+                                )
+                            }
+                        }
+                        if (isBand) {
+                            Text(
+                                if (usesBands) {
+                                    stringResource(
+                                        if (exercise.bandAssist) R.string.band_assistance else R.string.band_resistance,
+                                        rangeKg(bandMin, bandMax),
+                                    )
+                                } else {
+                                    stringResource(R.string.band_pick_hint)
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                    if (equipmentType.canPair) {
+                        CheckRow(pair, stringResource(R.string.pair_label), { pair = it })
+                    }
+                }
                 if (exercise.trackReps) {
                     NumberField(
                         value = reps,
@@ -94,7 +194,7 @@ fun SetDialog(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                if (showWeight) {
+                if (showWeight && !usesBands) {
                     val extra = parseDecimal(weight) ?: 0.0
                     NumberField(
                         value = weight,
@@ -109,6 +209,14 @@ fun SetDialog(
                             else -> null
                         },
                         modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (usesBands && exercise.useBodyWeight && bodyWeight != null) {
+                    val extra = if (exercise.bandAssist) -bandMax else bandMax
+                    Text(
+                        stringResource(R.string.working_weight, formatNumber(bodyWeight + extra)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 if (exercise.trackTime) {
