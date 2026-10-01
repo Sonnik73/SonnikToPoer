@@ -53,19 +53,23 @@ jobs:
 
       - name: Rename APK
         run: |
+          VERSION=$(grep '^appVersion=' gradle.properties | cut -d= -f2)
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/SonnikToPower-1.0.${{ github.run_number }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/SonnikToPower-$VERSION.apk"
+          awk '/^## /{n++} n==1' changelog/changelog_ru.md > release-notes.md
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SonnikToPower-1.0.${{ github.run_number }}
+          name: SonnikToPower-${{ env.APP_VERSION }}-build${{ github.run_number }}
           path: dist/*.apk
 
       - name: Publish release
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: SonnikToPower 1.0.${{ github.run_number }}
+          tag_name: v${{ env.APP_VERSION }}
+          name: SonnikToPower ${{ env.APP_VERSION }}
+          body_path: release-notes.md
           files: dist/*.apk
           make_latest: true

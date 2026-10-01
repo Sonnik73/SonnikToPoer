@@ -41,15 +41,18 @@ import com.sonnik.topower.ui.common.ConfirmDialog
 import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.ScreenScaffold
 
+/** Краткое описание упражнения: тип инвентаря или «собственный вес», а если нет — что измеряется. */
 @Composable
-fun trackedSummary(e: ExerciseEntity): String = buildList {
-    if (e.useBodyWeight) add(stringResource(R.string.use_body_weight))
-    if (e.trackReps) add(stringResource(R.string.track_reps))
-    if (e.trackWeight) add(stringResource(R.string.track_weight))
-    if (e.trackTime) add(stringResource(R.string.track_time))
-    if (e.trackDistance) add(stringResource(R.string.track_distance))
-    EquipmentType.of(e.equipmentType)?.let { add(equipmentTypeLabel(it)) }
-}.joinToString(", ")
+fun trackedSummary(e: ExerciseEntity): String {
+    EquipmentType.of(e.equipmentType)?.let { return equipmentTypeLabel(it) }
+    if (e.useBodyWeight) return stringResource(R.string.body_weight_tag)
+    return buildList {
+        if (e.trackReps) add(stringResource(R.string.track_reps))
+        if (e.trackWeight) add(stringResource(R.string.track_weight))
+        if (e.trackTime) add(stringResource(R.string.track_time))
+        if (e.trackDistance) add(stringResource(R.string.track_distance))
+    }.joinToString(", ")
+}
 
 @Composable
 fun ExercisesScreen(openStats: (String) -> Unit) {

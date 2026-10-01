@@ -222,10 +222,10 @@
     <string name="rest_default">Default rest between sets</string>
     <string name="rest_default_hint">Starts after each new set. If you change the time with −15/+15 during a workout, it is remembered for that exercise.</string>
     <string name="exercise_rest">Rest, sec (empty — default %d)</string>
-    <string name="record_line">🏆 Record: %1$s (%2$s)</string>
+    <string name="record_line">Record: %1$s · %2$s</string>
     <string name="new_record">🎉 New record!</string>
-    <string name="new_record_badge">🎉 New record in this workout!</string>
-    <string name="plateau_line">⚠️ No progress for %1$d workouts. Try: %2$s</string>
+    <string name="new_record_badge">New record in this workout</string>
+    <string name="plateau_line">No progress for %1$d workouts — try %2$s</string>
     <string name="plateau_or">" or "</string>
     <string name="suggest_item">take %s</string>
     <string name="suggest_plus_kg">+%s kg</string>
@@ -249,12 +249,21 @@
     <string name="watch_calories">Calories burned, kcal</string>
     <string name="watch_save_finish">Save and finish</string>
     <string name="watch_skip_finish">Finish without data</string>
-    <string name="watch_line_empty">⌚ Smartwatch data: not entered</string>
-    <string name="watch_max_hr_short">❤ max %d</string>
+    <string name="watch_line_empty">Smartwatch data: not entered</string>
+    <string name="watch_max_hr_short">HR max %d</string>
     <string name="watch_avg_hr_short">avg %d</string>
-    <string name="watch_duration_short">⏱ %s</string>
-    <string name="watch_calories_short">🔥 %d kcal</string>
+    <string name="watch_duration_short">%s</string>
+    <string name="watch_calories_short">%d kcal</string>
     <string name="stat_calories">Calories, kcal</string>
     <string name="stat_avg_duration">Avg. workout time</string>
     <string name="stat_avg_max_hr">Avg. max heart rate</string>
+
+    <!-- Changelog -->
+    <string name="whats_new">What's new</string>
+    <string name="whats_new_in">What's new in %s</string>
+    <string name="whats_new_all">All changes</string>
+    <string name="ok">OK</string>
+    <string name="finish_workout_full">Finish workout</string>
+    <string name="watch_line">Smartwatch: %s</string>
+    <string name="body_weight_tag">Body weight</string>
 </resources>

@@ -18,6 +18,11 @@ class AppSettings(context: Context) {
     private val _plateauSessions = MutableStateFlow(prefs.getInt(KEY_PLATEAU_N, DEFAULT_PLATEAU_SESSIONS))
     val plateauSessions: StateFlow<Int> = _plateauSessions.asStateFlow()
 
+    /** Версия, новинки которой пользователь уже видел (окно «Что нового»). */
+    var lastSeenVersion: String?
+        get() = prefs.getString(KEY_LAST_SEEN_VERSION, null)
+        set(value) = prefs.edit().putString(KEY_LAST_SEEN_VERSION, value).apply()
+
     fun setDefaultRestSec(value: Int) {
         val v = value.coerceIn(MIN_REST_SEC, MAX_REST_SEC)
         prefs.edit().putInt(KEY_REST, v).apply()
@@ -47,5 +52,6 @@ class AppSettings(context: Context) {
         private const val KEY_REST = "default_rest_sec"
         private const val KEY_PLATEAU_ON = "plateau_enabled"
         private const val KEY_PLATEAU_N = "plateau_sessions"
+        private const val KEY_LAST_SEEN_VERSION = "last_seen_version"
     }
 }

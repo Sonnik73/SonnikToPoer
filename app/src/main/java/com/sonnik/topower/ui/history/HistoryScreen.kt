@@ -28,7 +28,7 @@ import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.ScreenScaffold
-import com.sonnik.topower.ui.common.formatDateTime
+import com.sonnik.topower.ui.common.formatDayDateTime
 import com.sonnik.topower.ui.workout.watchSummary
 
 @Composable
@@ -67,7 +67,7 @@ private fun WorkoutCard(summary: WorkoutSummary, onClick: () -> Unit) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row {
                 Text(
-                    formatDateTime(w.startedAt),
+                    formatDayDateTime(w.startedAt),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
@@ -81,7 +81,9 @@ private fun WorkoutCard(summary: WorkoutSummary, onClick: () -> Unit) {
                 stringResource(R.string.exercises_and_sets, summary.exerciseCount, summary.setCount),
             ).joinToString(" · ")
             Text(details, style = MaterialTheme.typography.bodyMedium)
-            watchSummary(w)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            watchSummary(w)?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             summary.exerciseNames?.let {
                 Text(
                     it,

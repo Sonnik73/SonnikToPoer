@@ -100,10 +100,14 @@ fun InventoryScreen() {
                             } else {
                                 null
                             },
-                            headlineContent = { Text(equipmentName(item)) },
-                            supportingContent = { Text(equipmentLoad(item)) },
-                            trailingContent = {
-                                TextButton(onClick = { deleting = item }) { Text(stringResource(R.string.delete)) }
+                            // У безымянных гантелей и гирь заголовком служит вес — тип уже в заголовке группы.
+                            headlineContent = {
+                                Text(if (item.name.isBlank() && !item.equipmentType.isBand) equipmentLoad(item) else equipmentName(item))
+                            },
+                            supportingContent = if (item.name.isBlank() && !item.equipmentType.isBand) {
+                                null
+                            } else {
+                                { Text(equipmentLoad(item), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             },
                         )
                         HorizontalDivider()
@@ -114,7 +118,9 @@ fun InventoryScreen() {
     }
 
     if (creating) EquipmentEditDialog(initial = null, onDismiss = { creating = false })
-    editing?.let { EquipmentEditDialog(initial = it, onDismiss = { editing = null }) }
+    editing?.let { item ->
+        EquipmentEditDialog(initial = item, onDismiss = { editing = null }, onDelete = { deleting = item })
+    }
     deleting?.let { item ->
         ConfirmDialog(
             title = stringResource(R.string.delete_equipment_title, equipmentName(item) + " " + equipmentLoad(item)),
@@ -130,7 +136,7 @@ fun InventoryScreen() {
 }
 
 @Composable
-fun EquipmentEditDialog(initial: EquipmentEntity?, onDismiss: () -> Unit) {
+fun EquipmentEditDialog(initial: EquipmentEntity?, onDismiss: () -> Unit, onDelete: (() -> Unit)? = null) {
     val repo = LocalRepository.current
     var type by rememberSaveable { mutableStateOf(initial?.equipmentType ?: EquipmentType.DUMBBELL) }
     var name by rememberSaveable { mutableStateOf(initial?.name ?: "") }
@@ -217,6 +223,11 @@ fun EquipmentEditDialog(initial: EquipmentEntity?, onDismiss: () -> Unit) {
                 }
                 if (showErrors && error != null) {
                     Text(stringResource(error), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+                if (onDelete != null) {
+                    TextButton(onClick = { onDismiss(); onDelete() }) {
+                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         },

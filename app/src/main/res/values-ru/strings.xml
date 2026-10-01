@@ -210,10 +210,10 @@
     <string name="rest_default">Отдых между подходами по умолчанию</string>
     <string name="rest_default_hint">Запускается после каждого нового подхода. Если на тренировке изменить время кнопками −15/+15, оно запомнится для этого упражнения.</string>
     <string name="exercise_rest">Отдых, сек (пусто — общий, %d)</string>
-    <string name="record_line">🏆 Рекорд: %1$s (%2$s)</string>
+    <string name="record_line">Рекорд: %1$s · %2$s</string>
     <string name="new_record">🎉 Новый рекорд!</string>
-    <string name="new_record_badge">🎉 Новый рекорд на этой тренировке!</string>
-    <string name="plateau_line">⚠️ Нет роста %1$d тренировок. Попробуйте: %2$s</string>
+    <string name="new_record_badge">Новый рекорд на этой тренировке</string>
+    <string name="plateau_line">Нет роста %1$d тренировок — попробуйте %2$s</string>
     <string name="plateau_or">" или "</string>
     <string name="suggest_item">взять %s</string>
     <string name="suggest_plus_kg">+%s кг</string>
@@ -236,12 +236,20 @@
     <string name="watch_calories">Сожжено, ккал</string>
     <string name="watch_save_finish">Сохранить и завершить</string>
     <string name="watch_skip_finish">Завершить без данных</string>
-    <string name="watch_line_empty">⌚ Данные с часов: не внесены</string>
-    <string name="watch_max_hr_short">❤ макс %d</string>
+    <string name="watch_line_empty">Данные с часов: не внесены</string>
+    <string name="watch_max_hr_short">пульс макс %d</string>
     <string name="watch_avg_hr_short">ср %d</string>
-    <string name="watch_duration_short">⏱ %s</string>
-    <string name="watch_calories_short">🔥 %d ккал</string>
+    <string name="watch_duration_short">%s</string>
+    <string name="watch_calories_short">%d ккал</string>
     <string name="stat_calories">Сожжено, ккал</string>
     <string name="stat_avg_duration">Средняя длительность</string>
     <string name="stat_avg_max_hr">Средний макс. пульс</string>
+
+    <string name="whats_new">Что нового</string>
+    <string name="whats_new_in">Что нового в версии %s</string>
+    <string name="whats_new_all">Все изменения</string>
+    <string name="ok">ОК</string>
+    <string name="finish_workout_full">Завершить тренировку</string>
+    <string name="watch_line">Часы: %s</string>
+    <string name="body_weight_tag">Собственный вес</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,7 +24,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -105,8 +106,8 @@ fun WorkoutHomeScreen(
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionTitle(stringResource(R.string.templates_title), Modifier.weight(1f))
-                    OutlinedButton(onClick = { newTemplateDialog = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = null)
+                    TextButton(onClick = { newTemplateDialog = true }) {
+                        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.new_template))
                     }
@@ -157,9 +158,6 @@ private fun TemplateCard(summary: TemplateSummary, onStart: () -> Unit, onEdit: 
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-            }
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit))
             }
             FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }
         }

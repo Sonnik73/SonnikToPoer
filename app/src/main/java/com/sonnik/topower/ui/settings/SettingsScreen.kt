@@ -13,7 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Switch
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
     val repo = LocalRepository.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -105,6 +105,9 @@ fun SettingsScreen(onBack: () -> Unit) {
                     context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
                 }
                 Text(stringResource(R.string.app_name) + " · " + stringResource(R.string.version, version))
+                OutlinedButton(onClick = openChangelog, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.whats_new))
+                }
                 Text(
                     stringResource(R.string.language_hint),
                     style = MaterialTheme.typography.bodySmall,
@@ -195,8 +198,12 @@ private fun Stepper(
     plusEnabled: Boolean,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        FilledTonalButton(onClick = onMinus, enabled = minusEnabled) { Text("−") }
+        FilledTonalIconButton(onClick = onMinus, enabled = minusEnabled) {
+            Text("−", style = MaterialTheme.typography.titleLarge)
+        }
         Text(value, style = MaterialTheme.typography.titleLarge)
-        FilledTonalButton(onClick = onPlus, enabled = plusEnabled) { Text("+") }
+        FilledTonalIconButton(onClick = onPlus, enabled = plusEnabled) {
+            Text("+", style = MaterialTheme.typography.titleLarge)
+        }
     }
 }

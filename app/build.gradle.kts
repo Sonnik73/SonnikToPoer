@@ -23,7 +23,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "1.0.$buildNumber"
+        versionName = providers.gradleProperty("appVersion").get()
     }
 
     signingConfigs {
@@ -58,6 +58,8 @@ android {
     buildFeatures {
         compose = true
     }
+    // Журнал изменений (changelog/*.md) встраивается в приложение.
+    sourceSets.getByName("main").assets.srcDir("$rootDir/changelog")
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }

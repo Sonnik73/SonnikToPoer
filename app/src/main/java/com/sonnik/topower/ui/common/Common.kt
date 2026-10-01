@@ -55,7 +55,8 @@ import kotlin.math.abs
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import java.time.LocalDate
+import java.util.Locale
 
 /** Открывает настройки; задаётся в корне навигации. */
 val LocalOpenSettings = staticCompositionLocalOf<() -> Unit> { {} }
@@ -134,13 +135,15 @@ fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
 
 @Composable
 fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-    ) {
+    Card(modifier = modifier) {
         Column(Modifier.padding(12.dp).fillMaxWidth()) {
-            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(label, style = MaterialTheme.typography.bodySmall)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -234,18 +237,26 @@ fun NumberField(
 
 // ---- Форматирование ----
 
-private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-private val shortDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM")
+private fun zoned(millis: Long) = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
 
-fun formatDate(millis: Long): String =
-    dateFormatter.format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+/** Шаблон даты без года, если дата в текущем году: «1 окт.» / «1 окт. 2025». */
+private fun datePattern(millis: Long): String =
+    if (zoned(millis).year == LocalDate.now().year) "d MMM" else "d MMM yyyy"
 
-fun formatDateTime(millis: Long): String =
-    dateTimeFormatter.format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+private fun format(millis: Long, pattern: String): String =
+    DateTimeFormatter.ofPattern(pattern, Locale.getDefault()).format(zoned(millis))
 
-fun formatShortDate(millis: Long): String =
-    shortDateFormatter.format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+/** «1 окт.» */
+fun formatDate(millis: Long): String = format(millis, datePattern(millis))
+
+/** «1 окт., 19:57» */
+fun formatDateTime(millis: Long): String = format(millis, datePattern(millis) + ", HH:mm")
+
+/** «ср, 1 окт. · 19:57» — для списков тренировок. */
+fun formatDayDateTime(millis: Long): String = format(millis, "EEE, " + datePattern(millis) + " · HH:mm")
+
+/** «01.10» — подписи на графиках. */
+fun formatShortDate(millis: Long): String = format(millis, "dd.MM")
 
 @Composable
 fun kg(value: Double): String = stringResource(R.string.fmt_kg, formatNumber(value))

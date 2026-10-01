@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -17,6 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,6 +37,10 @@ import com.sonnik.topower.R
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
 import com.sonnik.topower.timer.RestTimer
+import com.sonnik.topower.ui.changelog.ChangelogEntry
+import com.sonnik.topower.ui.changelog.ChangelogScreen
+import com.sonnik.topower.ui.changelog.WhatsNewDialog
+import com.sonnik.topower.ui.changelog.loadChangelog
 import com.sonnik.topower.ui.common.LocalOpenSettings
 import com.sonnik.topower.ui.exercises.ExercisesScreen
 import com.sonnik.topower.ui.inventory.InventoryScreen
@@ -54,6 +63,7 @@ object Routes {
     const val EXERCISES = "exercises"
     const val INVENTORY = "inventory"
     const val SETTINGS = "settings"
+    const val CHANGELOG = "changelog"
     const val WORKOUT = "workout/{id}"
     const val TEMPLATE = "template/{id}"
     const val EXERCISE_STATS = "exercise_stats/{id}"
@@ -85,6 +95,7 @@ fun AppRoot() {
     val currentTab = tabFor(backStack?.destination?.route)
 
     val openSettings: () -> Unit = { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } }
+    WhatsNewOnUpdate(openChangelog = { nav.navigate(Routes.CHANGELOG) })
 
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
         Scaffold(
@@ -97,7 +108,13 @@ fun AppRoot() {
                             onClick = { nav.openTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
                             label = {
-                                Text(stringResource(tab.label), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                        stringResource(tab.label),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
                             },
                         )
                     }
@@ -128,9 +145,15 @@ fun AppRoot() {
                     InventoryScreen()
                 }
                 composable(Routes.SETTINGS) {
-                    SettingsScreen(onBack = { nav.popBackStack() })
+                    SettingsScreen(
+                    onBack = { nav.popBackStack() },
+                    openChangelog = { nav.navigate(Routes.CHANGELOG) },
+                )
                 }
-                composable(Routes.WORKOUT) { entry ->
+                composable(Routes.CHANGELOG) {
+                ChangelogScreen(onBack = { nav.popBackStack() })
+            }
+            composable(Routes.WORKOUT) { entry ->
                     WorkoutScreen(
                         workoutId = entry.arguments?.getString("id").orEmpty(),
                         onBack = { nav.popBackStack() },
@@ -164,5 +187,28 @@ private fun NavHostController.openTab(route: String) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
+    }
+}
+
+/**
+ * После обновления один раз показывает новинки текущей версии.
+ * При первой установке окно не показывается — сразу запоминается текущая версия.
+ */
+@Composable
+private fun WhatsNewOnUpdate(openChangelog: () -> Unit) {
+    val context = LocalContext.current
+    val settings = LocalAppSettings.current
+    var entry by remember {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        val current = info.versionName.orEmpty()
+        val freshInstall = info.firstInstallTime == info.lastUpdateTime
+        val show = settings.lastSeenVersion != current && !freshInstall
+        settings.lastSeenVersion = current
+        mutableStateOf<ChangelogEntry?>(
+            if (show) loadChangelog(context).firstOrNull { it.version == current } else null
+        )
+    }
+    entry?.let {
+        WhatsNewDialog(it, onShowAll = openChangelog, onDismiss = { entry = null })
     }
 }

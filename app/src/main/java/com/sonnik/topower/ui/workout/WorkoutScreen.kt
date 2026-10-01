@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -99,10 +101,12 @@ fun WorkoutScreen(
         }
     }
 
+    var finishing by remember { mutableStateOf(false) }
+
     ScreenScaffold(
         title = stringResource(R.string.workout_title),
         onBack = onBack,
-        actions = { workout?.let { WorkoutActions(it, onBack) } },
+        actions = { workout?.let { WorkoutActions(it, onBack, finishing, { finishing = it }) } },
         bottomBar = { RestTimerBar() },
     ) { padding ->
         workout?.let { w ->
@@ -110,6 +114,7 @@ fun WorkoutScreen(
                 workout = w,
                 items = items,
                 openStats = openStats,
+                onFinish = { finishing = true },
                 modifier = Modifier.padding(padding),
             )
         }
@@ -117,7 +122,12 @@ fun WorkoutScreen(
 }
 
 @Composable
-private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
+private fun WorkoutActions(
+    workout: WorkoutEntity,
+    onBack: () -> Unit,
+    finishing: Boolean,
+    setFinishing: (Boolean) -> Unit,
+) {
     val repo = LocalRepository.current
     val context = LocalContext.current
     var menu by remember { mutableStateOf(false) }
@@ -125,15 +135,7 @@ private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
     var saveTemplate by remember { mutableStateOf(false) }
     val savedMsg = stringResource(R.string.template_saved)
 
-    var finishing by remember { mutableStateOf(false) }
     val restTimer = LocalRestTimer.current
-    if (workout.finishedAt == null) {
-        TextButton(onClick = { finishing = true }) {
-            Icon(Icons.Filled.Check, contentDescription = null)
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.finish_workout))
-        }
-    }
     Box {
         IconButton(onClick = { menu = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more))
@@ -181,7 +183,7 @@ private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
                 repo.launch { finishWorkout(workout) }
                 onBack()
             },
-            onDismiss = { finishing = false },
+            onDismiss = { setFinishing(false) },
         )
     }
     if (saveTemplate) {
@@ -204,6 +206,7 @@ private fun WorkoutContent(
     workout: WorkoutEntity,
     items: List<WorkoutExerciseFull>,
     openStats: (String) -> Unit,
+    onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val repo = LocalRepository.current
@@ -274,11 +277,18 @@ private fun WorkoutContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        watchSummary(workout)?.let { "⌚ $it" } ?: stringResource(R.string.watch_line_empty),
+                        watchSummary(workout)?.let { stringResource(R.string.watch_line, it) }
+                            ?: stringResource(R.string.watch_line_empty),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
-                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.watch_title))
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.watch_title),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
         }
@@ -329,6 +339,16 @@ private fun WorkoutContent(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 modifier = Modifier.fillMaxWidth(),
             )
+        }
+
+        if (workout.finishedAt == null) {
+            item {
+                Button(onClick = onFinish, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.Check, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.finish_workout_full))
+                }
+            }
         }
     }
 
@@ -488,7 +508,7 @@ private fun ExerciseCard(
             ProgressLines(progress, exercise, equipment, plateauSessions)
 
             if (previous.isNotEmpty()) {
-                val text = previous.map { formatSet(it, exercise, null, equipment) }.joinToString("; ")
+                val text = compactSets(previous.map { formatSet(it, exercise, null, equipment) })
                 Text(
                     stringResource(R.string.previous_time, text),
                     style = MaterialTheme.typography.bodySmall,
@@ -530,3 +550,13 @@ private fun WorkoutEntity.withWatch(v: WatchValues) = copy(
     watchDurationSec = v.durationSec,
     calories = v.calories,
 )
+
+/** Одинаковые подряд подходы сворачиваются: «2 × 12 кг · 11 повт. ×3; 2 × 12 кг · 9 повт.». */
+private fun compactSets(sets: List<String>): String {
+    val groups = mutableListOf<Pair<String, Int>>()
+    sets.forEach { text ->
+        val last = groups.lastOrNull()
+        if (last != null && last.first == text) groups[groups.lastIndex] = text to last.second + 1 else groups += text to 1
+    }
+    return groups.joinToString("; ") { (text, count) -> if (count > 1) "$text ×$count" else text }
+}

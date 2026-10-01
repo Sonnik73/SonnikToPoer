@@ -2,7 +2,10 @@ package com.sonnik.topower.ui
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
@@ -58,14 +61,23 @@ class ScreenshotTest {
 
     @Test fun stats() = shoot("04-stats") {
         click("Статистика")
-        waitText("По упражнениям")
+        waitText("Общая статистика")
     }
 
     @Test fun exerciseStats() = shoot("05-exercise-stats") {
         click("Статистика")
-        waitText("Жим гантелей лёжа")
+        waitText("Общая статистика")
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Жим гантелей лёжа"))
         click("Жим гантелей лёжа")
-        waitText("Лучший подход")
+        waitText("Динамика")
+    }
+
+    @Test fun changelog() = shoot("10-changelog") {
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Таймер отдыха")
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
+        click("Что нового")
+        waitText("Версия 1.0")
     }
 
     @Test fun exercises() = shoot("06-exercises") {

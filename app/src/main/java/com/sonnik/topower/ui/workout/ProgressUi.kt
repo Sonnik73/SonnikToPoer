@@ -2,11 +2,11 @@ package com.sonnik.topower.ui.workout
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
 import com.sonnik.topower.data.EquipmentEntity
@@ -56,7 +56,7 @@ fun progressFor(
     )
 }
 
-/** Строки «Рекорд», «Новый рекорд!» и подсказка о застое под названием упражнения. */
+/** Строки «Рекорд», «Новый рекорд» и подсказка о застое под названием упражнения. */
 @Composable
 fun ProgressLines(
     progress: ProgressUi?,
@@ -74,28 +74,33 @@ fun ProgressLines(
                 formatDate(record.workoutDate),
             ),
             style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = modifier,
         )
     }
     when {
         progress.isNewRecord -> Text(
             stringResource(R.string.new_record_badge),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.tertiary,
-            fontWeight = FontWeight.Bold,
             modifier = modifier,
         )
-        plateauSessions != null && progress.stalledSessions >= plateauSessions -> Text(
-            stringResource(
-                R.string.plateau_line,
-                progress.stalledSessions,
-                plateauSuggestions(exercise, progress.record, equipment.values.toList()),
-            ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error,
-            modifier = modifier,
-        )
+        plateauSessions != null && progress.stalledSessions >= plateauSessions -> Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.padding(end = 12.dp, top = 2.dp, bottom = 6.dp),
+        ) {
+            Text(
+                stringResource(
+                    R.string.plateau_line,
+                    progress.stalledSessions,
+                    plateauSuggestions(exercise, progress.record, equipment.values.toList()),
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            )
+        }
     }
 }
 
