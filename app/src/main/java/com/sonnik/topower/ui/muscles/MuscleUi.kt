@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -21,17 +23,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.domain.Muscle
@@ -39,11 +46,14 @@ import com.sonnik.topower.domain.MuscleState
 import com.sonnik.topower.domain.MuscleStatus
 import com.sonnik.topower.domain.MuscleWork
 import com.sonnik.topower.domain.computeMuscleStatus
-import com.sonnik.topower.domain.hoursLeft
 import com.sonnik.topower.domain.recoveredFraction
 import com.sonnik.topower.domain.state
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.SectionCard
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 @Composable
 fun muscleName(muscle: Muscle): String = stringResource(
@@ -77,14 +87,50 @@ private val Orange = Color(0xFFFB8C00)
 private val Yellow = Color(0xFFFDD835)
 private val Green = Color(0xFF43A047)
 
-/** Красный → оранжевый → жёлтый по мере восстановления, зелёный — восстановилась, серый — давно или никогда. */
+/** Опорные цвета шкалы восстановления: доля восстановления → цвет. */
+private val RecoveryStops = listOf(0f to Red, 0.35f to Orange, 0.7f to Yellow, 1f to Green)
+
+/** Плавный цвет для доли восстановления 0…1: красный → оранжевый → жёлтый → зелёный. */
+fun recoveryColor(fraction: Float): Color {
+    val f = fraction.coerceIn(0f, 1f)
+    val upper = RecoveryStops.indexOfFirst { it.first >= f }.coerceAtLeast(1)
+    val (f0, c0) = RecoveryStops[upper - 1]
+    val (f1, c1) = RecoveryStops[upper]
+    return lerp(c0, c1, (f - f0) / (f1 - f0))
+}
+
+/** Цвет мышцы: по шкале восстановления, зелёный — восстановилась, серый — давно или никогда. */
 fun muscleColor(status: MuscleStatus, now: Long, idle: Color): Color = when (status.state(now)) {
-    MuscleState.RECOVERING -> {
-        val f = status.recoveredFraction(now)
-        if (f < 0.5f) lerp(Red, Orange, f * 2) else lerp(Orange, Yellow, (f - 0.5f) * 2)
-    }
+    MuscleState.RECOVERING -> recoveryColor(status.recoveredFraction(now))
     MuscleState.READY -> Green
     MuscleState.STALE, MuscleState.NEVER -> idle
+}
+
+/** Оставшееся время «ч:мм:сс» (часы не ограничены сутками: 71:59:12). */
+fun formatCountdown(ms: Long): String {
+    val total = (ms.coerceAtLeast(0) + 999) / 1000
+    return "%d:%02d:%02d".format(total / 3600, total % 3600 / 60, total % 60)
+}
+
+/**
+ * Текущее время, обновляемое каждую секунду, пока экран на виду. Тикает на фоновом диспетчере
+ * в реальном времени, чтобы не мешать тестам Compose с виртуальными часами дождаться простоя.
+ */
+@Composable
+fun rememberNow(): Long {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle) {
+        withContext(Dispatchers.Default) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (isActive) {
+                    now = System.currentTimeMillis()
+                    delay(1000 - now % 1000)
+                }
+            }
+        }
+    }
+    return now
 }
 
 @Composable
@@ -104,18 +150,42 @@ private fun LegendDot(color: Color, label: String) {
     }
 }
 
+/** Легенда: градиент восстановления от «только что» до «готова» и серый «давно». */
+@Composable
+private fun RecoveryLegend(idle: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f)) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Brush.horizontalGradient(RecoveryStops.map { it.first to it.second }.toTypedArray()))
+            )
+            Row(Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.muscles_legend_fresh),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    stringResource(R.string.muscles_ready),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        LegendDot(idle, stringResource(R.string.muscles_stale))
+    }
+}
+
 /** Карточка «Состояние мышц» для первого экрана: тело спереди и сзади, легенда и подсказка. */
 @Composable
 fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val repo = LocalRepository.current
     val rows by remember { repo.dao.observeMuscleWork() }.collectAsStateWithLifecycle(initialValue = emptyList())
-    // Время обновляется при каждом возвращении на экран — для суточных сроков восстановления этого достаточно
-    // (бесконечный таймер мешал бы тестам Compose дождаться простоя).
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LifecycleResumeEffect(Unit) {
-        now = System.currentTimeMillis()
-        onPauseOrDispose { }
-    }
+    val now = rememberNow()
     val statuses = remember(rows) {
         computeMuscleStatus(rows.map { MuscleWork(it.workoutId, it.time, Muscle.parse(it.muscles), it.recoveryHours) })
     }
@@ -144,11 +214,7 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            LegendDot(Red, stringResource(R.string.muscles_recovering))
-            LegendDot(Green, stringResource(R.string.muscles_ready))
-            LegendDot(idle, stringResource(R.string.muscles_stale))
-        }
+        RecoveryLegend(idle)
 
         val all = statuses.values
         if (all.all { it.lastTrained == null }) {
@@ -169,12 +235,33 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                 )
             }
             if (recovering.isNotEmpty()) {
-                val text = recovering.map { stringResource(R.string.muscles_hours_left, muscleName(it.muscle), it.hoursLeft(now)) }
+                val fullRecovery = recovering.maxOf { it.readyAt ?: now }
                 Text(
-                    stringResource(R.string.muscles_recovering_list, text.joinToString(", ")),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(R.string.muscles_full_recovery, formatCountdown(fullRecovery - now)),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
+                recovering.forEach { status ->
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier
+                                .size(10.dp)
+                                .background(muscleColor(status, now, idle), CircleShape)
+                        )
+                        Text(
+                            muscleName(status.muscle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),
+                        )
+                        Text(
+                            formatCountdown((status.readyAt ?: now) - now),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
     }

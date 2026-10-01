@@ -288,12 +288,9 @@
     <string name="muscles_title">Muscle status</string>
     <string name="muscles_front">Front</string>
     <string name="muscles_back">Back</string>
-    <string name="muscles_recovering">Recovering</string>
     <string name="muscles_ready">Ready</string>
     <string name="muscles_stale">Long ago</string>
     <string name="muscles_train_now">Ready to train: %s</string>
-    <string name="muscles_recovering_list">Recovering: %s</string>
-    <string name="muscles_hours_left">%1$s (%2$d h)</string>
     <string name="muscles_empty">Assign muscles to your exercises and log workouts — the body map will show what is ready to train.</string>
     <string name="exercise_muscles">Main muscles</string>
     <string name="muscles_suggest">Suggest by name</string>
@@ -305,4 +302,6 @@
     <string name="recovery_max">To the limit — 96 h</string>
     <string name="recovery_menu">How hard was it</string>
     <string name="recovery_line">Recovery: %d h</string>
+    <string name="muscles_full_recovery">Full recovery in %s</string>
+    <string name="muscles_legend_fresh">Just trained</string>
 </resources>

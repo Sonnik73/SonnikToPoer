@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.6
+- Smooth muscle color transition from red to green as it recovers, gradient legend
+- Live countdown to recovery of each muscle (h:mm:ss) and to full recovery of all muscles
+
 ## 1.5
 - Muscle status on the home screen: body front and back, red (recovering) to green (ready), gray — not trained for a long time
 - “How hard was it?” after the last set of an exercise sets the recovery time (24–96 h); several exercises for one muscle extend it a bit
