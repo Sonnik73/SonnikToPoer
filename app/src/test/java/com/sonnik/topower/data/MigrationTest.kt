@@ -1,31 +1,48 @@
 package com.sonnik.topower.data
 
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
-import androidx.room.testing.MigrationTestHelper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.io.File
 
 /** Проверяет, что обновление приложения не теряет записанные тренировки. */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
 class MigrationTest {
     private val dbName = "migration-test.db"
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @get:Rule
-    val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), AppDatabase::class.java)
+    /** Создаёт базу старой версии по экспортированной схеме Room (app/schemas). */
+    private fun createDatabase(version: Int): SQLiteDatabase {
+        val schema = File("schemas/com.sonnik.topower.data.AppDatabase/$version.json").readText()
+        val database = Json.parseToJsonElement(schema).jsonObject["database"]!!.jsonObject
+        val db = context.openOrCreateDatabase(dbName, Context.MODE_PRIVATE, null)
+        database["entities"]!!.jsonArray.forEach { entity ->
+            val table = entity.jsonObject["tableName"]!!.jsonPrimitive.content
+            fun sql(raw: String) = db.execSQL(raw.replace("\${TABLE_NAME}", table))
+            sql(entity.jsonObject["createSql"]!!.jsonPrimitive.content)
+            entity.jsonObject["indices"]?.jsonArray?.forEach { sql(it.jsonObject["createSql"]!!.jsonPrimitive.content) }
+        }
+        db.version = version
+        return db
+    }
 
     @Test
     fun migrate1To2KeepsData() {
-        helper.createDatabase(dbName, 1).apply {
+        createDatabase(1).apply {
             execSQL(
                 "INSERT INTO exercises (id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, " +
                     "useBodyWeight, archived, createdAt, updatedAt) VALUES ('e1', 'Жим', '', '', 1, 1, 0, 0, 0, 0, 1, 1)"
@@ -43,7 +60,7 @@ class MigrationTest {
         }
 
         // Открываем базу так же, как приложение: Room проверит, что схема после миграции совпадает с кодом.
-        val db = Room.databaseBuilder(ApplicationProvider.getApplicationContext(), AppDatabase::class.java, dbName)
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
             .addMigrations(*MIGRATIONS)
             .allowMainThreadQueries()
             .build()
