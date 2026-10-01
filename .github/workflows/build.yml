@@ -38,6 +38,7 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SCREENSHOTS: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
 
       - name: Commit UI screenshots

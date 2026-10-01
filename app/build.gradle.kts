@@ -99,4 +99,5 @@ dependencies {
 // Зависший тест не должен держать сборку бесконечно.
 tasks.withType<Test>().configureEach {
     timeout.set(Duration.ofMinutes(8))
+    testLogging { events("started", "passed", "skipped", "failed") }
 }

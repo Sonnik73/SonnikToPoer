@@ -19,6 +19,7 @@ import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseEntity
 import kotlinx.coroutines.runBlocking
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -42,6 +43,8 @@ class ScreenshotTest {
 
     @Before
     fun seed() = runBlocking {
+        // Скриншоты нужны только при ручном запуске сборки (SCREENSHOTS=1), релизную сборку не задерживают.
+        assumeTrue(System.getenv("SCREENSHOTS") == "1")
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
         seedDemoData(app)
     }
