@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -96,5 +98,5 @@ dependencies {
 
 // Зависший тест не должен держать сборку бесконечно.
 tasks.withType<Test>().configureEach {
-    timeout.set(java.time.Duration.ofMinutes(8))
+    timeout.set(Duration.ofMinutes(8))
 }
