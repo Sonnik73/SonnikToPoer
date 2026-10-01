@@ -46,7 +46,7 @@ class ScreenshotTest {
         seedDemoData(app)
     }
 
-    @Test fun home() = shoot("01-home") { waitText("Верх тела") }
+    @Test fun home() = shoot("01-home") { waitText("Можно тренировать", substring = true) }
 
     @Test fun workout() = shoot("02-workout") {
         waitText("Продолжить")
