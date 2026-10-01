@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_workout">Тренировка</string>
+    <string name="nav_history">История</string>
+    <string name="nav_stats">Статистика</string>
+    <string name="nav_exercises">Упражнения</string>
+    <string name="nav_settings">Настройки</string>
+
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Изменить</string>
+    <string name="back">Назад</string>
+    <string name="more">Ещё</string>
+    <string name="move_up">Выше</string>
+    <string name="move_down">Ниже</string>
+    <string name="unit_kg">кг</string>
+    <string name="unit_km">км</string>
+
+    <string name="fmt_kg">%s кг</string>
+    <string name="fmt_km">%s км</string>
+    <string name="fmt_reps">%s повт.</string>
+    <string name="fmt_bodyweight">СВ</string>
+    <string name="warmup">Разминка</string>
+    <string name="warmup_short">Р</string>
+
+    <string name="start_workout_title">Начать тренировку</string>
+    <string name="start_empty_workout">Пустая тренировка</string>
+    <string name="active_workouts">Идёт тренировка</string>
+    <string name="continue_workout">Продолжить</string>
+    <string name="templates_title">Шаблоны</string>
+    <string name="new_template">Новый шаблон</string>
+    <string name="no_templates">Шаблонов пока нет. Создайте шаблон, чтобы быстрее начинать тренировки.</string>
+    <string name="start">Начать</string>
+    <string name="exercise_count">Упражнений: %d</string>
+    <string name="started_at">Начата %s</string>
+
+    <string name="workout_title">Тренировка</string>
+    <string name="body_weight_label">Мой вес, кг</string>
+    <string name="workout_note">Заметка</string>
+    <string name="add_exercise">Добавить упражнение</string>
+    <string name="add_set">Подход</string>
+    <string name="finish_workout">Завершить</string>
+    <string name="resume_workout">Возобновить тренировку</string>
+    <string name="delete_workout">Удалить тренировку</string>
+    <string name="delete_workout_confirm">Тренировка и все её подходы будут удалены.</string>
+    <string name="save_as_template">Сохранить как шаблон</string>
+    <string name="template_name">Название шаблона</string>
+    <string name="template_saved">Шаблон сохранён</string>
+    <string name="remove_from_workout">Убрать из тренировки</string>
+    <string name="remove_exercise_confirm">Упражнение и его подходы будут убраны из этой тренировки.</string>
+    <string name="sets_progress">Подходы: %1$d из %2$d</string>
+    <string name="sets_count">Подходов: %d</string>
+    <string name="previous_time">Прошлый раз: %s</string>
+    <string name="workout_empty_hint">Добавьте упражнения в тренировку</string>
+    <string name="workout_finished_at">Завершена %s</string>
+
+    <string name="set_title">Подход %d</string>
+    <string name="new_set">Новый подход</string>
+    <string name="reps_label">Повторения</string>
+    <string name="weight_label">Вес, кг</string>
+    <string name="extra_weight_label">Доп. вес, кг</string>
+    <string name="extra_weight_hint">Отрицательное значение — для упражнений с помощью (резинка, гравитрон)</string>
+    <string name="time_label">Время</string>
+    <string name="time_min">Мин</string>
+    <string name="time_sec">Сек</string>
+    <string name="distance_label">Расстояние, км</string>
+    <string name="set_empty_error">Заполните хотя бы одно поле</string>
+    <string name="working_weight">Рабочий вес: %s кг</string>
+    <string name="delete_set">Удалить подход</string>
+
+    <string name="new_exercise">Новое упражнение</string>
+    <string name="edit_exercise">Упражнение</string>
+    <string name="exercise_name">Название</string>
+    <string name="exercise_category">Категория (грудь, спина, ноги…)</string>
+    <string name="exercise_note">Заметка</string>
+    <string name="what_to_track">Что измеряем</string>
+    <string name="track_reps">Повторения</string>
+    <string name="track_weight">Вес отягощения</string>
+    <string name="track_time">Время</string>
+    <string name="track_distance">Расстояние</string>
+    <string name="use_body_weight">Учитывать собственный вес</string>
+    <string name="use_body_weight_hint">Рабочий вес = ваш вес + доп. вес (подтягивания, брусья, отжимания)</string>
+    <string name="show_archived">Показать архив</string>
+    <string name="archived">В архиве</string>
+    <string name="archive">В архив</string>
+    <string name="unarchive">Вернуть из архива</string>
+    <string name="exercise_archived_msg">Упражнение используется в тренировках или шаблонах, поэтому оно перемещено в архив</string>
+    <string name="no_exercises">Упражнений пока нет. Нажмите «+», чтобы добавить.</string>
+    <string name="name_required">Введите название</string>
+    <string name="track_required">Выберите хотя бы один параметр</string>
+    <string name="search_hint">Поиск</string>
+    <string name="create_exercise_named">Создать «%s»</string>
+    <string name="select_exercises">Выберите упражнения</string>
+    <string name="add_selected">Добавить (%d)</string>
+    <string name="delete_exercise_title">Удалить «%s»?</string>
+    <string name="delete_exercise_confirm">Если упражнение уже использовалось, оно будет перемещено в архив, чтобы сохранить историю.</string>
+    <string name="statistics">Статистика</string>
+
+    <string name="history_empty">Тренировок пока нет. Начните первую!</string>
+    <string name="in_progress">Идёт</string>
+    <string name="body_weight_short">Вес: %s кг</string>
+    <string name="exercises_and_sets">Упражнений: %1$d · Подходов: %2$d</string>
+
+    <string name="stats_overview">Общая статистика</string>
+    <string name="stat_total_workouts">Тренировок</string>
+    <string name="stat_this_week">На этой неделе</string>
+    <string name="stat_this_month">В этом месяце</string>
+    <string name="stat_total_sets">Рабочих подходов</string>
+    <string name="stat_tonnage">Тоннаж, кг</string>
+    <string name="stat_distance">Дистанция, км</string>
+    <string name="stat_duration">Общее время</string>
+    <string name="workouts_per_week">Тренировок в неделю</string>
+    <string name="body_weight_chart">Собственный вес</string>
+    <string name="by_exercise">По упражнениям</string>
+    <string name="no_stats">Данных пока нет. Запишите подходы, и здесь появится статистика.</string>
+    <string name="not_enough_data">Недостаточно данных для графика</string>
+    <string name="stat_workouts">Тренировок</string>
+    <string name="stat_sets">Подходов</string>
+    <string name="stat_start">Старт</string>
+    <string name="stat_max">Максимум</string>
+    <string name="stat_last">Последний</string>
+    <string name="stat_gain">Прирост</string>
+    <string name="best_set">Лучший подход</string>
+    <string name="first_workout">Первая тренировка</string>
+    <string name="period">%1$s — %2$s</string>
+    <string name="metric_weight">Вес</string>
+    <string name="metric_reps">Повторения</string>
+    <string name="metric_e1rm">Расч. максимум</string>
+    <string name="metric_volume">Объём</string>
+    <string name="metric_time">Время</string>
+    <string name="metric_distance">Дистанция</string>
+    <string name="e1rm_hint">Расч. максимум — расчётный разовый максимум (формула Эпли). Объём — вес × повторения за тренировку.</string>
+    <string name="progress_title">Динамика</string>
+
+    <string name="template_title">Шаблон</string>
+    <string name="planned_sets">Подходов: %d</string>
+    <string name="template_empty">Добавьте упражнения в шаблон</string>
+    <string name="delete_template">Удалить шаблон</string>
+    <string name="delete_template_confirm">Шаблон будет удалён. Тренировки, начатые по нему, сохранятся.</string>
+    <string name="rename">Переименовать</string>
+
+    <string name="backup_title">Резервная копия</string>
+    <string name="backup_description">Все данные хранятся только на телефоне. Регулярно сохраняйте резервную копию в файл, чтобы не потерять их.</string>
+    <string name="export_backup">Сохранить в файл</string>
+    <string name="import_backup">Восстановить из файла</string>
+    <string name="import_confirm_title">Восстановить данные?</string>
+    <string name="import_confirm_text">Все текущие данные будут заменены данными из файла. Это действие нельзя отменить.</string>
+    <string name="export_done">Резервная копия сохранена</string>
+    <string name="import_done">Данные восстановлены</string>
+    <string name="backup_error">Ошибка: %s</string>
+    <string name="about_title">О приложении</string>
+    <string name="version">Версия %s</string>
+    <string name="language_hint">Язык приложения соответствует языку системы (русский или английский).</string>
+</resources>

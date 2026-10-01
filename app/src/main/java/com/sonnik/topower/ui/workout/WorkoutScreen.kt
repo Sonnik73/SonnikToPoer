@@ -1,0 +1,400 @@
+package com.sonnik.topower.ui.workout
+
+import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sonnik.topower.R
+import com.sonnik.topower.data.SetEntity
+import com.sonnik.topower.data.WorkoutEntity
+import com.sonnik.topower.data.WorkoutExerciseFull
+import com.sonnik.topower.domain.formatNumber
+import com.sonnik.topower.domain.parseDecimal
+import com.sonnik.topower.ui.LocalRepository
+import com.sonnik.topower.ui.common.ConfirmDialog
+import com.sonnik.topower.ui.common.NumberField
+import com.sonnik.topower.ui.common.ScreenScaffold
+import com.sonnik.topower.ui.common.TextInputDialog
+import com.sonnik.topower.ui.common.formatDateTime
+import com.sonnik.topower.ui.common.formatSet
+import com.sonnik.topower.ui.exercises.ExercisePickerDialog
+
+/** Состояние открытого диалога подхода: [set] == null — новый подход. */
+private data class SetDialogState(val item: WorkoutExerciseFull, val set: SetEntity?)
+
+@Composable
+fun WorkoutScreen(
+    workoutId: String,
+    onBack: () -> Unit,
+    openStats: (String) -> Unit,
+) {
+    val repo = LocalRepository.current
+    val workout by remember(workoutId) { repo.dao.observeWorkout(workoutId) }
+        .collectAsStateWithLifecycle(initialValue = null)
+    val items by remember(workoutId) { repo.dao.observeWorkoutExercises(workoutId) }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+
+    ScreenScaffold(
+        title = stringResource(R.string.workout_title),
+        onBack = onBack,
+        actions = { workout?.let { WorkoutActions(it, onBack) } },
+    ) { padding ->
+        workout?.let { w ->
+            WorkoutContent(
+                workout = w,
+                items = items,
+                openStats = openStats,
+                modifier = Modifier.padding(padding),
+            )
+        }
+    }
+}
+
+@Composable
+private fun WorkoutActions(workout: WorkoutEntity, onBack: () -> Unit) {
+    val repo = LocalRepository.current
+    val context = LocalContext.current
+    var menu by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    var saveTemplate by remember { mutableStateOf(false) }
+    val savedMsg = stringResource(R.string.template_saved)
+
+    if (workout.finishedAt == null) {
+        TextButton(onClick = {
+            repo.launch { finishWorkout(workout) }
+            onBack()
+        }) {
+            Icon(Icons.Filled.Check, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(R.string.finish_workout))
+        }
+    }
+    Box {
+        IconButton(onClick = { menu = true }) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more))
+        }
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.save_as_template)) },
+                onClick = { menu = false; saveTemplate = true },
+            )
+            if (workout.finishedAt != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.resume_workout)) },
+                    onClick = { menu = false; repo.launch { resumeWorkout(workout) } },
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.delete_workout)) },
+                onClick = { menu = false; confirmDelete = true },
+            )
+        }
+    }
+
+    if (confirmDelete) {
+        ConfirmDialog(
+            title = stringResource(R.string.delete_workout) + "?",
+            text = stringResource(R.string.delete_workout_confirm),
+            onConfirm = {
+                repo.launch { deleteWorkout(workout.id) }
+                onBack()
+            },
+            onDismiss = { confirmDelete = false },
+        )
+    }
+    if (saveTemplate) {
+        TextInputDialog(
+            title = stringResource(R.string.save_as_template),
+            label = stringResource(R.string.template_name),
+            onConfirm = { name ->
+                repo.launch {
+                    saveWorkoutAsTemplate(workout.id, name)
+                    Toast.makeText(context, savedMsg, Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDismiss = { saveTemplate = false },
+        )
+    }
+}
+
+@Composable
+private fun WorkoutContent(
+    workout: WorkoutEntity,
+    items: List<WorkoutExerciseFull>,
+    openStats: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val repo = LocalRepository.current
+    val latestWorkout by rememberUpdatedState(workout)
+    var bodyWeightText by remember(workout.id) { mutableStateOf(workout.bodyWeight?.let(::formatNumber) ?: "") }
+    var noteText by remember(workout.id) { mutableStateOf(workout.note) }
+    var picking by remember { mutableStateOf(false) }
+    var setDialog by remember { mutableStateOf<SetDialogState?>(null) }
+    var removing by remember { mutableStateOf<WorkoutExerciseFull?>(null) }
+
+    // Подходы прошлой тренировки по каждому упражнению — для подсказки и автозаполнения.
+    var previous by remember { mutableStateOf<Map<String, List<SetEntity>>>(emptyMap()) }
+    val exerciseIds = items.map { it.exercise.id }.distinct()
+    LaunchedEffect(exerciseIds, workout.startedAt) {
+        previous = exerciseIds.associateWith { repo.previousSets(it, latestWorkout) }
+    }
+
+    LazyColumn(
+        modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(formatDateTime(workout.startedAt), style = MaterialTheme.typography.titleMedium)
+                workout.finishedAt?.let {
+                    Text(
+                        stringResource(R.string.workout_finished_at, formatDateTime(it)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                NumberField(
+                    value = bodyWeightText,
+                    onValueChange = { text ->
+                        bodyWeightText = text
+                        repo.launch { updateWorkout(latestWorkout.copy(bodyWeight = parseDecimal(text))) }
+                    },
+                    label = stringResource(R.string.body_weight_label),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        if (items.isEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.workout_empty_hint),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        items(items, key = { it.item.id }) { entry ->
+            ExerciseCard(
+                entry = entry,
+                bodyWeight = workout.bodyWeight,
+                previous = previous[entry.exercise.id].orEmpty(),
+                isFirst = entry == items.first(),
+                isLast = entry == items.last(),
+                onAddSet = { setDialog = SetDialogState(entry, null) },
+                onEditSet = { setDialog = SetDialogState(entry, it) },
+                onMove = { delta -> repo.launch { moveWorkoutExercise(workout.id, entry.item.id, delta) } },
+                onRemove = { removing = entry },
+                onStats = { openStats(entry.exercise.id) },
+            )
+        }
+
+        item {
+            OutlinedButton(onClick = { picking = true }, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.add_exercise))
+            }
+        }
+
+        item {
+            OutlinedTextField(
+                value = noteText,
+                onValueChange = { text ->
+                    noteText = text
+                    repo.launch { updateWorkout(latestWorkout.copy(note = text)) }
+                },
+                label = { Text(stringResource(R.string.workout_note)) },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+
+    if (picking) {
+        ExercisePickerDialog(
+            onDismiss = { picking = false },
+            onPicked = { ids -> repo.launch { addExercisesToWorkout(workout.id, ids) } },
+        )
+    }
+
+    setDialog?.let { state ->
+        val sorted = state.item.sets.sortedBy { it.position }
+        val index = if (state.set == null) sorted.size else sorted.indexOf(state.set)
+        val prev = previous[state.item.exercise.id].orEmpty()
+        // Новый подход заполняем по прошлому подходу этой тренировки или по прошлой тренировке.
+        val prefill = state.set ?: sorted.lastOrNull() ?: prev.getOrNull(index) ?: prev.lastOrNull()
+        SetDialog(
+            exercise = state.item.exercise,
+            setNumber = index + 1,
+            isNew = state.set == null,
+            prefill = prefill,
+            bodyWeight = workout.bodyWeight,
+            onSave = { values ->
+                val base = state.set ?: SetEntity(workoutExerciseId = state.item.item.id, position = -1)
+                repo.launch {
+                    saveSet(
+                        base.copy(
+                            reps = values.reps,
+                            weight = values.weight,
+                            durationSec = values.durationSec,
+                            distanceKm = values.distanceKm,
+                            isWarmup = values.isWarmup,
+                        )
+                    )
+                }
+            },
+            onDelete = state.set?.let { s -> { repo.launch { deleteSet(s) }; Unit } },
+            onDismiss = { setDialog = null },
+        )
+    }
+
+    removing?.let { entry ->
+        ConfirmDialog(
+            title = stringResource(R.string.remove_from_workout) + "?",
+            text = stringResource(R.string.remove_exercise_confirm),
+            onConfirm = { repo.launch { removeWorkoutExercise(workout.id, entry.item.id) } },
+            onDismiss = { removing = null },
+        )
+    }
+}
+
+@Composable
+private fun ExerciseCard(
+    entry: WorkoutExerciseFull,
+    bodyWeight: Double?,
+    previous: List<SetEntity>,
+    isFirst: Boolean,
+    isLast: Boolean,
+    onAddSet: () -> Unit,
+    onEditSet: (SetEntity) -> Unit,
+    onMove: (Int) -> Unit,
+    onRemove: () -> Unit,
+    onStats: () -> Unit,
+) {
+    val exercise = entry.exercise
+    val sets = entry.sets.sortedBy { it.position }
+    var menu by remember { mutableStateOf(false) }
+
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(exercise.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    val planned = entry.item.plannedSets
+                    val workingSets = sets.count { !it.isWarmup }
+                    Text(
+                        if (planned != null) stringResource(R.string.sets_progress, workingSets, planned)
+                        else stringResource(R.string.sets_count, workingSets),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (planned != null && workingSets >= planned) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Box {
+                    IconButton(onClick = { menu = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more))
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        if (!isFirst) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.move_up)) },
+                                onClick = { menu = false; onMove(-1) },
+                            )
+                        }
+                        if (!isLast) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.move_down)) },
+                                onClick = { menu = false; onMove(1) },
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.statistics)) },
+                            onClick = { menu = false; onStats() },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.remove_from_workout)) },
+                            onClick = { menu = false; onRemove() },
+                        )
+                    }
+                }
+            }
+
+            if (previous.isNotEmpty()) {
+                val text = previous.map { formatSet(it, exercise, null) }.joinToString("; ")
+                Text(
+                    stringResource(R.string.previous_time, text),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
+                )
+            }
+
+            sets.forEachIndexed { i, set ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditSet(set) }
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        if (set.isWarmup) stringResource(R.string.warmup_short) else "${i + 1}.",
+                        modifier = Modifier.width(32.dp),
+                        color = if (set.isWarmup) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(formatSet(set, exercise, bodyWeight), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
+            FilledTonalButton(onClick = onAddSet, modifier = Modifier.padding(top = 4.dp)) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Spacer(Modifier.width(4.dp))
+                Text(stringResource(R.string.add_set))
+            }
+        }
+    }
+}
