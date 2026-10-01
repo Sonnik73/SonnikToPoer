@@ -49,8 +49,7 @@ class ScreenshotTest {
     @Test fun home() = shoot("01-home") { waitText("Можно тренировать", substring = true) }
 
     @Test fun workout() = shoot("02-workout") {
-        waitText("Продолжить")
-        click("Продолжить")
+        openActiveWorkout()
         waitText("Рекорд", substring = true)
     }
 
@@ -98,9 +97,15 @@ class ScreenshotTest {
     @Test
     @Config(qualifiers = "+night")
     fun workoutDark() = shoot("09-workout-dark") {
-        waitText("Продолжить")
-        click("Продолжить")
+        openActiveWorkout()
         waitText("Рекорд", substring = true)
+    }
+
+    /** Кнопка «Продолжить» ниже карточки мышц — сначала прокручиваем к ней. */
+    private fun openActiveWorkout() {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Продолжить"))
+        click("Продолжить")
     }
 
     private fun click(text: String) {
@@ -192,6 +197,14 @@ suspend fun seedDemoData(app: SonnikApp) {
             ) + if (i == 5) listOf(squat to List(3) { s(reps = 20) }) else emptyList(),
         )
     }
+    // Ноги — полтора дня назад: на схеме промежуточный цвет между красным и зелёным.
+    workout(
+        start = now - 36 * 3_600_000L,
+        finished = true,
+        bodyWeight = 79.0,
+        watch = false,
+        sets = listOf(squat to List(3) { s(reps = 25) }),
+    )
     workout(
         start = now - 20 * 60_000,
         finished = false,
