@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.domain.Muscle
@@ -44,7 +44,6 @@ import com.sonnik.topower.domain.recoveredFraction
 import com.sonnik.topower.domain.state
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.SectionCard
-import kotlinx.coroutines.delay
 
 @Composable
 fun muscleName(muscle: Muscle): String = stringResource(
@@ -110,12 +109,12 @@ private fun LegendDot(color: Color, label: String) {
 fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val repo = LocalRepository.current
     val rows by remember { repo.dao.observeMuscleWork() }.collectAsStateWithLifecycle(initialValue = emptyList())
+    // Время обновляется при каждом возвращении на экран — для суточных сроков восстановления этого достаточно
+    // (бесконечный таймер мешал бы тестам Compose дождаться простоя).
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(60_000)
-            now = System.currentTimeMillis()
-        }
+    LifecycleResumeEffect(Unit) {
+        now = System.currentTimeMillis()
+        onPauseOrDispose { }
     }
     val statuses = remember(rows) {
         computeMuscleStatus(rows.map { MuscleWork(it.workoutId, it.time, Muscle.parse(it.muscles), it.recoveryHours) })
