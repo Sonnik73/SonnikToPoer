@@ -4,6 +4,8 @@ import androidx.room.withTransaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Единая точка доступа к данным. Короткие операции записи запускаются в [scope] приложения,
@@ -14,6 +16,7 @@ class Repository(
     private val scope: CoroutineScope,
 ) {
     val dao: AppDao = db.dao()
+    private val seedLock = Mutex()
 
     fun launch(block: suspend Repository.() -> Unit): Job = scope.launch { block() }
 
@@ -38,6 +41,16 @@ class Repository(
 
     /** Запоминает время отдыха, выставленное для упражнения во время тренировки. */
     suspend fun setExerciseRest(exerciseId: String, restSec: Int?) = dao.setExerciseRest(exerciseId, restSec, now())
+
+    suspend fun setRecoveryHours(workoutExerciseId: String, hours: Int?) =
+        dao.setRecoveryHours(workoutExerciseId, hours, now())
+
+    /** При первом запуске добавляет упражнения по умолчанию (если упражнений ещё нет). */
+    suspend fun seedDefaultsIfNeeded(settings: AppSettings, russian: Boolean) = seedLock.withLock {
+        if (settings.defaultsSeeded) return@withLock
+        if (dao.exerciseCount() == 0) dao.insertExercises(DEFAULT_EXERCISES.map { it.toEntity(russian) })
+        settings.defaultsSeeded = true
+    }
 
     // ---- Инвентарь ----
 

@@ -1,5 +1,11 @@
 # What's new in SonnikToPower
 
+## 1.5
+- Muscle status on the home screen: body front and back, red (recovering) to green (ready), gray — not trained for a long time
+- “How hard was it?” after the last set of an exercise sets the recovery time (24–96 h); several exercises for one muscle extend it a bit
+- Main muscles for exercises with a suggestion by name; existing exercises got their muscles automatically
+- Default exercise set for a fresh install
+
 ## 1.4
 - Changelog: “Settings → What's new”, plus a what's-new dialog after an update
 - Refreshed calm interface: consistent colors instead of wallpaper colors, fewer borders and fills, tidier cards

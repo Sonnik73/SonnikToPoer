@@ -43,7 +43,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.EquipmentType
+import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.parseInt
+import com.sonnik.topower.domain.suggestMuscles
+import com.sonnik.topower.ui.muscles.MusclePicker
 import com.sonnik.topower.ui.LocalAppSettings
 import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.data.ExerciseEntity
@@ -86,6 +89,10 @@ fun ExerciseEditDialog(
     var equipmentType by rememberSaveable { mutableStateOf(EquipmentType.of(initial?.equipmentType)) }
     var bandAssist by rememberSaveable { mutableStateOf(initial?.bandAssist ?: false) }
     var rest by rememberSaveable { mutableStateOf(initial?.restSec?.toString() ?: "") }
+    // Новому упражнению мышцы сразу подбираются по названию (если оно уже известно).
+    var muscles by rememberSaveable {
+        mutableStateOf(initial?.muscles ?: Muscle.format(suggestMuscles(initialName)))
+    }
     val defaultRest by LocalAppSettings.current.defaultRestSec.collectAsStateWithLifecycle()
     var showErrors by rememberSaveable { mutableStateOf(false) }
 
@@ -117,6 +124,21 @@ fun ExerciseEditDialog(
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Row(
+                    Modifier.padding(top = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.exercise_muscles),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        onClick = { muscles = Muscle.format(suggestMuscles(name)) },
+                        enabled = suggestMuscles(name).isNotEmpty(),
+                    ) { Text(stringResource(R.string.muscles_suggest)) }
+                }
+                MusclePicker(Muscle.parse(muscles)) { muscles = Muscle.format(it) }
                 Text(
                     stringResource(R.string.what_to_track),
                     style = MaterialTheme.typography.titleSmall,
@@ -202,6 +224,7 @@ fun ExerciseEditDialog(
                     equipmentType = equipmentType?.name,
                     bandAssist = equipmentType == EquipmentType.BAND && bodyWeight && bandAssist,
                     restSec = parseInt(rest)?.coerceIn(AppSettings.MIN_REST_SEC, AppSettings.MAX_REST_SEC),
+                    muscles = muscles,
                 )
                 repo.launch {
                     saveExercise(exercise)

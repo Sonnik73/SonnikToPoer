@@ -23,6 +23,11 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_LAST_SEEN_VERSION, null)
         set(value) = prefs.edit().putString(KEY_LAST_SEEN_VERSION, value).apply()
 
+    /** Упражнения по умолчанию уже добавлены (или пользователь начал со своих). */
+    var defaultsSeeded: Boolean
+        get() = prefs.getBoolean(KEY_DEFAULTS_SEEDED, false)
+        set(value) = prefs.edit().putBoolean(KEY_DEFAULTS_SEEDED, value).apply()
+
     fun setDefaultRestSec(value: Int) {
         val v = value.coerceIn(MIN_REST_SEC, MAX_REST_SEC)
         prefs.edit().putInt(KEY_REST, v).apply()
@@ -53,5 +58,6 @@ class AppSettings(context: Context) {
         private const val KEY_PLATEAU_ON = "plateau_enabled"
         private const val KEY_PLATEAU_N = "plateau_sessions"
         private const val KEY_LAST_SEEN_VERSION = "last_seen_version"
+        private const val KEY_DEFAULTS_SEEDED = "defaults_seeded"
     }
 }

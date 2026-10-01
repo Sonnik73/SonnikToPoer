@@ -165,6 +165,24 @@ interface AppDao {
     @Query("SELECT * FROM workouts ORDER BY startedAt")
     fun observeWorkouts(): Flow<List<WorkoutEntity>>
 
+    /** Упражнения с рабочими подходами и заданными мышцами — для схемы восстановления. */
+    @Query(
+        """SELECT we.workoutId AS workoutId, COALESCE(w.finishedAt, w.startedAt) AS time,
+                  e.muscles AS muscles, we.recoveryHours AS recoveryHours
+           FROM workout_exercises we
+           JOIN workouts w ON w.id = we.workoutId
+           JOIN exercises e ON e.id = we.exerciseId
+           WHERE e.muscles != ''
+             AND EXISTS (SELECT 1 FROM sets s WHERE s.workoutExerciseId = we.id AND s.isWarmup = 0)"""
+    )
+    fun observeMuscleWork(): Flow<List<MuscleWorkRow>>
+
+    @Query("UPDATE workout_exercises SET recoveryHours = :hours, updatedAt = :now WHERE id = :id")
+    suspend fun setRecoveryHours(id: String, hours: Int?, now: Long)
+
+    @Query("SELECT COUNT(*) FROM exercises")
+    suspend fun exerciseCount(): Int
+
     @Query("SELECT DISTINCT we.exerciseId FROM workout_exercises we JOIN sets s ON s.workoutExerciseId = we.id")
     fun observeExerciseIdsWithSets(): Flow<List<String>>
 

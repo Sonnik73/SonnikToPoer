@@ -73,6 +73,7 @@ import com.sonnik.topower.ui.common.TextInputDialog
 import com.sonnik.topower.ui.common.formatDateTime
 import com.sonnik.topower.ui.common.formatSet
 import com.sonnik.topower.ui.exercises.ExercisePickerDialog
+import com.sonnik.topower.ui.muscles.RecoveryDialog
 
 /** Состояние открытого диалога подхода: [set] == null — новый подход. */
 private data class SetDialogState(val item: WorkoutExerciseFull, val set: SetEntity?)
@@ -217,6 +218,7 @@ private fun WorkoutContent(
     var setDialog by remember { mutableStateOf<SetDialogState?>(null) }
     var removing by remember { mutableStateOf<WorkoutExerciseFull?>(null) }
     var editingWatch by remember { mutableStateOf(false) }
+    var recoveryFor by remember { mutableStateOf<WorkoutExerciseFull?>(null) }
 
     val allEquipment by remember { repo.dao.observeEquipment(includeArchived = true) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
@@ -317,6 +319,11 @@ private fun WorkoutContent(
                 onMove = { delta -> repo.launch { moveWorkoutExercise(workout.id, entry.item.id, delta) } },
                 onRemove = { removing = entry },
                 onStats = { openStats(entry.exercise.id) },
+                onRecovery = if (entry.exercise.muscles.isNotBlank()) {
+                    { recoveryFor = entry }
+                } else {
+                    null
+                },
             )
         }
 
@@ -400,6 +407,14 @@ private fun WorkoutContent(
                 if (score != null && p?.record != null && bestSoFar != null && score > bestSoFar + 1e-9) {
                     Toast.makeText(context, newRecordMsg, Toast.LENGTH_LONG).show()
                 }
+                // После последнего запланированного подхода спрашиваем, насколько было тяжело.
+                val planned = state.item.item.plannedSets
+                val workingBefore = state.item.sets.count { !it.isWarmup }
+                if (state.set == null && !values.isWarmup && planned != null && workingBefore + 1 == planned &&
+                    exercise.muscles.isNotBlank() && state.item.item.recoveryHours == null
+                ) {
+                    recoveryFor = state.item
+                }
                 repo.launch {
                     saveSet(
                         base.copy(
@@ -418,6 +433,15 @@ private fun WorkoutContent(
             },
             onDelete = state.set?.let { s -> { repo.launch { deleteSet(s) }; Unit } },
             onDismiss = { setDialog = null },
+        )
+    }
+
+    recoveryFor?.let { entry ->
+        RecoveryDialog(
+            exerciseName = entry.exercise.name,
+            current = entry.item.recoveryHours,
+            onPick = { hours -> repo.launch { setRecoveryHours(entry.item.id, hours) } },
+            onDismiss = { recoveryFor = null },
         )
     }
 
@@ -456,6 +480,7 @@ private fun ExerciseCard(
     onMove: (Int) -> Unit,
     onRemove: () -> Unit,
     onStats: () -> Unit,
+    onRecovery: (() -> Unit)?,
 ) {
     val exercise = entry.exercise
     val sets = entry.sets.sortedBy { it.position }
@@ -493,6 +518,12 @@ private fun ExerciseCard(
                                 onClick = { menu = false; onMove(1) },
                             )
                         }
+                        if (onRecovery != null) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.recovery_menu)) },
+                                onClick = { menu = false; onRecovery() },
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.statistics)) },
                             onClick = { menu = false; onStats() },
@@ -506,6 +537,14 @@ private fun ExerciseCard(
             }
 
             ProgressLines(progress, exercise, equipment, plateauSessions)
+            entry.item.recoveryHours?.let { hours ->
+                Text(
+                    stringResource(R.string.recovery_line, hours),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
+                )
+            }
 
             if (previous.isNotEmpty()) {
                 val text = compactSets(previous.map { formatSet(it, exercise, null, equipment) })

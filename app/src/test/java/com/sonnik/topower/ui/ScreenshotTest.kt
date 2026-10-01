@@ -131,6 +131,9 @@ class ScreenshotTest {
 suspend fun seedDemoData(app: SonnikApp) {
     val repo = app.repository
     val dao = repo.dao
+    // Упражнения по умолчанию заменяем демо-набором.
+    repo.seedDefaultsIfNeeded(app.settings, russian = true)
+    dao.clearExercises()
     val day = 86_400_000L
     val now = System.currentTimeMillis()
 
@@ -141,11 +144,12 @@ suspend fun seedDemoData(app: SonnikApp) {
     val blue = EquipmentEntity(name = "Синяя", type = "BAND", minResistance = 11.0, maxResistance = 23.0, color = 0xFF1E88E5)
     dao.insertEquipment(listOf(d10, d12, d14, red, blue))
 
-    val press = ExerciseEntity(name = "Жим гантелей лёжа", category = "Грудь", trackWeight = true, equipmentType = "DUMBBELL")
-    val pull = ExerciseEntity(name = "Подтягивания", category = "Спина", trackWeight = true, useBodyWeight = true)
-    val row = ExerciseEntity(name = "Тяга резины к поясу", category = "Спина", trackWeight = true, equipmentType = "BAND")
-    val plank = ExerciseEntity(name = "Планка", category = "Пресс", trackReps = false, trackTime = true)
-    dao.insertExercises(listOf(press, pull, row, plank))
+    val press = ExerciseEntity(name = "Жим гантелей лёжа", trackWeight = true, equipmentType = "DUMBBELL", muscles = "CHEST,FRONT_DELTS,TRICEPS")
+    val pull = ExerciseEntity(name = "Подтягивания", trackWeight = true, useBodyWeight = true, muscles = "LATS,BICEPS")
+    val row = ExerciseEntity(name = "Тяга резины к поясу", trackWeight = true, equipmentType = "BAND", muscles = "LATS,REAR_DELTS")
+    val plank = ExerciseEntity(name = "Планка", trackReps = false, trackTime = true, muscles = "ABS")
+    val squat = ExerciseEntity(name = "Приседания", trackWeight = true, useBodyWeight = true, muscles = "QUADS,GLUTES")
+    dao.insertExercises(listOf(press, pull, row, plank, squat))
 
     val templateId = repo.createTemplate("Верх тела")
     repo.addExercisesToTemplate(templateId, listOf(press.id, pull.id, row.id, plank.id))
@@ -162,7 +166,7 @@ suspend fun seedDemoData(app: SonnikApp) {
         )
         dao.upsertWorkout(w)
         sets.forEachIndexed { i, (exercise, list) ->
-            val we = WorkoutExerciseEntity(workoutId = w.id, exerciseId = exercise.id, position = i, plannedSets = 3)
+            val we = WorkoutExerciseEntity(workoutId = w.id, exerciseId = exercise.id, position = i, plannedSets = 3, recoveryHours = 72)
             dao.upsertWorkoutExercise(we)
             list.forEachIndexed { j, s -> dao.upsertSet(s.copy(workoutExerciseId = we.id, position = j)) }
         }
@@ -185,7 +189,7 @@ suspend fun seedDemoData(app: SonnikApp) {
                 pull to List(3) { s(reps = 8) },
                 row to List(3) { s(reps = 15, weight = if (i < 5) 16.0 else 39.0, bandMin = if (i < 5) 7.0 else 18.0, eq = red.id, eq2 = if (i < 5) null else blue.id) },
                 plank to listOf(s(sec = 60 + i * 5)),
-            ),
+            ) + if (i == 5) listOf(squat to List(3) { s(reps = 20) }) else emptyList(),
         )
     }
     workout(

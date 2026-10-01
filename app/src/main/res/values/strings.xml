@@ -266,4 +266,43 @@
     <string name="finish_workout_full">Finish workout</string>
     <string name="watch_line">Smartwatch: %s</string>
     <string name="body_weight_tag">Body weight</string>
+
+    <!-- Muscles -->
+    <string name="m_chest">Chest</string>
+    <string name="m_front_delts">Front delts</string>
+    <string name="m_side_delts">Side delts</string>
+    <string name="m_rear_delts">Rear delts</string>
+    <string name="m_traps">Traps</string>
+    <string name="m_lats">Lats</string>
+    <string name="m_lower_back">Lower back</string>
+    <string name="m_biceps">Biceps</string>
+    <string name="m_triceps">Triceps</string>
+    <string name="m_forearms">Forearms</string>
+    <string name="m_abs">Abs</string>
+    <string name="m_obliques">Obliques</string>
+    <string name="m_glutes">Glutes</string>
+    <string name="m_quads">Quads</string>
+    <string name="m_hamstrings">Hamstrings</string>
+    <string name="m_adductors">Adductors</string>
+    <string name="m_calves">Calves</string>
+    <string name="muscles_title">Muscle status</string>
+    <string name="muscles_front">Front</string>
+    <string name="muscles_back">Back</string>
+    <string name="muscles_recovering">Recovering</string>
+    <string name="muscles_ready">Ready</string>
+    <string name="muscles_stale">Long ago</string>
+    <string name="muscles_train_now">Ready to train: %s</string>
+    <string name="muscles_recovering_list">Recovering: %s</string>
+    <string name="muscles_hours_left">%1$s (%2$d h)</string>
+    <string name="muscles_empty">Assign muscles to your exercises and log workouts — the body map will show what is ready to train.</string>
+    <string name="exercise_muscles">Main muscles</string>
+    <string name="muscles_suggest">Suggest by name</string>
+    <string name="recovery_title">How hard was it?</string>
+    <string name="recovery_hint">Sets the recovery time for the muscles of this exercise.</string>
+    <string name="recovery_easy">Easy — 24 h</string>
+    <string name="recovery_normal">Normal — 48 h</string>
+    <string name="recovery_hard">Hard — 72 h</string>
+    <string name="recovery_max">To the limit — 96 h</string>
+    <string name="recovery_menu">How hard was it</string>
+    <string name="recovery_line">Recovery: %d h</string>
 </resources>

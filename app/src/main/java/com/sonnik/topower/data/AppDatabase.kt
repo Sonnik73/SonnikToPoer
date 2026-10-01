@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.sonnik.topower.domain.Muscle
 
 @Database(
     entities = [
@@ -17,7 +18,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TemplateExerciseEntity::class,
         EquipmentEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -68,4 +69,19 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
-val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+/** v5: основные мышцы упражнения и срок восстановления после упражнения. */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `exercises` ADD COLUMN `muscles` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `workout_exercises` ADD COLUMN `recoveryHours` INTEGER")
+        // Уже созданным упражнениям проставляем мышцы по известным названиям.
+        MUSCLES_BY_NAME.forEach { (name, muscles) ->
+            db.execSQL(
+                "UPDATE `exercises` SET `muscles` = ? WHERE `name` = ? AND `muscles` = ''",
+                arrayOf<Any>(Muscle.format(muscles), name),
+            )
+        }
+    }
+}
+
+val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)

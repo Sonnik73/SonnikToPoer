@@ -41,6 +41,31 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate4To5AssignsMusclesByName() {
+        createDatabase(4).apply {
+            val cols = "id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, useBodyWeight, archived, createdAt, updatedAt, bandAssist"
+            execSQL("INSERT INTO exercises ($cols) VALUES ('e1', 'Подтягивания узким обратным хватом', '', '', 1, 1, 0, 0, 1, 0, 1, 1, 0)")
+            execSQL("INSERT INTO exercises ($cols) VALUES ('e2', 'Резинка на трицепс из за спины', '', '', 1, 1, 0, 0, 0, 0, 1, 1, 0)")
+            execSQL("INSERT INTO exercises ($cols) VALUES ('e3', 'Моё упражнение', '', '', 1, 1, 0, 0, 0, 0, 1, 1, 0)")
+            close()
+        }
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(*MIGRATIONS)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            runBlocking {
+                val byId = db.dao().allExercises().associateBy { it.id }
+                assertEquals("LATS,BICEPS", byId.getValue("e1").muscles)
+                assertEquals("TRICEPS", byId.getValue("e2").muscles)
+                assertEquals("", byId.getValue("e3").muscles)
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun migrate3To4AddsWatchData() {
         createDatabase(3).apply {
             execSQL("INSERT INTO workouts (id, startedAt, finishedAt, bodyWeight, note, updatedAt) VALUES ('w1', 1, 2, 80.0, '', 1)")

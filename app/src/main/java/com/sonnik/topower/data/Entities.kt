@@ -39,6 +39,9 @@ data class ExerciseEntity(
     val bandAssist: Boolean = false,
     /** Своё время отдыха между подходами, сек; null — общее из настроек. */
     val restSec: Int? = null,
+    /** Основные мышцы через запятую (имена [com.sonnik.topower.domain.Muscle]). */
+    @ColumnInfo(defaultValue = "''")
+    val muscles: String = "",
 )
 
 @Serializable
@@ -86,6 +89,8 @@ data class WorkoutExerciseEntity(
     val position: Int,
     val plannedSets: Int? = null,
     val updatedAt: Long = now(),
+    /** Срок восстановления мышц после упражнения, часов (ответ «насколько тяжело было»). */
+    val recoveryHours: Int? = null,
 )
 
 @Serializable
@@ -229,6 +234,14 @@ data class SetWithContext(
     val bodyWeight: Double?,
     val exerciseId: String,
     val useBodyWeight: Boolean,
+)
+
+/** Упражнение тренировки с мышцами — для схемы восстановления. */
+data class MuscleWorkRow(
+    val workoutId: String,
+    val time: Long,
+    val muscles: String,
+    val recoveryHours: Int?,
 )
 
 data class BodyWeightPoint(

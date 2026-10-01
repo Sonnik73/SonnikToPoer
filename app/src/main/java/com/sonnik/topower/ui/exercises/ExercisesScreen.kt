@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.data.EquipmentType
+import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.ui.muscles.muscleNames
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.ui.inventory.equipmentTypeLabel
 import com.sonnik.topower.ui.LocalRepository
@@ -41,11 +43,14 @@ import com.sonnik.topower.ui.common.ConfirmDialog
 import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.ScreenScaffold
 
-/** Краткое описание упражнения: тип инвентаря или «собственный вес», а если нет — что измеряется. */
+/** Краткое описание упражнения: мышцы и тип инвентаря (или «собственный вес»), иначе — что измеряется. */
 @Composable
 fun trackedSummary(e: ExerciseEntity): String {
-    EquipmentType.of(e.equipmentType)?.let { return equipmentTypeLabel(it) }
-    if (e.useBodyWeight) return stringResource(R.string.body_weight_tag)
+    val muscles = Muscle.parse(e.muscles)
+    val tool = EquipmentType.of(e.equipmentType)?.let { equipmentTypeLabel(it) }
+        ?: if (e.useBodyWeight) stringResource(R.string.body_weight_tag) else null
+    if (muscles.isNotEmpty()) return listOfNotNull(muscleNames(muscles), tool).joinToString(" · ")
+    if (tool != null) return tool
     return buildList {
         if (e.trackReps) add(stringResource(R.string.track_reps))
         if (e.trackWeight) add(stringResource(R.string.track_weight))
@@ -150,7 +155,7 @@ private fun ExerciseRow(
         headlineContent = { Text(exercise.name) },
         supportingContent = {
             val details = listOfNotNull(
-                exercise.category.takeIf { it.isNotBlank() },
+                exercise.category.takeIf { it.isNotBlank() && exercise.muscles.isBlank() },
                 trackedSummary(exercise),
                 if (exercise.archived) stringResource(R.string.archived) else null,
             ).joinToString(" · ")
