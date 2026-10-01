@@ -24,6 +24,17 @@ Offline Android workout tracker with progress statistics (Russian and English UI
   - Общая: число тренировок, тоннаж, тренировки по неделям, график веса тела.
 - **Резервная копия.** Экспорт всех данных в JSON-файл и восстановление из него.
 
+## Скриншоты
+
+Скриншоты экранов с демо-данными лежат в [`docs/screenshots`](docs/screenshots). Их снимает тест `ScreenshotTest`
+(Robolectric) при ручном запуске сборки на ветке.
+
+## Что нового
+
+Журнал изменений: [`changelog/changelog_ru.md`](changelog/changelog_ru.md) ([English](changelog/changelog_en.md)).
+Он же доступен в приложении: «Настройки → Что нового». Версия задаётся в `gradle.properties` (`appVersion`);
+при каждом выпуске нужно добавить раздел в оба файла журнала — это проверяет тест `ChangelogTest`.
+
 ## Установка
 
 Готовый APK лежит в разделе [Releases](../../releases): каждая сборка ветки `main` публикуется автоматически.
