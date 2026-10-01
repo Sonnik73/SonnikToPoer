@@ -259,8 +259,8 @@
     <string name="stat_avg_max_hr">Avg. max heart rate</string>
 
     <!-- Changelog -->
-    <string name="whats_new">What's new</string>
-    <string name="whats_new_in">What's new in %s</string>
+    <string name="whats_new">What\'s new</string>
+    <string name="whats_new_in">What\'s new in %s</string>
     <string name="whats_new_all">All changes</string>
     <string name="ok">OK</string>
     <string name="finish_workout_full">Finish workout</string>
