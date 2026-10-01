@@ -1,7 +1,19 @@
 package com.sonnik.topower.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -11,8 +23,8 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -100,26 +117,7 @@ fun AppRoot() {
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            bottomBar = {
-                NavigationBar {
-                    Tab.entries.forEach { tab ->
-                        NavigationBarItem(
-                            selected = tab == currentTab,
-                            onClick = { nav.openTab(tab.route) },
-                            icon = { Icon(tab.icon, contentDescription = null) },
-                            label = {
-                                Text(
-                                        stringResource(tab.label),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                            },
-                        )
-                    }
-                }
-            },
+            bottomBar = { BottomBar(currentTab, onSelect = { nav.openTab(it.route) }) },
         ) { padding ->
             NavHost(
                 navController = nav,
@@ -210,5 +208,56 @@ private fun WhatsNewOnUpdate(openChangelog: () -> Unit) {
     }
     entry?.let {
         WhatsNewDialog(it, onShowAll = openChangelog, onDismiss = { entry = null })
+    }
+}
+
+/**
+ * Нижняя панель вкладок. Своя вместо NavigationBar: у неё вся ширина вкладки отдана подписи,
+ * поэтому «Тренировка» и «Статистика» не обрезаются на узких экранах.
+ */
+@Composable
+private fun BottomBar(current: Tab?, onSelect: (Tab) -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
+        Column {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .height(64.dp)
+            ) {
+                Tab.entries.forEach { tab ->
+                    val selected = tab == current
+                    val color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable { onSelect(tab) },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Box(
+                            Modifier
+                                .size(width = 52.dp, height = 28.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(tab.icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+                        }
+                        Text(
+                            stringResource(tab.label),
+                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
+                            color = color,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
+                }
+            }
+        }
     }
 }

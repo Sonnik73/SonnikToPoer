@@ -98,12 +98,13 @@ fun StatsScreen(openExercise: (String) -> Unit) {
                     )
                 }
             }
-            if (overall.totalDistanceKm > 0 || overall.totalDurationSec > 0) {
+            val extraTiles = buildList {
+                if (overall.totalDistanceKm > 0) add(R.string.stat_distance to formatNumber(overall.totalDistanceKm))
+                if (overall.totalDurationSec > 0) add(R.string.stat_duration to formatDuration(overall.totalDurationSec.toInt()))
+            }
+            if (extraTiles.isNotEmpty()) {
                 item {
-                    StatRow(
-                        stringResource(R.string.stat_distance) to formatNumber(overall.totalDistanceKm),
-                        stringResource(R.string.stat_duration) to formatDuration(overall.totalDurationSec.toInt()),
-                    )
+                    StatRow(*extraTiles.map { (label, value) -> stringResource(label) to value }.toTypedArray())
                 }
             }
             item {

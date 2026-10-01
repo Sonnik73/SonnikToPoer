@@ -51,7 +51,7 @@ class ScreenshotTest {
     @Test fun workout() = shoot("02-workout") {
         waitText("Продолжить")
         click("Продолжить")
-        waitText("Жим гантелей лёжа")
+        waitText("Рекорд", substring = true)
     }
 
     @Test fun history() = shoot("03-history") {
@@ -77,7 +77,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.0")
+        waitText("Версия 1.4")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -100,7 +100,7 @@ class ScreenshotTest {
     fun workoutDark() = shoot("09-workout-dark") {
         waitText("Продолжить")
         click("Продолжить")
-        waitText("Жим гантелей лёжа")
+        waitText("Рекорд", substring = true)
     }
 
     private fun click(text: String) {
