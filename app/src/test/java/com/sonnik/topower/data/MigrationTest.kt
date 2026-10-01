@@ -41,6 +41,33 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate2To3AddsRestTime() {
+        createDatabase(2).apply {
+            execSQL(
+                "INSERT INTO exercises (id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, " +
+                    "useBodyWeight, archived, createdAt, updatedAt, equipmentType, bandAssist) " +
+                    "VALUES ('e1', 'Подтягивания', '', '', 1, 0, 0, 0, 1, 0, 1, 1, 'BAND', 1)"
+            )
+            close()
+        }
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(*MIGRATIONS)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            runBlocking {
+                val exercise = db.dao().allExercises().single()
+                assertEquals("BAND", exercise.equipmentType)
+                assertNull(exercise.restSec)
+                db.dao().setExerciseRest("e1", 120, 2)
+                assertEquals(120, db.dao().allExercises().single().restSec)
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun migrate1To2KeepsData() {
         createDatabase(1).apply {
             execSQL(

@@ -128,6 +128,21 @@ interface AppDao {
            JOIN workout_exercises we ON s.workoutExerciseId = we.id
            JOIN workouts w ON w.id = we.workoutId
            JOIN exercises e ON e.id = we.exerciseId
+           WHERE e.id = :exerciseId
+           ORDER BY w.startedAt, we.position, s.position"""
+    )
+    suspend fun setsForExercise(exerciseId: String): List<SetWithContext>
+
+    @Query("UPDATE exercises SET restSec = :restSec, updatedAt = :now WHERE id = :id")
+    suspend fun setExerciseRest(id: String, restSec: Int?, now: Long)
+
+    @Query(
+        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
+                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
+           FROM sets s
+           JOIN workout_exercises we ON s.workoutExerciseId = we.id
+           JOIN workouts w ON w.id = we.workoutId
+           JOIN exercises e ON e.id = we.exerciseId
            WHERE e.id = :exerciseId AND w.id != :excludeWorkoutId AND w.startedAt < :before
            ORDER BY w.startedAt DESC, we.position, s.position"""
     )

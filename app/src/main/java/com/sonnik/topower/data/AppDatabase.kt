@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TemplateExerciseEntity::class,
         EquipmentEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -51,4 +51,11 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
-val MIGRATIONS = arrayOf(MIGRATION_1_2)
+/** v3: своё время отдыха у упражнения. */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `exercises` ADD COLUMN `restSec` INTEGER")
+    }
+}
+
+val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)

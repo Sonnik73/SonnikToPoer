@@ -1,6 +1,10 @@
 package com.sonnik.topower.ui.workout
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,7 +54,13 @@ import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseFull
+import com.sonnik.topower.domain.SetRecord
 import com.sonnik.topower.domain.formatNumber
+import com.sonnik.topower.domain.setScore
+import com.sonnik.topower.timer.RestTimer
+import com.sonnik.topower.ui.LocalAppSettings
+import com.sonnik.topower.ui.LocalRestTimer
+import com.sonnik.topower.ui.stats.config
 import com.sonnik.topower.domain.parseDecimal
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ConfirmDialog
@@ -76,10 +86,23 @@ fun WorkoutScreen(
     val items by remember(workoutId) { repo.dao.observeWorkoutExercises(workoutId) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+    // Уведомления нужны таймеру отдыха при заблокированном экране (Android 13+).
+    val context = LocalContext.current
+    val notificationsMsg = stringResource(R.string.notifications_needed)
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (!granted) Toast.makeText(context, notificationsMsg, Toast.LENGTH_LONG).show()
+    }
+    LaunchedEffect(Unit) {
+        if (!RestTimer.canNotify(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     ScreenScaffold(
         title = stringResource(R.string.workout_title),
         onBack = onBack,
         actions = { workout?.let { WorkoutActions(it, onBack) } },
+        bottomBar = { RestTimerBar() },
     ) { padding ->
         workout?.let { w ->
             WorkoutContent(
@@ -178,6 +201,22 @@ private fun WorkoutContent(
         .collectAsStateWithLifecycle(initialValue = emptyList())
     val equipmentById = allEquipment.associateBy { it.id }
 
+    val context = LocalContext.current
+    val settings = LocalAppSettings.current
+    val restTimer = LocalRestTimer.current
+    val defaultRest by settings.defaultRestSec.collectAsStateWithLifecycle()
+    val plateauEnabled by settings.plateauEnabled.collectAsStateWithLifecycle()
+    val plateauSessions by settings.plateauSessions.collectAsStateWithLifecycle()
+    val newRecordMsg = stringResource(R.string.new_record)
+
+    // Рекорд и застой по каждому упражнению; пересчитываются при любом изменении подходов.
+    var progress by remember { mutableStateOf<Map<String, ProgressUi>>(emptyMap()) }
+    LaunchedEffect(items, workout.startedAt) {
+        progress = items.map { it.exercise }.distinctBy { it.id }.associate { exercise ->
+            exercise.id to progressFor(repo.dao.setsForExercise(exercise.id), exercise, workout.id, workout.startedAt)
+        }
+    }
+
     // Подходы прошлой тренировки по каждому упражнению — для подсказки и автозаполнения.
     var previous by remember { mutableStateOf<Map<String, List<SetEntity>>>(emptyMap()) }
     val exerciseIds = items.map { it.exercise.id }.distinct()
@@ -227,6 +266,8 @@ private fun WorkoutContent(
                 bodyWeight = workout.bodyWeight,
                 equipment = equipmentById,
                 previous = previous[entry.exercise.id].orEmpty(),
+                progress = progress[entry.exercise.id],
+                plateauSessions = if (plateauEnabled) plateauSessions else null,
                 isFirst = entry == items.first(),
                 isLast = entry == items.last(),
                 onAddSet = { setDialog = SetDialogState(entry, null) },
@@ -283,6 +324,30 @@ private fun WorkoutContent(
             },
             onSave = { values ->
                 val base = state.set ?: SetEntity(workoutExerciseId = state.item.item.id, position = -1)
+                val exercise = state.item.exercise
+                if (state.set == null && workout.finishedAt == null) {
+                    restTimer.start(exercise.id, exercise.name, exercise.restSec ?: defaultRest)
+                }
+                val score = setScore(
+                    SetRecord(
+                        workoutId = workout.id,
+                        date = workout.startedAt,
+                        bodyWeight = workout.bodyWeight,
+                        useBodyWeight = exercise.useBodyWeight,
+                        reps = values.reps,
+                        weight = values.weight,
+                        durationSec = values.durationSec,
+                        distanceKm = values.distanceKm,
+                        isWarmup = values.isWarmup,
+                        pair = values.pair,
+                    ),
+                    exercise.config(),
+                )
+                val p = progress[exercise.id]
+                val bestSoFar = listOfNotNull(p?.recordScore, p?.currentBest).maxOrNull()
+                if (score != null && p?.record != null && bestSoFar != null && score > bestSoFar + 1e-9) {
+                    Toast.makeText(context, newRecordMsg, Toast.LENGTH_LONG).show()
+                }
                 repo.launch {
                     saveSet(
                         base.copy(
@@ -320,6 +385,8 @@ private fun ExerciseCard(
     bodyWeight: Double?,
     equipment: Map<String, EquipmentEntity>,
     previous: List<SetEntity>,
+    progress: ProgressUi?,
+    plateauSessions: Int?,
     isFirst: Boolean,
     isLast: Boolean,
     onAddSet: () -> Unit,
@@ -375,6 +442,8 @@ private fun ExerciseCard(
                     }
                 }
             }
+
+            ProgressLines(progress, exercise, equipment, plateauSessions)
 
             if (previous.isNotEmpty()) {
                 val text = previous.map { formatSet(it, exercise, null, equipment) }.joinToString("; ")

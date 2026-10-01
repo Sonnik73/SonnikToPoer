@@ -37,6 +37,8 @@ data class ExerciseEntity(
     val equipmentType: String? = null,
     @ColumnInfo(defaultValue = "0")
     val bandAssist: Boolean = false,
+    /** Своё время отдыха между подходами, сек; null — общее из настроек. */
+    val restSec: Int? = null,
 )
 
 @Serializable

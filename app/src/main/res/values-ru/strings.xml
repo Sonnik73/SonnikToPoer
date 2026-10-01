@@ -195,4 +195,34 @@
     <string name="band_assistance">Помощь: %s</string>
     <string name="no_equipment_of_type">Инвентаря этого типа пока нет — добавьте его во вкладке «Инвентарь»</string>
     <string name="fmt_range_kg">%1$s–%2$s кг</string>
+
+    <string name="rest_title">Отдых</string>
+    <string name="rest_channel_running">Таймер отдыха</string>
+    <string name="rest_channel_done">Окончание отдыха</string>
+    <string name="rest_done_title">Отдых окончен</string>
+    <string name="rest_done_text">Пора делать следующий подход 💪</string>
+    <string name="rest_skip">Пропустить</string>
+    <string name="rest_minus">−15 с</string>
+    <string name="rest_plus">+15 с</string>
+    <string name="rest_over">Отдых окончен — следующий подход!</string>
+    <string name="rest_close">Закрыть</string>
+    <string name="rest_section">Таймер отдыха</string>
+    <string name="rest_default">Отдых между подходами по умолчанию</string>
+    <string name="rest_default_hint">Запускается после каждого нового подхода. Если на тренировке изменить время кнопками −15/+15, оно запомнится для этого упражнения.</string>
+    <string name="exercise_rest">Отдых, сек (пусто — общий, %d)</string>
+    <string name="record_line">🏆 Рекорд: %1$s (%2$s)</string>
+    <string name="new_record">🎉 Новый рекорд!</string>
+    <string name="new_record_badge">🎉 Новый рекорд на этой тренировке!</string>
+    <string name="plateau_line">⚠️ Нет роста %1$d тренировок. Попробуйте: %2$s</string>
+    <string name="plateau_or">" или "</string>
+    <string name="suggest_item">взять %s</string>
+    <string name="suggest_plus_kg">+%s кг</string>
+    <string name="suggest_plus_rep">+1 повтор</string>
+    <string name="suggest_plus_time">+%d сек</string>
+    <string name="suggest_plus_distance">+%s км</string>
+    <string name="plateau_section">Подсказка о застое</string>
+    <string name="plateau_enabled">Предупреждать, если нет роста</string>
+    <string name="plateau_sessions">Тренировок без роста: %d</string>
+    <string name="plateau_hint">Если столько тренировок подряд ни один показатель (вес, повторения, время, дистанция) не вырос, у упражнения появится подсказка, как увеличить нагрузку.</string>
+    <string name="notifications_needed">Разрешите уведомления, чтобы таймер отдыха срабатывал при заблокированном экране</string>
 </resources>

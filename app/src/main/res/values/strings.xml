@@ -206,4 +206,35 @@
     <string name="band_assistance">Assistance: %s</string>
     <string name="no_equipment_of_type">No items of this type yet — add them on the Inventory tab</string>
     <string name="fmt_range_kg">%1$s–%2$s kg</string>
+
+    <!-- Rest timer, records, plateau -->
+    <string name="rest_title">Rest</string>
+    <string name="rest_channel_running">Rest timer</string>
+    <string name="rest_channel_done">Rest finished</string>
+    <string name="rest_done_title">Rest is over</string>
+    <string name="rest_done_text">Time for the next set 💪</string>
+    <string name="rest_skip">Skip</string>
+    <string name="rest_minus">−15 s</string>
+    <string name="rest_plus">+15 s</string>
+    <string name="rest_over">Rest is over — next set!</string>
+    <string name="rest_close">Close</string>
+    <string name="rest_section">Rest timer</string>
+    <string name="rest_default">Default rest between sets</string>
+    <string name="rest_default_hint">Starts after each new set. If you change the time with −15/+15 during a workout, it is remembered for that exercise.</string>
+    <string name="exercise_rest">Rest, sec (empty — default %d)</string>
+    <string name="record_line">🏆 Record: %1$s (%2$s)</string>
+    <string name="new_record">🎉 New record!</string>
+    <string name="new_record_badge">🎉 New record in this workout!</string>
+    <string name="plateau_line">⚠️ No progress for %1$d workouts. Try: %2$s</string>
+    <string name="plateau_or">" or "</string>
+    <string name="suggest_item">take %s</string>
+    <string name="suggest_plus_kg">+%s kg</string>
+    <string name="suggest_plus_rep">+1 rep</string>
+    <string name="suggest_plus_time">+%d s</string>
+    <string name="suggest_plus_distance">+%s km</string>
+    <string name="plateau_section">Plateau hint</string>
+    <string name="plateau_enabled">Warn when there is no progress</string>
+    <string name="plateau_sessions">Workouts without progress: %d</string>
+    <string name="plateau_hint">If no metric (weight, reps, time, distance) improves for this many workouts in a row, the exercise shows a hint on how to increase the load.</string>
+    <string name="notifications_needed">Allow notifications so the rest timer can signal with the screen locked</string>
 </resources>

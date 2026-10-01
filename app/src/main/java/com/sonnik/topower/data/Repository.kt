@@ -36,6 +36,9 @@ class Repository(
         }
     }
 
+    /** Запоминает время отдыха, выставленное для упражнения во время тренировки. */
+    suspend fun setExerciseRest(exerciseId: String, restSec: Int?) = dao.setExerciseRest(exerciseId, restSec, now())
+
     // ---- Инвентарь ----
 
     suspend fun saveEquipment(item: EquipmentEntity) {

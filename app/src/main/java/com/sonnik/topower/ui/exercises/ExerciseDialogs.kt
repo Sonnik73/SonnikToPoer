@@ -41,7 +41,11 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.EquipmentType
+import com.sonnik.topower.domain.parseInt
+import com.sonnik.topower.ui.LocalAppSettings
+import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.ui.inventory.equipmentTypeLabel
 import com.sonnik.topower.ui.LocalRepository
@@ -81,6 +85,8 @@ fun ExerciseEditDialog(
     var bodyWeight by rememberSaveable { mutableStateOf(initial?.useBodyWeight ?: false) }
     var equipmentType by rememberSaveable { mutableStateOf(EquipmentType.of(initial?.equipmentType)) }
     var bandAssist by rememberSaveable { mutableStateOf(initial?.bandAssist ?: false) }
+    var rest by rememberSaveable { mutableStateOf(initial?.restSec?.toString() ?: "") }
+    val defaultRest by LocalAppSettings.current.defaultRestSec.collectAsStateWithLifecycle()
     var showErrors by rememberSaveable { mutableStateOf(false) }
 
     val nameError = name.isBlank()
@@ -157,6 +163,15 @@ fun ExerciseEditDialog(
                 if (equipmentType == EquipmentType.BAND && bodyWeight) {
                     CheckRow(bandAssist, stringResource(R.string.band_assist), { bandAssist = it })
                 }
+                NumberField(
+                    value = rest,
+                    onValueChange = { rest = it },
+                    label = stringResource(R.string.exercise_rest, defaultRest),
+                    decimal = false,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                )
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
@@ -186,6 +201,7 @@ fun ExerciseEditDialog(
                     useBodyWeight = bodyWeight,
                     equipmentType = equipmentType?.name,
                     bandAssist = equipmentType == EquipmentType.BAND && bodyWeight && bandAssist,
+                    restSec = parseInt(rest)?.coerceIn(AppSettings.MIN_REST_SEC, AppSettings.MAX_REST_SEC),
                 )
                 repo.launch {
                     saveExercise(exercise)

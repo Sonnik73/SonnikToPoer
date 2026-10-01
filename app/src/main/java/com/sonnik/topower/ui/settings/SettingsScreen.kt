@@ -11,7 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Switch
+import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sonnik.topower.data.AppSettings
+import com.sonnik.topower.domain.formatDuration
+import com.sonnik.topower.ui.LocalAppSettings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -78,6 +86,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            TrainingSettings()
             SectionCard {
                 Text(stringResource(R.string.backup_title), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.backup_description), style = MaterialTheme.typography.bodyMedium)
@@ -126,5 +135,68 @@ fun SettingsScreen(onBack: () -> Unit) {
             },
             onDismiss = { pendingImport = null },
         )
+    }
+}
+
+/** Таймер отдыха и подсказка о застое. */
+@Composable
+private fun TrainingSettings() {
+    val settings = LocalAppSettings.current
+    val rest by settings.defaultRestSec.collectAsStateWithLifecycle()
+    val plateauOn by settings.plateauEnabled.collectAsStateWithLifecycle()
+    val plateauN by settings.plateauSessions.collectAsStateWithLifecycle()
+
+    SectionCard {
+        Text(stringResource(R.string.rest_section), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.rest_default), style = MaterialTheme.typography.bodyMedium)
+        Stepper(
+            value = formatDuration(rest),
+            onMinus = { settings.setDefaultRestSec(rest - AppSettings.REST_STEP_SEC) },
+            onPlus = { settings.setDefaultRestSec(rest + AppSettings.REST_STEP_SEC) },
+            minusEnabled = rest > AppSettings.MIN_REST_SEC,
+            plusEnabled = rest < AppSettings.MAX_REST_SEC,
+        )
+        Text(
+            stringResource(R.string.rest_default_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    SectionCard {
+        Text(stringResource(R.string.plateau_section), style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.plateau_enabled), modifier = Modifier.weight(1f))
+            Switch(checked = plateauOn, onCheckedChange = { settings.setPlateauEnabled(it) })
+        }
+        if (plateauOn) {
+            Text(stringResource(R.string.plateau_sessions, plateauN), style = MaterialTheme.typography.bodyMedium)
+            Stepper(
+                value = plateauN.toString(),
+                onMinus = { settings.setPlateauSessions(plateauN - 1) },
+                onPlus = { settings.setPlateauSessions(plateauN + 1) },
+                minusEnabled = plateauN > AppSettings.MIN_PLATEAU_SESSIONS,
+                plusEnabled = plateauN < AppSettings.MAX_PLATEAU_SESSIONS,
+            )
+        }
+        Text(
+            stringResource(R.string.plateau_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun Stepper(
+    value: String,
+    onMinus: () -> Unit,
+    onPlus: () -> Unit,
+    minusEnabled: Boolean,
+    plusEnabled: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        FilledTonalButton(onClick = onMinus, enabled = minusEnabled) { Text("−") }
+        Text(value, style = MaterialTheme.typography.titleLarge)
+        FilledTonalButton(onClick = onPlus, enabled = plusEnabled) { Text("+") }
     }
 }

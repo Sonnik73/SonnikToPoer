@@ -29,7 +29,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sonnik.topower.R
+import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
+import com.sonnik.topower.timer.RestTimer
 import com.sonnik.topower.ui.common.LocalOpenSettings
 import com.sonnik.topower.ui.exercises.ExercisesScreen
 import com.sonnik.topower.ui.inventory.InventoryScreen
@@ -42,6 +44,8 @@ import com.sonnik.topower.ui.workout.WorkoutHomeScreen
 import com.sonnik.topower.ui.workout.WorkoutScreen
 
 val LocalRepository = staticCompositionLocalOf<Repository> { error("Repository is not provided") }
+val LocalAppSettings = staticCompositionLocalOf<AppSettings> { error("Settings are not provided") }
+val LocalRestTimer = staticCompositionLocalOf<RestTimer> { error("Rest timer is not provided") }
 
 object Routes {
     const val WORKOUT_HOME = "workout_home"
