@@ -1,4 +1,5 @@
 import java.time.Duration
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     alias(libs.plugins.android.application)
@@ -99,5 +100,8 @@ dependencies {
 // Зависший тест не должен держать сборку бесконечно.
 tasks.withType<Test>().configureEach {
     timeout.set(Duration.ofMinutes(8))
-    testLogging { events("started", "passed", "skipped", "failed") }
+    testLogging {
+        events("started", "passed", "skipped", "failed")
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
