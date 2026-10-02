@@ -46,6 +46,7 @@ data class DefaultExercise(
         muscles = Muscle.format(muscles),
         repMin = reps?.first,
         repMax = reps?.last,
+        technique = TECHNIQUE[nameRu]?.let { if (russian) it.first else it.second }.orEmpty(),
     )
 }
 

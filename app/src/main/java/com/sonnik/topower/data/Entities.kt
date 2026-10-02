@@ -45,6 +45,9 @@ data class ExerciseEntity(
     /** Рабочий диапазон повторов для подсказки цели; null — не задан. */
     val repMin: Int? = null,
     val repMax: Int? = null,
+    /** Как правильно выполнять упражнение (пункты с новой строки). */
+    @ColumnInfo(defaultValue = "''")
+    val technique: String = "",
 )
 
 @Serializable

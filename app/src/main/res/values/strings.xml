@@ -384,4 +384,5 @@
     <string name="share_text">My week in SonnikToPower: %1$d workouts, %2$d weeks in a row</string>
     <string name="share_results">Share results</string>
     <string name="share_error">Could not prepare the image</string>
+    <string name="exercise_technique">How to perform</string>
 </resources>

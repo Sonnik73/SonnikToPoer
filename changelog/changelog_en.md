@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.18
+- How-to for all 63 default exercises: setup, movement and the main mistake to avoid. Your exercises with the same names got it automatically
+- The ⓘ icon next to an exercise in a workout shows the technique; edit it in the exercise dialog
+
 ## 1.17
 - Report image, CSV and backup file names include date and time: SonnikToPower-2026-10-08_14-35.png
 

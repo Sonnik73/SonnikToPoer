@@ -373,4 +373,5 @@
     <string name="share_text">Моя неделя в SonnikToPower: тренировок — %1$d, недель подряд — %2$d</string>
     <string name="share_results">Поделиться результатами</string>
     <string name="share_error">Не удалось подготовить картинку</string>
+    <string name="exercise_technique">Техника выполнения</string>
 </resources>

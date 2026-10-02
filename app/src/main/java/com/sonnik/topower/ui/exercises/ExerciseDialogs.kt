@@ -93,6 +93,7 @@ fun ExerciseEditDialog(
     var equipmentType by rememberSaveable { mutableStateOf(EquipmentType.of(initial?.equipmentType)) }
     var bandAssist by rememberSaveable { mutableStateOf(initial?.bandAssist ?: false) }
     var rest by rememberSaveable { mutableStateOf(initial?.restSec?.toString() ?: "") }
+    var technique by rememberSaveable { mutableStateOf(initial?.technique ?: "") }
     var repMin by rememberSaveable { mutableStateOf(initial?.repMin?.toString() ?: "") }
     var repMax by rememberSaveable { mutableStateOf(initial?.repMax?.toString() ?: "") }
     // Новому упражнению мышцы сразу подбираются по названию (если оно уже известно).
@@ -238,6 +239,16 @@ fun ExerciseEditDialog(
                         .fillMaxWidth()
                         .padding(top = 8.dp),
                 )
+                OutlinedTextField(
+                    value = technique,
+                    onValueChange = { technique = it },
+                    label = { Text(stringResource(R.string.exercise_technique)) },
+                    minLines = 3,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                )
             }
         },
         confirmButton = {
@@ -252,6 +263,7 @@ fun ExerciseEditDialog(
                     name = name.trim(),
                     category = category.trim(),
                     note = note.trim(),
+                    technique = technique.trim(),
                     trackReps = reps,
                     trackWeight = weight,
                     trackTime = time,

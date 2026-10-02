@@ -41,6 +41,28 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate6To7AddsTechnique() {
+        createDatabase(6).apply {
+            val cols = "id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, useBodyWeight, archived, createdAt, updatedAt, bandAssist, muscles, repMin, repMax"
+            execSQL("INSERT INTO exercises ($cols) VALUES ('e1', 'Планка', '', 'моя заметка', 0, 0, 1, 0, 1, 0, 1, 1, 0, 'ABS', NULL, NULL)")
+            close()
+        }
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(*MIGRATIONS)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            runBlocking {
+                val e = db.dao().allExercises().single()
+                assertEquals("моя заметка", e.note)
+                assertEquals("", e.technique)
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun migrate5To6AddsRepRange() {
         createDatabase(5).apply {
             val cols = "id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, useBodyWeight, archived, createdAt, updatedAt, bandAssist, muscles"

@@ -66,6 +66,14 @@ class Repository(
             if (added.isNotEmpty()) dao.insertExercises(added)
             settings.exercisePack = 2
         }
+        // Техника выполнения: проставляем упражнениям, совпадающим по названию, если она ещё пустая.
+        if (settings.exercisePack < 3) {
+            val updated = dao.allExercises().filter { it.technique.isBlank() }.mapNotNull { e ->
+                techniqueFor(e.name, russian)?.let { e.copy(technique = it) }
+            }
+            updated.forEach { dao.upsertExercise(it) }
+            settings.exercisePack = 3
+        }
     }
 
     // ---- Инвентарь ----

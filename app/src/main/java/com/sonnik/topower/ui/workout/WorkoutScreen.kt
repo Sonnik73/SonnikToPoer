@@ -25,6 +25,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -492,6 +496,8 @@ private fun ExerciseCard(
     val exercise = entry.exercise
     val sets = entry.sets.sortedBy { it.position }
     var menu by remember { mutableStateOf(false) }
+    var showTechnique by remember { mutableStateOf(false) }
+    if (showTechnique) TechniqueDialog(exercise.name, exercise.technique) { showTechnique = false }
 
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 12.dp)) {
@@ -507,6 +513,15 @@ private fun ExerciseCard(
                         color = if (planned != null && workingSets >= planned) MaterialTheme.colorScheme.tertiary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                if (exercise.technique.isNotBlank()) {
+                    IconButton(onClick = { showTechnique = true }) {
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.exercise_technique),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 Box {
                     IconButton(onClick = { menu = true }) {
@@ -589,6 +604,28 @@ private fun ExerciseCard(
             }
         }
     }
+}
+
+/** Техника выполнения упражнения — по значку ⓘ в карточке. */
+@Composable
+fun TechniqueDialog(name: String, technique: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(stringResource(R.string.exercise_technique), style = MaterialTheme.typography.labelLarge)
+                Text(name)
+            }
+        },
+        text = {
+            Text(
+                technique,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            )
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) } },
+    )
 }
 
 private fun WorkoutEntity.withWatch(v: WatchValues) = copy(
