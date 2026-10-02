@@ -9,7 +9,9 @@ import com.sonnik.topower.ui.share.SHARE_WIDTH
 import com.sonnik.topower.ui.share.ShareCardData
 import com.sonnik.topower.ui.share.ShareRecordLine
 import com.sonnik.topower.ui.share.ShareTile
+import com.sonnik.topower.ui.share.fileTimestamp
 import com.sonnik.topower.ui.share.renderShareCard
+import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +23,10 @@ import java.io.File
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34])
 class ShareCardTest {
+    @Test fun fileNameHasDateAndTime() {
+        assertEquals("2026-10-08_09-05", fileTimestamp(LocalDateTime.of(2026, 10, 8, 9, 5)))
+    }
+
     @Test fun rendersWeekCard() {
         val bitmap = renderShareCard(
             ShareCardData(

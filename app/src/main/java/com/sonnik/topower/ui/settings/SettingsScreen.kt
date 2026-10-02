@@ -41,7 +41,7 @@ import com.sonnik.topower.ui.common.SectionCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
+import com.sonnik.topower.ui.share.fileTimestamp
 import java.util.Locale
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.ui.muscles.muscleNameRes
@@ -120,7 +120,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                 Text(stringResource(R.string.backup_title), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.backup_description), style = MaterialTheme.typography.bodyMedium)
                 Button(
-                    onClick = { exportLauncher.launch("sonniktopower-backup-${LocalDate.now()}.json") },
+                    onClick = { exportLauncher.launch("SonnikToPower-backup-${fileTimestamp()}.json") },
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.export_backup)) }
                 OutlinedButton(
@@ -128,7 +128,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.import_backup)) }
                 OutlinedButton(
-                    onClick = { csvLauncher.launch("sonniktopower-${LocalDate.now()}.csv") },
+                    onClick = { csvLauncher.launch("SonnikToPower-${fileTimestamp()}.csv") },
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.export_csv)) }
                 Text(

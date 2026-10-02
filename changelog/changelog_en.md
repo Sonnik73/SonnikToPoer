@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.17
+- Report image, CSV and backup file names include date and time: SonnikToPower-2026-10-08_14-35.png
+
 ## 1.16
 - “Share results” on the Statistics screen: an image with your week — workouts this week, in 30 days and in total, weeks in a row, volume and kcal, muscles trained this week and the week's records. Sent via the regular Share menu to any messenger
 

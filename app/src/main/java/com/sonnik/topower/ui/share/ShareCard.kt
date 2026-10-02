@@ -18,6 +18,8 @@ import com.sonnik.topower.domain.volumeLevel
 import com.sonnik.topower.ui.muscles.renderBodyBitmap
 import com.sonnik.topower.ui.muscles.volumeColor
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class ShareTile(val value: String, val label: String)
 
@@ -163,10 +165,16 @@ fun renderShareCard(data: ShareCardData): Bitmap {
     return bitmap
 }
 
+/** Дата и время для имён файлов: 2026-10-08_14-35. */
+fun fileTimestamp(now: LocalDateTime = LocalDateTime.now()): String =
+    now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"))
+
 /** Сохраняет картинку во временную папку и открывает системное меню «Поделиться». */
 fun shareImage(context: Context, bitmap: Bitmap, text: String, chooserTitle: String) {
     val dir = File(context.cacheDir, "share").apply { mkdirs() }
-    val file = File(dir, "sonniktopower.png")
+    // Прошлые картинки больше не нужны — в папке остаётся только текущий отчёт.
+    dir.listFiles()?.forEach { it.delete() }
+    val file = File(dir, "SonnikToPower-${fileTimestamp()}.png")
     file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     val uri = FileProvider.getUriForFile(context, context.packageName + ".files", file)
     val send = Intent(Intent.ACTION_SEND).apply {
