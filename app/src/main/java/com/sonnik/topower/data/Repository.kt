@@ -47,9 +47,19 @@ class Repository(
 
     /** При первом запуске добавляет упражнения по умолчанию (если упражнений ещё нет). */
     suspend fun seedDefaultsIfNeeded(settings: AppSettings, russian: Boolean) = seedLock.withLock {
-        if (settings.defaultsSeeded) return@withLock
-        if (dao.exerciseCount() == 0) dao.insertExercises(DEFAULT_EXERCISES.map { it.toEntity(russian) })
-        settings.defaultsSeeded = true
+        if (!settings.defaultsSeeded) {
+            if (dao.exerciseCount() == 0) dao.insertExercises(DEFAULT_EXERCISES.map { it.toEntity(russian) })
+            settings.defaultsSeeded = true
+        }
+        // Набор 2 добавляется и новым, и уже установленным приложениям — кроме совпадающих по названию.
+        if (settings.exercisePack < 2) {
+            val existing = dao.allExercises().map { it.name.trim().lowercase() }.toSet()
+            val added = EXERCISE_PACK_2
+                .filter { it.nameRu.lowercase() !in existing && it.nameEn.lowercase() !in existing }
+                .map { it.toEntity(russian) }
+            if (added.isNotEmpty()) dao.insertExercises(added)
+            settings.exercisePack = 2
+        }
     }
 
     // ---- Инвентарь ----

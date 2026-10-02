@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.13
+- 50 new exercises — at least three for every muscle group — with your equipment: dumbbells, bands, spring expander, weight vest, pull-up bar, bench. Each has main muscles and a rep range; exercises with matching names are not duplicated
+
 ## 1.12
 - Readiness color on templates: a stripe from red (the workout's muscles are still recovering) to green (all recovered) and “Readiness N%”
 - Templates are sorted by readiness — the best fit for today comes first

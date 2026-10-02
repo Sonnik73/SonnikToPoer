@@ -74,6 +74,11 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean(KEY_DEFAULTS_SEEDED, false)
         set(value) = prefs.edit().putBoolean(KEY_DEFAULTS_SEEDED, value).apply()
 
+    /** Номер последнего добавленного набора упражнений по умолчанию. */
+    var exercisePack: Int
+        get() = prefs.getInt(KEY_EXERCISE_PACK, 0)
+        set(value) = prefs.edit().putInt(KEY_EXERCISE_PACK, value).apply()
+
     fun setDefaultRestSec(value: Int) {
         val v = value.coerceIn(MIN_REST_SEC, MAX_REST_SEC)
         prefs.edit().putInt(KEY_REST, v).apply()
@@ -107,6 +112,7 @@ class AppSettings(context: Context) {
         private const val KEY_PLATEAU_N = "plateau_sessions"
         private const val KEY_LAST_SEEN_VERSION = "last_seen_version"
         private const val KEY_DEFAULTS_SEEDED = "defaults_seeded"
+        private const val KEY_EXERCISE_PACK = "exercise_pack"
         private const val KEY_R_ON = "reminder_recovery_on"
         private const val KEY_R_MODE = "reminder_recovery_mode"
         private const val KEY_R_GROUPS = "reminder_recovery_groups"

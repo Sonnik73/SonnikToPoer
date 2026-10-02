@@ -123,7 +123,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.12")
+        waitText("Версия 1.13")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
