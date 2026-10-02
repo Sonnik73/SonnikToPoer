@@ -198,7 +198,8 @@ private fun TemplateCard(
                     else -> Text(
                         stringResource(
                             R.string.template_recovering,
-                            blocking.joinToString(", ") { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) },
+                            blocking.map { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) }
+                                .joinToString(", "),
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
