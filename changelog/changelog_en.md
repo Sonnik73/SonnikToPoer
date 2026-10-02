@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.15
+- More detailed muscle map: fibers follow each muscle's shape (fanning on the chest, delts, lats and glutes, arcing along the limbs), veins on the arms, lower abdomen and calves, light tendons — kneecap, Achilles, elbow and back of the knee
+
 ## 1.14
 - “Build a workout for rested muscles” button in templates: creates a template of 4–6 exercises for the longest-rested muscles, skipping exercises that load muscles still recovering; familiar exercises are preferred, compound ones come first. The template opens for editing right away
 
