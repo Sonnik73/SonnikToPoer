@@ -104,7 +104,7 @@ fun ShareResultsButton(
         volumeLegend = listOf(
             VolumeLevel.LOW to "1–5",
             VolumeLevel.MODERATE to "6–9",
-            VolumeLevel.OPTIMAL to stringResource(R.string.volume_optimal),
+            VolumeLevel.OPTIMAL to "10–20",
             VolumeLevel.HIGH to "21+",
         ),
         recordsTitle = stringResource(R.string.share_records),
