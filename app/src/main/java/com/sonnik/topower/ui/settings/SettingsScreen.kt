@@ -42,6 +42,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.util.Locale
+import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.ui.muscles.muscleNameRes
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
@@ -64,6 +67,31 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                 val json = repo.exportBackup()
                 withContext(Dispatchers.IO) {
                     context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(json.toByteArray()) }
+                        ?: error("Cannot open file")
+                }
+                toast(exportDone)
+            } catch (e: Exception) {
+                toast(errorTemplate.format(e.message ?: e.javaClass.simpleName))
+            }
+        }
+    }
+
+    val csvHeader = stringResource(R.string.csv_header).split('|')
+    val warmupMark = stringResource(R.string.warmup_short)
+    val yesMark = stringResource(R.string.csv_yes)
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            try {
+                val csv = repo.exportCsv(
+                    header = csvHeader,
+                    decimalComma = Locale.getDefault().language == "ru",
+                    warmupMark = warmupMark,
+                    yesMark = yesMark,
+                    muscleNames = { text -> Muscle.parse(text).sortedBy { it.ordinal }.joinToString(", ") { context.getString(muscleNameRes(it)) } },
+                )
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(csv.toByteArray()) }
                         ?: error("Cannot open file")
                 }
                 toast(exportDone)
@@ -99,6 +127,15 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.import_backup)) }
+                OutlinedButton(
+                    onClick = { csvLauncher.launch("sonniktopower-${LocalDate.now()}.csv") },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.export_csv)) }
+                Text(
+                    stringResource(R.string.export_csv_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             SectionCard {
                 Text(stringResource(R.string.about_title), style = MaterialTheme.typography.titleMedium)

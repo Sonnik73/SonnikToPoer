@@ -155,3 +155,36 @@ fun BodyFigure(
         }
     }
 }
+
+/**
+ * Тело спереди и сзади рядом одной картинкой — для виджета (там нет Compose).
+ * [colorOf] — цвет мышцы (ARGB), [height] — высота картинки в пикселях.
+ */
+fun renderBodyBitmap(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, height: Int): android.graphics.Bitmap {
+    val scale = height / 200f
+    val gap = 12f
+    val bitmap = android.graphics.Bitmap.createBitmap((200 * scale + gap * scale).toInt(), height, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val fill = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    val stroke = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        style = android.graphics.Paint.Style.STROKE
+        strokeWidth = 0.8f
+        color = gapColor
+    }
+    val body = silhouette().asAndroidPath()
+    listOf(false, true).forEachIndexed { i, back ->
+        canvas.save()
+        canvas.translate(i * (100 + gap) * scale, 0f)
+        canvas.scale(scale, scale)
+        fill.color = bodyColor
+        canvas.drawPath(body, fill)
+        (if (back) backMuscles() else frontMuscles()).forEach { (muscle, path) ->
+            val p = path.asAndroidPath()
+            fill.color = colorOf(muscle)
+            canvas.drawPath(p, fill)
+            canvas.drawPath(p, stroke)
+        }
+        canvas.restore()
+    }
+    return bitmap
+}

@@ -348,4 +348,14 @@
         <item quantity="one">After %d day without training</item>
         <item quantity="other">After %d days without training</item>
     </plurals>
+    <string name="csv_header">Date|Time|Exercise|Set|Reps|Weight, kg|Pair|Equipment|Body weight, kg|Time, sec|Distance, km|Volume, kg|Muscles|Workout note</string>
+    <string name="csv_yes">yes</string>
+    <string name="export_csv">Export to CSV (Excel, Sheets)</string>
+    <string name="export_csv_hint">All sets as a table for your own analysis. CSV cannot be imported back — use a backup for that.</string>
+    <string name="widget_description">Muscle recovery at a glance</string>
+    <string name="widget_full_in">Full recovery in %s</string>
+    <string name="widget_all_ready">All muscles ready</string>
+    <string name="widget_no_data">No workouts yet</string>
+    <string name="widget_hours">%d h</string>
+    <string name="widget_minutes">%d min</string>
 </resources>

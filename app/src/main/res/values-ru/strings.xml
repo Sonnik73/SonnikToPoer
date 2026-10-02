@@ -337,4 +337,14 @@
         <item quantity="many">Через %d дней без тренировок</item>
         <item quantity="other">Через %d дня без тренировок</item>
     </plurals>
+    <string name="csv_header">Дата|Время|Упражнение|Подход|Повторы|Вес, кг|Пара|Снаряд|Вес тела, кг|Время, сек|Дистанция, км|Тоннаж, кг|Мышцы|Заметка к тренировке</string>
+    <string name="csv_yes">да</string>
+    <string name="export_csv">Экспорт в CSV (Excel, Таблицы)</string>
+    <string name="export_csv_hint">Все подходы таблицей — для своего анализа. Восстановить данные из CSV нельзя, для этого — резервная копия.</string>
+    <string name="widget_description">Восстановление мышц на рабочем столе</string>
+    <string name="widget_full_in">Полное восстановление через %s</string>
+    <string name="widget_all_ready">Все мышцы готовы</string>
+    <string name="widget_no_data">Пока нет тренировок</string>
+    <string name="widget_hours">%d ч</string>
+    <string name="widget_minutes">%d мин</string>
 </resources>

@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.10
+- “Muscle status” home screen widget: body map in recovery colors and time to full recovery; tap to open the app
+- Export all sets to CSV for Excel and Google Sheets (Settings → Backup)
+
 ## 1.9
 - “Volume, 7 days” mode on the muscle map: working sets per muscle and which muscles lack volume (target: 10–20 a week)
 - Templates on the home screen show whether their muscles are ready; ready templates come first

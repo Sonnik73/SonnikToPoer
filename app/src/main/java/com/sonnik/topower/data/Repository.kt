@@ -200,6 +200,29 @@ class Repository(
 
     // ---- Резервная копия ----
 
+    /** Все подходы в CSV, см. [CsvExport]. */
+    suspend fun exportCsv(
+        header: List<String>,
+        decimalComma: Boolean,
+        warmupMark: String,
+        yesMark: String,
+        muscleNames: (String) -> String,
+    ): String = db.withTransaction {
+        CsvExport.build(
+            header = header,
+            exercises = dao.allExercises(),
+            workouts = dao.allWorkouts(),
+            workoutExercises = dao.allWorkoutExercises(),
+            sets = dao.allSets(),
+            equipment = dao.allEquipment(),
+            zone = java.time.ZoneId.systemDefault(),
+            decimalComma = decimalComma,
+            warmupMark = warmupMark,
+            yesMark = yesMark,
+            muscleNames = muscleNames,
+        )
+    }
+
     suspend fun exportBackup(): String = db.withTransaction {
         BackupCodec.encode(
             BackupFile(

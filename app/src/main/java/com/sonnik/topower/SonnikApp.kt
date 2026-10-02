@@ -7,6 +7,7 @@ import com.sonnik.topower.data.Repository
 import com.sonnik.topower.reminders.Reminders
 import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.timer.RestTimer
+import com.sonnik.topower.widget.MuscleWidget
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +36,10 @@ class SonnikApp : Application() {
                 repository.dao.observeMuscleWork(),
                 repository.dao.observeLastWorkoutStart(),
             ) { _, rows, last -> muscleStatuses(rows) to last }
-                .collectLatest { (statuses, last) -> reminders.reschedule(statuses, last) }
+                .collectLatest { (statuses, last) ->
+                    reminders.reschedule(statuses, last)
+                    MuscleWidget.update(this@SonnikApp, statuses)
+                }
         }
     }
 }
