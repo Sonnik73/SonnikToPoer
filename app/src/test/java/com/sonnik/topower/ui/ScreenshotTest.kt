@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -41,7 +43,6 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowDialog
 import java.io.File
-import kotlin.math.abs
 import java.io.FileOutputStream
 
 /**
@@ -101,15 +102,15 @@ class ScreenshotTest {
     @Test fun reminders() = shoot("13-reminders") {
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Таймер отдыха")
-        visibleList().performScrollToNode(hasText("О восстановлении мышц"))
+        listWith("Таймер отдыха").performScrollToNode(hasText("О восстановлении мышц"))
         click("О восстановлении мышц")
         waitText("Когда восстановились все мышцы")
-        visibleList().performScrollToNode(hasText("Тихие часы"))
+        listWith("Таймер отдыха").performScrollToNode(hasText("Тихие часы"))
     }
 
     @Test fun templates() = shoot("15-templates") {
         waitText("Можно тренировать", substring = true)
-        visibleList().performScrollToNode(hasText("Верх тела"))
+        listWith("Состояние мышц").performScrollToNode(hasText("Верх тела"))
         waitText("Готовность", substring = true)
     }
 
@@ -145,15 +146,15 @@ class ScreenshotTest {
     @Test fun exerciseStats() = shoot("05-exercise-stats") {
         tab("Stats")
         waitText("Общая статистика")
-        visibleList().performScrollToNode(hasText("Жим гантелей лёжа"))
-        click("Жим гантелей лёжа")
+        listWith("Общая статистика").performScrollToNode(hasText("Жим гантелей лёжа"))
+        click("Жим гантелей лёжа", inList = true)
         waitText("Динамика")
     }
 
     @Test fun changelog() = shoot("10-changelog") {
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Таймер отдыха")
-        visibleList().performScrollToNode(hasText("Что нового"))
+        listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
         waitText("Версия 1.19")
     }
@@ -183,22 +184,25 @@ class ScreenshotTest {
     /** Кнопка «Продолжить» ниже карточки мышц — сначала прокручиваем к ней. */
     private fun openActiveWorkout() {
         waitText("Можно тренировать", substring = true)
-        visibleList().performScrollToNode(hasText("Продолжить"))
+        listWith("Состояние мышц").performScrollToNode(hasText("Продолжить"))
         click("Продолжить")
     }
 
     /**
-     * Вертикальный список, который сейчас на экране: соседние вкладки пейджера тоже собраны,
-     * а сам пейджер прокручивается горизонтально — их пропускаем.
+     * Вертикальный список экрана, в котором есть текст [marker]. Соседние вкладки пейджера тоже
+     * собраны (и их координаты вне экрана ненадёжны), поэтому список узнаём по содержимому.
      */
-    private fun visibleList(): SemanticsNodeInteraction {
+    private fun listWith(marker: String): SemanticsNodeInteraction {
+        compose.waitForIdle()
         val vertical = hasScrollAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
-        val nodes = compose.onAllNodes(vertical)
-        // Список остановившейся страницы стоит ровно у левого края; во время перелистывания такого нет.
-        fun visibleIndex() = nodes.fetchSemanticsNodes().indexOfFirst { abs(it.boundsInRoot.left) < 1f }
-        compose.waitUntil(10_000) { visibleIndex() >= 0 }
-        return nodes[visibleIndex()]
+        val id = compose.onAllNodes(vertical and hasAnyDescendant(hasText(marker, substring = true)))[0]
+            .fetchSemanticsNode().id
+        lastList = SemanticsMatcher("list #$id") { it.id == id }
+        return compose.onNode(lastList!!)
     }
+
+    /** Последний найденный [listWith] список — в нём ищет [click] с inList = true. */
+    private var lastList: SemanticsMatcher? = null
 
     /** Нажатие на вкладку в нижней панели. */
     private fun tab(name: String) {
@@ -217,14 +221,14 @@ class ScreenshotTest {
         compose.waitForIdle()
     }
 
-    /** Нажатие на текст, который сейчас на экране (на соседних вкладках пейджера бывает такой же). */
-    private fun click(text: String) {
+    /** Нажатие на текст; inList — только внутри последнего списка [listWith] (соседние вкладки собраны тоже). */
+    private fun click(text: String, inList: Boolean = false) {
         compose.waitForIdle()
-        val width = compose.onRoot().fetchSemanticsNode().size.width
-        val nodes = compose.onAllNodesWithText(text)
-        val index = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
-        nodes[index.coerceAtLeast(0)].performClick()
+        val matcher = if (inList) hasText(text) and hasAnyAncestor(lastList!!) else hasText(text)
+        compose.onAllNodes(matcher)[0].performClick()
     }
+
+
 
 
     private fun waitText(text: String, substring: Boolean = false) {
