@@ -202,8 +202,16 @@ class ScreenshotTest {
 
     /** Нажатие на вкладку в нижней панели. */
     private fun tab(name: String) {
+        val title = mapOf("History" to "История", "Stats" to "Статистика", "Exercises" to "Упражнения", "Inventory" to "Инвентарь")
+            .getValue(name)
         compose.waitForIdle()
         compose.onNodeWithTag("tab_$name").performClick()
+        // Перелистывание анимируется: ждём, пока заголовок вкладки встанет на место вверху экрана.
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(title).fetchSemanticsNodes().any {
+                it.boundsInRoot.top < 300f && it.boundsInRoot.left in 0f..200f
+            }
+        }
         compose.waitForIdle()
     }
 
