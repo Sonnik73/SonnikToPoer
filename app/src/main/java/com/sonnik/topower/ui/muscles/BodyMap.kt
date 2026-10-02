@@ -116,6 +116,7 @@ private fun resample(chain: List<Pt>, n: Int): List<Pt> {
 /** Шаг между волокнами в единицах схемы. */
 private const val FIBER_STEP = 1.7f
 private const val FIBER_POINTS = 24
+private const val FAN_START = 0.22f
 
 /**
  * Волокна вдоль оси под углом [deg]: контур делится на две стороны между крайними по оси точками,
@@ -154,8 +155,9 @@ private fun fanFibers(outline: List<Pt>, focus: Pt): APath {
     }.toFloat()
     val edge = resample(outline + outline.first(), max(8, (length / FIBER_STEP).toInt()))
     return APath().apply {
+        // Линии начинаются чуть дальше точки схождения — иначе там сливаются в тёмное пятно.
         edge.forEach { p ->
-            moveTo(focus.x, focus.y)
+            moveTo(focus.x + (p.x - focus.x) * FAN_START, focus.y + (p.y - focus.y) * FAN_START)
             lineTo(p.x, p.y)
         }
     }

@@ -55,13 +55,18 @@ class ScreenshotTest {
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
         // Приложение при старте само заполняет упражнения в главном потоке. Блокировать его
         // ожиданием нельзя (взаимная блокировка), поэтому готовим данные в фоне, прокручивая очередь.
-        val job = CoroutineScope(Dispatchers.IO).async { seedDemoData(app) }
+        inBackground { seedDemoData(app) }
+    }
+
+    /** Выполняет [block] в фоне, прокручивая очередь главного потока, пока он не закончится. */
+    private fun <T> inBackground(block: suspend () -> T): T {
+        val job = CoroutineScope(Dispatchers.IO).async { block() }
         val looper = shadowOf(Looper.getMainLooper())
         while (!job.isCompleted) {
             looper.idle()
             Thread.sleep(5)
         }
-        runBlocking { job.await() }
+        return runBlocking { job.await() }
     }
 
     @Test fun home() = shoot("01-home") { waitText("Можно тренировать", substring = true) }
@@ -102,9 +107,12 @@ class ScreenshotTest {
 
     @Test fun generatedTemplate() = shoot("16-generated-template") {
         waitText("Можно тренировать", substring = true)
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Подобрать на отдохнувшие мышцы"))
-        click("Подобрать на отдохнувшие мышцы")
-        waitText("Подбор:", substring = true)
+        // Подбор — запросы к базе; в тесте выполняем его в фоне, как подготовку данных.
+        val app = ApplicationProvider.getApplicationContext<SonnikApp>()
+        inBackground { app.repository.generateTemplate(System.currentTimeMillis()) { "Подбор: " + it.joinToString() } }
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Подбор:", substring = true))
+        compose.onAllNodesWithText("Подбор:", substring = true)[0].performClick()
+        waitText("Подходов", substring = true)
     }
 
     @Test fun history() = shoot("03-history") {
