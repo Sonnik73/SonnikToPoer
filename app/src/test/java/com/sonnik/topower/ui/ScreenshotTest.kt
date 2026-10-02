@@ -41,6 +41,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowDialog
 import java.io.File
+import kotlin.math.abs
 import java.io.FileOutputStream
 
 /**
@@ -192,10 +193,9 @@ class ScreenshotTest {
      */
     private fun visibleList(): SemanticsNodeInteraction {
         val vertical = hasScrollAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
-        val width = compose.onRoot().fetchSemanticsNode().size.width
         val nodes = compose.onAllNodes(vertical)
-        fun visibleIndex() = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
-        // Пока страница доезжает после перелистывания, видимого списка ещё может не быть.
+        // Список остановившейся страницы стоит ровно у левого края; во время перелистывания такого нет.
+        fun visibleIndex() = nodes.fetchSemanticsNodes().indexOfFirst { abs(it.boundsInRoot.left) < 1f }
         compose.waitUntil(10_000) { visibleIndex() >= 0 }
         return nodes[visibleIndex()]
     }
