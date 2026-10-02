@@ -364,4 +364,5 @@
     <string name="muscles_tap_hint">Tap a muscle to see its status</string>
     <string name="muscle_ready_now">ready to train</string>
     <string name="muscle_stale_long">not trained for a long time</string>
+    <string name="template_readiness">Readiness %d%%</string>
 </resources>

@@ -50,6 +50,15 @@ import com.sonnik.topower.ui.muscles.rememberNow
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.MuscleStatus
 import com.sonnik.topower.domain.blockingMuscles
+import com.sonnik.topower.domain.templateReadiness
+import com.sonnik.topower.ui.muscles.recoveryColor
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
+import kotlin.math.roundToInt
 import com.sonnik.topower.domain.hoursLeft
 import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.ui.common.SectionTitle
@@ -79,7 +88,11 @@ fun WorkoutHomeScreen(
     val blocking = templates.associate { t ->
         t.template.id to templateMuscles[t.template.id]?.let { blockingMuscles(it, statuses, now) }
     }
-    val sortedTemplates = templates.sortedBy { blocking[it.template.id]?.isNotEmpty() == true }
+    val readiness = templates.associate { t ->
+        t.template.id to templateMuscles[t.template.id]?.let { templateReadiness(it, statuses, now) }
+    }
+    // Самые готовые к тренировке — сверху; шаблоны без мышц — в конце.
+    val sortedTemplates = templates.sortedByDescending { readiness[it.template.id] ?: -1f }
 
     fun start(templateId: String?) {
         scope.launch { openWorkout(repo.startWorkout(templateId)) }
@@ -147,6 +160,7 @@ fun WorkoutHomeScreen(
                 TemplateCard(
                     summary = summary,
                     blocking = blocking[summary.template.id],
+                    readiness = readiness[summary.template.id],
                     now = now,
                     onStart = { start(summary.template.id) },
                     onEdit = { openTemplate(summary.template.id) },
@@ -169,6 +183,7 @@ fun WorkoutHomeScreen(
 private fun TemplateCard(
     summary: TemplateSummary,
     blocking: List<MuscleStatus>?,
+    readiness: Float?,
     now: Long,
     onStart: () -> Unit,
     onEdit: () -> Unit,
@@ -178,35 +193,56 @@ private fun TemplateCard(
             .fillMaxWidth()
             .clickable(onClick = onEdit),
     ) {
-        Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(summary.template.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text(
-                    summary.exerciseNames ?: stringResource(R.string.exercise_count, 0),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                when {
-                    blocking == null -> Unit
-                    blocking.isEmpty() -> Text(
-                        stringResource(R.string.template_ready),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
-                    else -> Text(
-                        stringResource(
-                            R.string.template_recovering,
-                            blocking.map { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) }
-                                .joinToString(", "),
-                        ),
+        Row(Modifier.height(IntrinsicSize.Min)) {
+            // Полоса готовности: от красной (мышцы не восстановились) до зелёной.
+            Box(
+                Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(readiness?.let { recoveryColor(it) } ?: Color.Transparent)
+            )
+            Row(
+                Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(summary.template.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        summary.exerciseNames ?: stringResource(R.string.exercise_count, 0),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
+                    readiness?.let {
+                        Text(
+                            stringResource(R.string.template_readiness, (it * 100).roundToInt()),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                    }
+                    when {
+                        blocking == null -> Unit
+                        blocking.isEmpty() -> Text(
+                            stringResource(R.string.template_ready),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
+                        else -> Text(
+                            stringResource(
+                                R.string.template_recovering,
+                                blocking.map { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) }
+                                    .joinToString(", "),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
+                FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }
             }
-            FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }
         }
     }
 }

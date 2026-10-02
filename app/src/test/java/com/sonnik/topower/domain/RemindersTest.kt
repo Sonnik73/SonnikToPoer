@@ -95,4 +95,14 @@ class RemindersTest {
         val b = blockingMuscles(setOf(Muscle.CHEST, Muscle.QUADS, Muscle.LATS), statuses, at(3, 20))
         assertEquals(listOf(Muscle.CHEST), b.map { it.muscle })
     }
+
+    @Test fun templateReadinessAveragesRecovery() {
+        // Грудь: 1-е 18:00 → 4-е 02:00 (56 ч); квадрицепсы: → 3-е 18:00 (48 ч). Сейчас 3-е 06:00 — 36 ч прошло.
+        val now = at(3, 6)
+        assertEquals(1f, templateReadiness(setOf(Muscle.LATS), statuses, now)!!, 1e-6f)
+        val chest = 36f / 56f
+        val quads = 36f / 48f
+        assertEquals((chest + quads + 1f) / 3, templateReadiness(setOf(Muscle.CHEST, Muscle.QUADS, Muscle.LATS), statuses, now)!!, 1e-4f)
+        assertEquals(null, templateReadiness(emptySet(), statuses, now))
+    }
 }

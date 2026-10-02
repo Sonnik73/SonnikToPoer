@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.12
+- Readiness color on templates: a stripe from red (the workout's muscles are still recovering) to green (all recovered) and “Readiness N%”
+- Templates are sorted by readiness — the best fit for today comes first
+
 ## 1.11
 - New anatomical body map: shaped muscles, ab blocks, heads of the quads, hamstrings and calves, subtle volume and fibers
 - Larger map on the home screen; tap a muscle to see its name and time to recovery (or weekly volume)

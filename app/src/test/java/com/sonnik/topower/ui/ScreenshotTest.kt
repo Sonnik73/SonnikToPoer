@@ -94,6 +94,12 @@ class ScreenshotTest {
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Тихие часы"))
     }
 
+    @Test fun templates() = shoot("15-templates") {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Верх тела"))
+        waitText("Готовность", substring = true)
+    }
+
     @Test fun history() = shoot("03-history") {
         click("История")
         waitText("Подтягивания", substring = true)
@@ -117,7 +123,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.11")
+        waitText("Версия 1.12")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -208,6 +214,8 @@ suspend fun seedDemoData(app: SonnikApp) {
 
     val templateId = repo.createTemplate("Верх тела")
     repo.addExercisesToTemplate(templateId, listOf(press.id, pull.id, row.id, plank.id))
+    repo.addExercisesToTemplate(repo.createTemplate("Ноги"), listOf(squat.id))
+    repo.addExercisesToTemplate(repo.createTemplate("Кор"), listOf(plank.id))
 
     suspend fun workout(start: Long, finished: Boolean, bodyWeight: Double, sets: List<Pair<ExerciseEntity, List<SetEntity>>>, watch: Boolean) {
         val w = WorkoutEntity(

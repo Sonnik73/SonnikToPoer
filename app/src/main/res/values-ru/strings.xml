@@ -353,4 +353,5 @@
     <string name="muscles_tap_hint">Нажмите на мышцу, чтобы увидеть её состояние</string>
     <string name="muscle_ready_now">готова к тренировке</string>
     <string name="muscle_stale_long">давно не тренировалась</string>
+    <string name="template_readiness">Готовность %d%%</string>
 </resources>

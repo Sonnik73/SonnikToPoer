@@ -31,3 +31,12 @@ fun blockingMuscles(templateMuscles: Set<Muscle>, statuses: Map<Muscle, MuscleSt
     templateMuscles.mapNotNull { statuses[it] }
         .filter { it.state(now) == MuscleState.RECOVERING }
         .sortedByDescending { it.readyAt }
+
+/**
+ * Готовность шаблона от 0 (все мышцы только что нагружены) до 1 (все восстановились): средняя доля
+ * восстановления его мышц. Мышцы, которые давно или ещё не тренировались, считаются готовыми. null — у шаблона нет мышц.
+ */
+fun templateReadiness(templateMuscles: Set<Muscle>, statuses: Map<Muscle, MuscleStatus>, now: Long): Float? {
+    if (templateMuscles.isEmpty()) return null
+    return templateMuscles.map { m -> statuses[m]?.recoveredFraction(now) ?: 1f }.average().toFloat()
+}
