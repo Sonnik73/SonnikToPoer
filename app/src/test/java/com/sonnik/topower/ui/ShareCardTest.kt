@@ -33,6 +33,8 @@ class ShareCardTest {
                 ),
                 musclesTitle = "Мышцы за неделю",
                 volume = mapOf(Muscle.CHEST to 12, Muscle.TRICEPS to 7, Muscle.LATS to 10, Muscle.BICEPS to 4, Muscle.QUADS to 22, Muscle.GLUTES to 9),
+                muscleNames = mapOf(Muscle.CHEST to "Грудь", Muscle.TRICEPS to "Трицепс", Muscle.LATS to "Широчайшие", Muscle.BICEPS to "Бицепс", Muscle.QUADS to "Квадрицепсы", Muscle.GLUTES to "Ягодицы"),
+                setsFormat = "%d подх.",
                 volumeLegend = listOf(VolumeLevel.LOW to "1–5", VolumeLevel.MODERATE to "6–9", VolumeLevel.OPTIMAL to "10–20 — норма", VolumeLevel.HIGH to "21+"),
                 recordsTitle = "Рекорды недели",
                 records = listOf(

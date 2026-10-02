@@ -9,7 +9,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.text.TextPaint
-import android.text.TextUtils
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
@@ -31,6 +30,9 @@ data class ShareCardData(
     val tiles: List<ShareTile>,
     val musclesTitle: String,
     val volume: Map<Muscle, Int>,
+    val muscleNames: Map<Muscle, String>,
+    /** «%d подх.» */
+    val setsFormat: String,
     val volumeLegend: List<Pair<VolumeLevel, String>>,
     val recordsTitle: String,
     val records: List<ShareRecordLine>,
@@ -56,8 +58,23 @@ private fun text(size: Float, color: Int, bold: Boolean = false) = TextPaint(Pai
     typeface = if (bold) Typeface.create(Typeface.DEFAULT, Typeface.BOLD) else Typeface.DEFAULT
 }
 
+/** Текст, укороченный с «…» до [maxWidth] (свой расчёт — не зависит от TextUtils). */
+private fun ellipsize(text: String, paint: TextPaint, maxWidth: Float): String {
+    if (paint.measureText(text) <= maxWidth) return text
+    var end = text.length
+    while (end > 0 && paint.measureText(text, 0, end) + paint.measureText("…") > maxWidth) end--
+    return text.substring(0, end).trimEnd() + "…"
+}
+
 private fun Canvas.line(text: String, x: Float, y: Float, paint: TextPaint, maxWidth: Float) {
-    drawText(TextUtils.ellipsize(text, paint, maxWidth, TextUtils.TruncateAt.END).toString(), x, y, paint)
+    drawText(ellipsize(text, paint, maxWidth), x, y, paint)
+}
+
+/** Строка в [maxWidth]: сначала уменьшаем шрифт (до [minSize]), потом укорачиваем. */
+private fun Canvas.fitLine(text: String, x: Float, y: Float, paint: TextPaint, maxWidth: Float, minSize: Float) {
+    val p = TextPaint(paint)
+    while (p.measureText(text) > maxWidth && p.textSize > minSize) p.textSize -= 1f
+    line(text, x, y, p, maxWidth)
 }
 
 /** Карточка 1080×1350 с итогами недели: плитки, схема нагруженных мышц и рекорды. */
@@ -87,7 +104,7 @@ fun renderShareCard(data: ShareCardData): Bitmap {
         fill.color = TileColor
         canvas.drawRoundRect(RectF(x, y, x + tileW, y + tileH), 28f, 28f, fill)
         canvas.line(tile.value, x + 26f, y + 76f, value, tileW - 40f)
-        canvas.line(tile.label, x + 26f, y + 120f, label, tileW - 40f)
+        canvas.fitLine(tile.label, x + 26f, y + 120f, label, tileW - 44f, minSize = 21f)
     }
 
     // Мышцы за неделю.
@@ -97,37 +114,52 @@ fun renderShareCard(data: ShareCardData): Bitmap {
         colorOf = { m -> volumeColor(volumeLevel(data.volume[m] ?: 0), Color(IdleMuscle)).toArgb() },
         bodyColor = BodyColor,
         gapColor = CardColor,
-        height = 360,
+        height = 400,
     )
-    canvas.drawBitmap(body, (SHARE_WIDTH - body.width) / 2f, 690f, null)
+    canvas.drawBitmap(body, left - 10f, 688f, null)
+
+    // Справа — самые нагруженные мышцы недели и легенда.
+    val colX = left + body.width + 30f
+    val colW = left + width - colX
+    val muscleName = text(30f, TextColor)
+    val muscleSets = text(30f, MutedColor, bold = true)
+    data.volume.filterValues { it > 0 }.entries.sortedByDescending { it.value }.take(6).forEachIndexed { i, (m, sets) ->
+        val y = 736f + i * 50f
+        fill.color = volumeColor(volumeLevel(sets), Color(IdleMuscle)).toArgb()
+        canvas.drawCircle(colX + 10f, y - 10f, 10f, fill)
+        val count = data.setsFormat.format(sets)
+        val countW = muscleSets.measureText(count)
+        canvas.drawText(count, colX + colW - countW, y, muscleSets)
+        canvas.line(data.muscleNames[m].orEmpty(), colX + 32f, y, muscleName, colW - countW - 48f)
+    }
     val legend = text(26f, MutedColor)
-    var x = left
-    data.volumeLegend.forEach { (level, caption) ->
+    data.volumeLegend.forEachIndexed { i, (level, caption) ->
+        val x = colX + (i % 2) * (colW / 2)
+        val y = 1050f + (i / 2) * 40f
         fill.color = volumeColor(level, Color(IdleMuscle)).toArgb()
-        canvas.drawCircle(x + 10f, 1076f, 10f, fill)
-        canvas.drawText(caption, x + 28f, 1085f, legend)
-        x += 28f + legend.measureText(caption) + 32f
+        canvas.drawCircle(x + 10f, y - 9f, 10f, fill)
+        canvas.line(caption, x + 28f, y, legend, colW / 2 - 32f)
     }
 
     // Рекорды недели.
-    canvas.line(data.recordsTitle, left, 1140f, section, width)
+    canvas.line(data.recordsTitle, left, 1160f, section, width)
     val name = text(30f, TextColor, bold = true)
     val detail = text(30f, MutedColor)
     val gain = text(30f, GainColor, bold = true)
     if (data.records.isEmpty()) {
-        canvas.line(data.noRecords, left, 1186f, detail, width)
+        canvas.line(data.noRecords, left, 1206f, detail, width)
     }
     data.records.take(3).forEachIndexed { i, r ->
-        val y = 1186f + i * 44f
+        val y = 1206f + i * 42f
         val gainWidth = gain.measureText(r.gain)
         canvas.drawText(r.gain, left + width - gainWidth, y, gain)
-        val nameText = TextUtils.ellipsize(r.exercise, name, width * 0.45f, TextUtils.TruncateAt.END).toString()
+        val nameText = ellipsize(r.exercise, name, width * 0.5f)
         canvas.drawText(nameText, left, y, name)
         val nameWidth = name.measureText(nameText) + 16f
         canvas.line(r.set, left + nameWidth, y, detail, width - nameWidth - gainWidth - 16f)
     }
 
-    canvas.line(data.footer, left, SHARE_HEIGHT - 26f, text(24f, MutedColor), width)
+    canvas.line(data.footer, left, SHARE_HEIGHT - 20f, text(24f, MutedColor), width)
     return bitmap
 }
 

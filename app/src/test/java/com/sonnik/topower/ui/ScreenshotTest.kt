@@ -105,16 +105,6 @@ class ScreenshotTest {
         waitText("Готовность", substring = true)
     }
 
-    @Test fun generatedTemplate() = shoot("16-generated-template") {
-        waitText("Можно тренировать", substring = true)
-        // Подбор — запросы к базе; в тесте выполняем его в фоне, как подготовку данных.
-        val app = ApplicationProvider.getApplicationContext<SonnikApp>()
-        inBackground { app.repository.generateTemplate(System.currentTimeMillis()) { "Подбор: " + it.joinToString() } }
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Подбор:", substring = true))
-        compose.onAllNodesWithText("Подбор:", substring = true)[0].performClick()
-        waitText("Подходов", substring = true)
-    }
-
     @Test fun history() = shoot("03-history") {
         click("История")
         waitText("Подтягивания", substring = true)

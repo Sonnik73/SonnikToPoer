@@ -26,6 +26,7 @@ import com.sonnik.topower.domain.weekStreak
 import com.sonnik.topower.domain.weeklySets
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.formatSet
+import com.sonnik.topower.ui.muscles.muscleName
 import com.sonnik.topower.ui.stats.config
 import com.sonnik.topower.ui.stats.toRecord
 import kotlinx.coroutines.Dispatchers
@@ -98,6 +99,8 @@ fun ShareResultsButton(
         ),
         musclesTitle = stringResource(R.string.share_muscles),
         volume = volume,
+        muscleNames = Muscle.entries.associateWith { muscleName(it) },
+        setsFormat = stringResource(R.string.volume_sets),
         volumeLegend = listOf(
             VolumeLevel.LOW to "1–5",
             VolumeLevel.MODERATE to "6–9",

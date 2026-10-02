@@ -53,4 +53,32 @@ class ExercisePackTest {
             db.close()
         }
     }
+
+    @Test fun generatedTemplateTargetsRestedMuscles() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).allowMainThreadQueries().build()
+        try {
+            val repo = Repository(db, CoroutineScope(Dispatchers.Unconfined))
+            val dao = db.dao()
+            dao.insertExercises(EXERCISE_PACK_2.map { it.toEntity(russian = true) })
+            // Вчера — грудь и трицепс: их упражнения в подборку попасть не должны.
+            val bench = dao.allExercises().first { it.name == "Жим гантелей лёжа" }
+            val now = System.currentTimeMillis()
+            val w = WorkoutEntity(startedAt = now - 20 * 3_600_000L, finishedAt = now - 19 * 3_600_000L)
+            dao.upsertWorkout(w)
+            val item = WorkoutExerciseEntity(workoutId = w.id, exerciseId = bench.id, position = 0, recoveryHours = 72)
+            dao.upsertWorkoutExercise(item)
+            dao.upsertSet(SetEntity(workoutExerciseId = item.id, position = 0, reps = 10, weight = 12.0))
+
+            val id = repo.generateTemplate(now) { "Подбор: " + it.joinToString() }!!
+            val picked = dao.getTemplateExercises(id).map { te -> dao.allExercises().first { it.id == te.exerciseId } }
+            assertTrue(picked.size in 4..6)
+            picked.forEach { e ->
+                val muscles = Muscle.parse(e.muscles)
+                assertTrue(e.name, Muscle.CHEST !in muscles && Muscle.TRICEPS !in muscles && Muscle.FRONT_DELTS !in muscles)
+            }
+        } finally {
+            db.close()
+        }
+    }
 }
