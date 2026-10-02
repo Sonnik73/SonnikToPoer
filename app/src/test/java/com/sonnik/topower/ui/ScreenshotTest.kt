@@ -207,10 +207,15 @@ class ScreenshotTest {
         compose.waitForIdle()
     }
 
+    /** Нажатие на текст, который сейчас на экране (на соседних вкладках пейджера бывает такой же). */
     private fun click(text: String) {
         compose.waitForIdle()
-        compose.onAllNodesWithText(text)[0].performClick()
+        val width = compose.onRoot().fetchSemanticsNode().size.width
+        val nodes = compose.onAllNodesWithText(text)
+        val index = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
+        nodes[index.coerceAtLeast(0)].performClick()
     }
+
 
     private fun waitText(text: String, substring: Boolean = false) {
         compose.waitUntil(10_000) {
