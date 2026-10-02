@@ -206,7 +206,9 @@ class ScreenshotTest {
             .getValue(name)
         compose.waitForIdle()
         compose.onNodeWithTag("tab_$name").performClick()
-        // Перелистывание анимируется: ждём, пока заголовок вкладки встанет на место вверху экрана.
+        // Перелистывание анимируется: даём анимации гарантированно закончиться, затем проверяем,
+        // что заголовок вкладки стоит на месте вверху экрана.
+        compose.mainClock.advanceTimeBy(2_000)
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText(title).fetchSemanticsNodes().any {
                 it.boundsInRoot.top < 300f && it.boundsInRoot.left in 0f..200f
