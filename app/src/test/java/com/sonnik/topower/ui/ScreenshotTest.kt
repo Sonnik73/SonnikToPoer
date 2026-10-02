@@ -12,6 +12,9 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ApplicationProvider
@@ -97,15 +100,15 @@ class ScreenshotTest {
     @Test fun reminders() = shoot("13-reminders") {
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Таймер отдыха")
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("О восстановлении мышц"))
+        visibleList().performScrollToNode(hasText("О восстановлении мышц"))
         click("О восстановлении мышц")
         waitText("Когда восстановились все мышцы")
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Тихие часы"))
+        visibleList().performScrollToNode(hasText("Тихие часы"))
     }
 
     @Test fun templates() = shoot("15-templates") {
         waitText("Можно тренировать", substring = true)
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Верх тела"))
+        visibleList().performScrollToNode(hasText("Верх тела"))
         waitText("Готовность", substring = true)
     }
 
@@ -141,7 +144,7 @@ class ScreenshotTest {
     @Test fun exerciseStats() = shoot("05-exercise-stats") {
         tab("Stats")
         waitText("Общая статистика")
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Жим гантелей лёжа"))
+        visibleList().performScrollToNode(hasText("Жим гантелей лёжа"))
         click("Жим гантелей лёжа")
         waitText("Динамика")
     }
@@ -149,7 +152,7 @@ class ScreenshotTest {
     @Test fun changelog() = shoot("10-changelog") {
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Таймер отдыха")
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
+        visibleList().performScrollToNode(hasText("Что нового"))
         click("Что нового")
         waitText("Версия 1.19")
     }
@@ -179,8 +182,20 @@ class ScreenshotTest {
     /** Кнопка «Продолжить» ниже карточки мышц — сначала прокручиваем к ней. */
     private fun openActiveWorkout() {
         waitText("Можно тренировать", substring = true)
-        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Продолжить"))
+        visibleList().performScrollToNode(hasText("Продолжить"))
         click("Продолжить")
+    }
+
+    /**
+     * Вертикальный список, который сейчас на экране: соседние вкладки пейджера тоже собраны,
+     * а сам пейджер прокручивается горизонтально — их пропускаем.
+     */
+    private fun visibleList(): SemanticsNodeInteraction {
+        val vertical = hasScrollAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
+        val width = compose.onRoot().fetchSemanticsNode().size.width
+        val nodes = compose.onAllNodes(vertical)
+        val index = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
+        return nodes[index.coerceAtLeast(0)]
     }
 
     /** Нажатие на вкладку в нижней панели. */
