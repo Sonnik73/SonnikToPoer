@@ -27,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.robolectric.shadows.ShadowDialog
 import java.io.File
 import java.io.FileOutputStream
 
@@ -88,7 +89,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.4")
+        waitText("Версия 1.7")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -137,7 +138,16 @@ class ScreenshotTest {
         compose.runOnUiThread {
             val view = compose.activity.window.decorView
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-            view.draw(Canvas(bitmap))
+            val canvas = Canvas(bitmap)
+            view.draw(canvas)
+            // Диалог — отдельное окно: дорисовываем его по центру поверх затемнения.
+            ShadowDialog.getLatestDialog()?.takeIf { it.isShowing }?.window?.decorView?.let { dialog ->
+                canvas.drawColor(0x99000000.toInt())
+                canvas.save()
+                canvas.translate((view.width - dialog.width) / 2f, (view.height - dialog.height) / 2f)
+                dialog.draw(canvas)
+                canvas.restore()
+            }
             val dir = File("build/screenshots").apply { mkdirs() }
             FileOutputStream(File(dir, "$name.png")).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
