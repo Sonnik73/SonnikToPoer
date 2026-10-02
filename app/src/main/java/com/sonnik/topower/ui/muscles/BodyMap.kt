@@ -104,21 +104,26 @@ private class MuscleMapBuilder {
 private fun muscleMap(block: MuscleMapBuilder.() -> Unit): Map<Muscle, List<MuscleShape>> =
     MuscleMapBuilder().apply(block).map
 
-private fun silhouette(): Path = Path().apply {
-    oval(50f, 12.5f, 7.5f, 9.5f)
-    spline(listOf(pt(45.5, 19), pt(54.5, 19), pt(55.5, 28), pt(44.5, 28)))
+/**
+ * Части силуэта по отдельности: зеркальные части обходятся в обратную сторону, и в одном пути
+ * их пересечения при заливке вычитались бы друг из друга.
+ */
+private fun silhouette(): List<Path> = buildList {
+    fun part(block: Path.() -> Unit) = add(Path().apply(block))
+    part { oval(50f, 12.5f, 7.5f, 9.5f) }
+    part { spline(listOf(pt(45.5, 19), pt(54.5, 19), pt(55.5, 28), pt(44.5, 28))) }
     val torsoLeft = listOf(pt(50, 26), pt(44, 26.5), pt(37, 28.5), pt(31, 31), pt(29, 37), pt(31, 46), pt(34, 56), pt(35.5, 68), pt(34, 80), pt(33, 92), pt(35, 104), pt(50, 108))
-    spline(torsoLeft + mirror(torsoLeft).reversed().drop(1).dropLast(1))
+    part { spline(torsoLeft + mirror(torsoLeft).reversed().drop(1).dropLast(1)) }
     listOf(
         listOf(pt(31, 30), pt(26, 32), pt(23, 38), pt(22, 48), pt(21, 60), pt(26, 63), pt(29, 54), pt(31, 44), pt(33, 36)),
         listOf(pt(21, 59), pt(19, 70), pt(17, 82), pt(16, 92), pt(20, 94), pt(23, 84), pt(26, 71), pt(27, 62)),
         listOf(pt(35, 100), pt(33, 116), pt(34.5, 134), pt(37, 148), pt(46, 150), pt(48.5, 132), pt(49.5, 114), pt(50, 106)),
         listOf(pt(36.5, 146), pt(35, 160), pt(36.5, 176), pt(38.5, 190), pt(44.5, 190), pt(45.5, 174), pt(46.5, 160), pt(46, 148)),
-    ).forEach { spline(it); spline(mirror(it)) }
-    oval(18f, 99f, 3.6f, 5.5f)
-    oval(82f, 99f, 3.6f, 5.5f)
-    oval(41.5f, 194f, 6f, 3f)
-    oval(58.5f, 194f, 6f, 3f)
+    ).forEach { part { spline(it) }; part { spline(mirror(it)) } }
+    part { oval(18f, 99f, 3.6f, 5.5f) }
+    part { oval(82f, 99f, 3.6f, 5.5f) }
+    part { oval(41.5f, 194f, 6f, 3f) }
+    part { oval(58.5f, 194f, 6f, 3f) }
 }
 
 private fun frontMuscles(): Map<Muscle, List<MuscleShape>> = muscleMap {
@@ -212,8 +217,8 @@ fun BodyFigure(
         val scale = size.width / 100f
         withTransform({ scale(scale, scale, pivot = Offset.Zero) }) {
             // Контур: обводка под заливкой видна только снаружи силуэта.
-            drawPath(body, outline, style = Stroke(width = OUTLINE_WIDTH))
-            drawPath(body, bodyColor)
+            body.forEach { drawPath(it, outline, style = Stroke(width = OUTLINE_WIDTH)) }
+            body.forEach { drawPath(it, bodyColor) }
             muscles.forEach { (muscle, shapes) ->
                 val color = colorOf(muscle)
                 shapes.forEach { s ->
@@ -253,14 +258,16 @@ fun renderBodyBitmap(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, he
     }
     val gapPaint = stroke(gapColor, GAP_WIDTH)
     val fiberPaint = stroke(FiberColor.toArgb(), FIBER_WIDTH)
-    val body = silhouette().asAndroidPath()
+    val body = silhouette().map { it.asAndroidPath() }
     listOf(false, true).forEachIndexed { i, back ->
         canvas.save()
         canvas.translate(i * (100 + gap) * scale, 0f)
         canvas.scale(scale, scale)
-        canvas.drawPath(body, stroke(lerp(Color(bodyColor), Color.Black, 0.1f).toArgb(), OUTLINE_WIDTH))
+        val outline = stroke(lerp(Color(bodyColor), Color.Black, 0.1f).toArgb(), OUTLINE_WIDTH)
+        body.forEach { canvas.drawPath(it, outline) }
+        fill.shader = null
         fill.color = bodyColor
-        canvas.drawPath(body, fill)
+        body.forEach { canvas.drawPath(it, fill) }
         (if (back) backMuscles() else frontMuscles()).forEach { (muscle, shapes) ->
             shapes.forEach { s ->
                 val p = s.path.asAndroidPath()
