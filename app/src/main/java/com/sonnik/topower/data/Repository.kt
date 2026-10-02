@@ -1,6 +1,12 @@
 package com.sonnik.topower.data
 
 import androidx.room.withTransaction
+import com.sonnik.topower.domain.ExerciseOption
+import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.domain.MuscleWork
+import com.sonnik.topower.domain.computeMuscleStatus
+import com.sonnik.topower.domain.generateWorkout
+import com.sonnik.topower.domain.restedMuscles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -163,6 +169,25 @@ class Repository(
     }
 
     suspend fun deleteTemplate(id: String) = dao.deleteTemplate(id)
+
+    /**
+     * Шаблон на самые отдохнувшие мышцы (см. [generateWorkout]); [name] получает нагруженные мышцы
+     * от самых отдохнувших. null — подходящих упражнений нет (всё восстанавливается или мышцы не заданы).
+     */
+    suspend fun generateTemplate(now: Long, name: (List<Muscle>) -> String): String? {
+        val statuses = computeMuscleStatus(
+            dao.muscleWork().map { MuscleWork(it.workoutId, it.time, Muscle.parse(it.muscles), it.recoveryHours) }
+        )
+        val usage = dao.exerciseUsage().associate { it.exerciseId to it.count }
+        val options = dao.allExercises().filter { !it.archived }
+            .map { ExerciseOption(it.id, Muscle.parse(it.muscles), usage[it.id] ?: 0) }
+        val picked = generateWorkout(options, statuses, now)
+        if (picked.isEmpty()) return null
+        val muscles = restedMuscles(statuses, now).filter { m -> picked.any { m in it.muscles } }
+        val id = createTemplate(name(muscles))
+        addExercisesToTemplate(id, picked.map { it.id })
+        return id
+    }
 
     suspend fun addExercisesToTemplate(templateId: String, exerciseIds: List<String>) = db.withTransaction {
         val start = dao.getTemplateExercises(templateId).size

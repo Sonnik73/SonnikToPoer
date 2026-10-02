@@ -100,6 +100,13 @@ class ScreenshotTest {
         waitText("Готовность", substring = true)
     }
 
+    @Test fun generatedTemplate() = shoot("16-generated-template") {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Подобрать на отдохнувшие мышцы"))
+        click("Подобрать на отдохнувшие мышцы")
+        waitText("Подбор:", substring = true)
+    }
+
     @Test fun history() = shoot("03-history") {
         click("История")
         waitText("Подтягивания", substring = true)
@@ -123,7 +130,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.13")
+        waitText("Версия 1.14")
     }
 
     @Test fun exercises() = shoot("06-exercises") {

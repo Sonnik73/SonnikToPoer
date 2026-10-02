@@ -251,6 +251,8 @@ data class MuscleWorkRow(
 
 data class TemplateMuscleRow(val templateId: String, val muscles: String)
 
+data class ExerciseUsage(val exerciseId: String, val count: Int)
+
 data class BodyWeightPoint(
     val startedAt: Long,
     val bodyWeight: Double,

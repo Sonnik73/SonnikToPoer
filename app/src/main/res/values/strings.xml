@@ -365,4 +365,7 @@
     <string name="muscle_ready_now">ready to train</string>
     <string name="muscle_stale_long">not trained for a long time</string>
     <string name="template_readiness">Readiness %d%%</string>
+    <string name="generate_template">Build a workout for rested muscles</string>
+    <string name="generated_template_name">Auto: %s</string>
+    <string name="generate_template_nothing">Nothing to suggest: muscles are still recovering, or exercises have no muscles set</string>
 </resources>

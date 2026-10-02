@@ -354,4 +354,7 @@
     <string name="muscle_ready_now">готова к тренировке</string>
     <string name="muscle_stale_long">давно не тренировалась</string>
     <string name="template_readiness">Готовность %d%%</string>
+    <string name="generate_template">Подобрать на отдохнувшие мышцы</string>
+    <string name="generated_template_name">Подбор: %s</string>
+    <string name="generate_template_nothing">Нечего предложить: мышцы ещё восстанавливаются или у упражнений не заданы мышцы</string>
 </resources>

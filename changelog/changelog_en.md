@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.14
+- “Build a workout for rested muscles” button in templates: creates a template of 4–6 exercises for the longest-rested muscles, skipping exercises that load muscles still recovering; familiar exercises are preferred, compound ones come first. The template opens for editing right away
+
 ## 1.13
 - 50 new exercises — at least three for every muscle group — with your equipment: dumbbells, bands, spring expander, weight vest, pull-up bar, bench. Each has main muscles and a rep range; exercises with matching names are not duplicated
 

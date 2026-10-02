@@ -17,6 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -76,6 +80,10 @@ fun WorkoutHomeScreen(
     val active by remember { repo.dao.observeActiveWorkouts() }.collectAsStateWithLifecycle(emptyList())
     val templates by remember { repo.dao.observeTemplateSummaries() }.collectAsStateWithLifecycle(emptyList())
     var newTemplateDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val names = Muscle.entries.associateWith { muscleName(it) }
+    val generatedName = stringResource(R.string.generated_template_name)
+    val nothingMsg = stringResource(R.string.generate_template_nothing)
 
     // Готовность мышц шаблонов: готовые к тренировке шаблоны — первыми.
     val muscleRows by remember { repo.dao.observeMuscleWork() }.collectAsStateWithLifecycle(emptyList())
@@ -146,6 +154,23 @@ fun WorkoutHomeScreen(
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.new_template))
                     }
+                }
+            }
+            item {
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            val id = repo.generateTemplate(System.currentTimeMillis()) { muscles ->
+                                generatedName.format(muscles.take(3).joinToString(", ") { names.getValue(it) })
+                            }
+                            if (id != null) openTemplate(id) else Toast.makeText(context, nothingMsg, Toast.LENGTH_LONG).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.generate_template))
                 }
             }
             if (templates.isEmpty()) {

@@ -172,6 +172,10 @@ interface AppDao {
     @Query(MUSCLE_WORK)
     suspend fun muscleWork(): List<MuscleWorkRow>
 
+    /** В скольких тренировках было каждое упражнение — для подбора привычных упражнений. */
+    @Query("SELECT exerciseId, COUNT(DISTINCT workoutId) AS count FROM workout_exercises GROUP BY exerciseId")
+    suspend fun exerciseUsage(): List<ExerciseUsage>
+
     @Query("SELECT MAX(startedAt) FROM workouts")
     fun observeLastWorkoutStart(): Flow<Long?>
 
