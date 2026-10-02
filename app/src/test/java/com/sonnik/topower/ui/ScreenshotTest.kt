@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -54,6 +55,14 @@ class ScreenshotTest {
     @Test fun workout() = shoot("02-workout") {
         openActiveWorkout()
         waitText("Рекорд", substring = true)
+    }
+
+    @Test fun muscleGuide() = shoot("11-muscle-guide") {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
+        waitText("Нажмите на мышцу", substring = true)
+        // Название может быть и на карточке под диалогом — нажимаем последнее, в диалоге.
+        compose.onAllNodesWithText("Широчайшие").onLast().performClick()
     }
 
     @Test fun history() = shoot("03-history") {

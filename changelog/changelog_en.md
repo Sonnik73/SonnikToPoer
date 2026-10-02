@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.7
+- “Muscle names” guide: the ⓘ button next to the body map and in the exercise dialog — tap a muscle on the figure or a name to see where it is
+
 ## 1.6
 - Smooth muscle color transition from red to green as it recovers, gradient legend
 - Live countdown to recovery of each muscle (h:mm:ss) and to full recovery of all muscles

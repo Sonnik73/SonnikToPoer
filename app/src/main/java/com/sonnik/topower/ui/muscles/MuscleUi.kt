@@ -16,6 +16,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
@@ -27,6 +33,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -197,8 +205,18 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val gapColor = MaterialTheme.colorScheme.surfaceContainerHighest
     val colorOf: (Muscle) -> Color = { m -> statuses[m]?.let { muscleColor(it, now, idle) } ?: idle }
 
+    var guide by rememberSaveable { mutableStateOf(false) }
+    if (guide) MuscleGuideDialog(onDismiss = { guide = false })
+
     SectionCard(modifier) {
-        Text(stringResource(R.string.muscles_title), style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.muscles_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+            )
+            MuscleGuideButton { guide = true }
+        }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             listOf(false to R.string.muscles_front, true to R.string.muscles_back).forEach { (back, label) ->
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -268,6 +286,86 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+/** Кнопка «?» рядом со схемой: открывает подсказку с названиями мышц. */
+@Composable
+fun MuscleGuideButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(36.dp)) {
+        Icon(
+            Icons.Outlined.Info,
+            contentDescription = stringResource(R.string.muscles_guide),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * Подсказка «Названия мышц»: нажатие на мышцу на схеме или на её название подсвечивает её
+ * и показывает название. [selected] — мышцы упражнения, они слегка подкрашены.
+ */
+@Composable
+fun MuscleGuideDialog(onDismiss: () -> Unit, selected: Set<Muscle> = emptySet()) {
+    var current by rememberSaveable { mutableStateOf<Muscle?>(null) }
+    val accent = MaterialTheme.colorScheme.primary
+    val tint = accent.copy(alpha = 0.35f)
+    val idle = if (isSystemInDarkTheme()) Color(0xFF4A515B) else Color(0xFFC3C9D1)
+    val bodyColor = MaterialTheme.colorScheme.surfaceVariant
+    val gapColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val colorOf: (Muscle) -> Color = { m ->
+        when (m) {
+            current -> accent
+            in selected -> tint
+            else -> idle
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.muscles_guide)) },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    listOf(false to R.string.muscles_front, true to R.string.muscles_back).forEach { (back, label) ->
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                            BodyFigure(
+                                back = back,
+                                colorOf = colorOf,
+                                bodyColor = bodyColor,
+                                gapColor = gapColor,
+                                modifier = Modifier.fillMaxWidth(),
+                                onTap = { current = it },
+                            )
+                            Text(
+                                stringResource(label),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                val name = current?.let { muscleName(it) }
+                Text(
+                    name ?: stringResource(R.string.muscles_guide_hint),
+                    style = if (name != null) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodySmall,
+                    color = if (name != null) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Muscle.entries.forEach { m ->
+                        FilterChip(
+                            selected = m == current,
+                            onClick = { current = if (m == current) null else m },
+                            label = { Text(muscleName(m)) },
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) } },
+    )
 }
 
 /** Выбор основных мышц упражнения. */

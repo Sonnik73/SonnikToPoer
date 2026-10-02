@@ -1,6 +1,9 @@
 package com.sonnik.topower.ui.muscles
 
+import android.graphics.Matrix
+import android.graphics.Region
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -9,8 +12,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.pointer.pointerInput
 import com.sonnik.topower.domain.Muscle
 
 /*
@@ -105,9 +110,22 @@ private fun backMuscles(): Map<Muscle, Path> = linkedMapOf(
 val FRONT_MUSCLES: Set<Muscle> get() = frontMuscles().keys
 val BACK_MUSCLES: Set<Muscle> get() = backMuscles().keys
 
+/** Мышца под точкой ([x], [y]) в координатах схемы 100×200 или null. Верхние слои проверяются первыми. */
+fun muscleAt(back: Boolean, x: Float, y: Float): Muscle? {
+    // Region работает с целыми координатами — увеличиваем схему в 10 раз для точности.
+    val zoom = Matrix().apply { setScale(10f, 10f) }
+    val clip = Region(0, 0, 1000, 2000)
+    val muscles = if (back) backMuscles() else frontMuscles()
+    return muscles.entries.reversed().firstOrNull { (_, path) ->
+        val android = android.graphics.Path(path.asAndroidPath()).apply { transform(zoom) }
+        Region().apply { setPath(android, clip) }.contains((x * 10).toInt(), (y * 10).toInt())
+    }?.key
+}
+
 /**
  * Тело спереди ([back] = false) или сзади с мышцами, окрашенными через [colorOf].
  * [bodyColor] — силуэт, [gapColor] — тонкие промежутки между мышцами (цвет фона карточки).
+ * [onTap] — нажатие на мышцу.
  */
 @Composable
 fun BodyFigure(
@@ -116,10 +134,17 @@ fun BodyFigure(
     bodyColor: Color,
     gapColor: Color,
     modifier: Modifier = Modifier,
+    onTap: ((Muscle) -> Unit)? = null,
 ) {
     val body = remember { silhouette() }
     val muscles = remember(back) { if (back) backMuscles() else frontMuscles() }
-    Canvas(modifier.aspectRatio(0.5f)) {
+    val tap = if (onTap == null) Modifier else Modifier.pointerInput(back, onTap) {
+        detectTapGestures { offset ->
+            val scale = size.width / 100f
+            muscleAt(back, offset.x / scale, offset.y / scale)?.let(onTap)
+        }
+    }
+    Canvas(modifier.aspectRatio(0.5f).then(tap)) {
         val scale = size.width / 100f
         withTransform({ scale(scale, scale, pivot = Offset.Zero) }) {
             drawPath(body, bodyColor)

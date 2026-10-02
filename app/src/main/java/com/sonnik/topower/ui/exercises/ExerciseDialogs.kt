@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -46,6 +47,8 @@ import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.parseInt
 import com.sonnik.topower.domain.suggestMuscles
+import com.sonnik.topower.ui.muscles.MuscleGuideButton
+import com.sonnik.topower.ui.muscles.MuscleGuideDialog
 import com.sonnik.topower.ui.muscles.MusclePicker
 import com.sonnik.topower.ui.LocalAppSettings
 import com.sonnik.topower.ui.common.NumberField
@@ -95,6 +98,7 @@ fun ExerciseEditDialog(
     }
     val defaultRest by LocalAppSettings.current.defaultRestSec.collectAsStateWithLifecycle()
     var showErrors by rememberSaveable { mutableStateOf(false) }
+    var muscleGuide by rememberSaveable { mutableStateOf(false) }
 
     val nameError = name.isBlank()
     val trackError = !(reps || weight || time || distance || bodyWeight)
@@ -131,14 +135,16 @@ fun ExerciseEditDialog(
                     Text(
                         stringResource(R.string.exercise_muscles),
                         style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.weight(1f),
                     )
+                    MuscleGuideButton { muscleGuide = true }
+                    Spacer(Modifier.weight(1f))
                     TextButton(
                         onClick = { muscles = Muscle.format(suggestMuscles(name)) },
                         enabled = suggestMuscles(name).isNotEmpty(),
                     ) { Text(stringResource(R.string.muscles_suggest)) }
                 }
                 MusclePicker(Muscle.parse(muscles)) { muscles = Muscle.format(it) }
+                if (muscleGuide) MuscleGuideDialog(onDismiss = { muscleGuide = false }, selected = Muscle.parse(muscles))
                 Text(
                     stringResource(R.string.what_to_track),
                     style = MaterialTheme.typography.titleSmall,
