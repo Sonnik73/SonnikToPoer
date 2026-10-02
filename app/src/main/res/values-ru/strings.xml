@@ -347,4 +347,10 @@
     <string name="widget_no_data">Пока нет тренировок</string>
     <string name="widget_hours">%d ч</string>
     <string name="widget_minutes">%d мин</string>
+    <string name="volume_sets_week">%d рабочих подх. за 7 дней</string>
+    <string name="muscle_never">ещё не тренировалась</string>
+    <string name="muscle_ready_in">восстановится через %s</string>
+    <string name="muscles_tap_hint">Нажмите на мышцу, чтобы увидеть её состояние</string>
+    <string name="muscle_ready_now">готова к тренировке</string>
+    <string name="muscle_stale_long">давно не тренировалась</string>
 </resources>

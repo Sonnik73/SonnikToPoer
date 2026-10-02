@@ -1,5 +1,10 @@
 # What's new in SonnikToPower
 
+## 1.11
+- New anatomical body map: shaped muscles, ab blocks, heads of the quads, hamstrings and calves, subtle volume and fibers
+- Larger map on the home screen; tap a muscle to see its name and time to recovery (or weekly volume)
+- The widget and the “Muscle names” guide use the new map
+
 ## 1.10
 - “Muscle status” home screen widget: body map in recovery colors and time to full recovery; tap to open the app
 - Export all sets to CSV for Excel and Google Sheets (Settings → Backup)

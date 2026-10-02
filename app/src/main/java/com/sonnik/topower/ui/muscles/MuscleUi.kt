@@ -204,6 +204,7 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val now = rememberNow()
     val statuses = remember(rows) { muscleStatuses(rows) }
     var volumeMode by rememberSaveable { mutableStateOf(false) }
+    var selected by rememberSaveable { mutableStateOf<Muscle?>(null) }
     val volume = remember(rows, now / VOLUME_REFRESH_MS) {
         weeklySets(rows.map { MuscleSets(it.time, Muscle.parse(it.muscles), it.sets) }, now)
     }
@@ -240,7 +241,7 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                 label = { Text(stringResource(R.string.muscles_mode_volume)) },
             )
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(false to R.string.muscles_front, true to R.string.muscles_back).forEach { (back, label) ->
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     BodyFigure(
@@ -248,7 +249,10 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                         colorOf = colorOf,
                         bodyColor = bodyColor,
                         gapColor = gapColor,
-                        modifier = Modifier.fillMaxWidth(0.85f),
+                        modifier = Modifier.fillMaxWidth(),
+                        selected = selected,
+                        selectedColor = MaterialTheme.colorScheme.onSurface,
+                        onTap = { m -> selected = if (selected == m) null else m },
                     )
                     Text(
                         stringResource(label),
@@ -258,6 +262,13 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                 }
             }
         }
+        selected?.let { m ->
+            SelectedMuscleInfo(m, statuses[m], volume[m] ?: 0, volumeMode, now)
+        } ?: Text(
+            stringResource(R.string.muscles_tap_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         if (volumeMode) {
             VolumeLegend(idle)
             VolumeDetails(volume)
@@ -314,6 +325,26 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+/** Нажатая на схеме мышца: название и состояние восстановления или объём за неделю. */
+@Composable
+private fun SelectedMuscleInfo(muscle: Muscle, status: MuscleStatus?, sets: Int, volumeMode: Boolean, now: Long) {
+    val detail = when {
+        volumeMode -> stringResource(R.string.volume_sets_week, sets)
+        status == null -> stringResource(R.string.muscle_never)
+        else -> when (status.state(now)) {
+            MuscleState.RECOVERING -> stringResource(R.string.muscle_ready_in, formatCountdown((status.readyAt ?: now) - now))
+            MuscleState.READY -> stringResource(R.string.muscle_ready_now)
+            MuscleState.STALE -> stringResource(R.string.muscle_stale_long)
+            MuscleState.NEVER -> stringResource(R.string.muscle_never)
+        }
+    }
+    Text(
+        muscleName(muscle) + " — " + detail,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+    )
 }
 
 /** Объём пересчитывается раз в минуту — точнее не нужно. */

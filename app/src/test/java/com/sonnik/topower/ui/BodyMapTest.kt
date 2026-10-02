@@ -21,9 +21,11 @@ class BodyMapTest {
     @Test fun tapFindsMuscle() {
         assertEquals(Muscle.CHEST, muscleAt(back = false, x = 43f, y = 42f))
         assertEquals(Muscle.CHEST, muscleAt(back = false, x = 57f, y = 42f))
-        assertEquals(Muscle.ABS, muscleAt(back = false, x = 50f, y = 70f))
-        assertEquals(Muscle.LOWER_BACK, muscleAt(back = true, x = 50f, y = 80f))
-        assertEquals(Muscle.HAMSTRINGS, muscleAt(back = true, x = 42f, y = 134f))
+        assertEquals(Muscle.ABS, muscleAt(back = false, x = 47f, y = 65f))
+        assertEquals(Muscle.QUADS, muscleAt(back = false, x = 37f, y = 125f))
+        assertEquals(Muscle.LOWER_BACK, muscleAt(back = true, x = 48f, y = 80f))
+        assertEquals(Muscle.HAMSTRINGS, muscleAt(back = true, x = 38f, y = 134f))
+        assertEquals(Muscle.CALVES, muscleAt(back = true, x = 39f, y = 164f))
     }
 
     @Test fun widgetBitmapHasBothFigures() {
@@ -37,8 +39,9 @@ class BodyMapTest {
         assertTrue(bitmap.width > 360)
         // Грудь спереди (x≈43, y≈42) и широчайшие сзади (x≈40, y≈55 правее на ширину фигуры) — красные.
         val s = 360 / 200f
-        assertEquals(0xFFE53935.toInt(), bitmap.getPixel((43 * s).toInt(), (42 * s).toInt()))
-        assertEquals(0xFFE53935.toInt(), bitmap.getPixel(((112 + 40) * s).toInt(), (55 * s).toInt()))
+        fun isRed(color: Int) = (color shr 16 and 0xFF) > 170 && (color shr 8 and 0xFF) < 110
+        assertTrue(isRed(bitmap.getPixel((43 * s).toInt(), (42 * s).toInt())))
+        assertTrue(isRed(bitmap.getPixel(((112 + 40) * s).toInt(), (55 * s).toInt())))
         File("build/screenshots").apply { mkdirs() }.resolve("14-widget-body.png").outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }

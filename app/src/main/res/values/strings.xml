@@ -358,4 +358,10 @@
     <string name="widget_no_data">No workouts yet</string>
     <string name="widget_hours">%d h</string>
     <string name="widget_minutes">%d min</string>
+    <string name="volume_sets_week">%d working sets in 7 days</string>
+    <string name="muscle_never">not trained yet</string>
+    <string name="muscle_ready_in">ready in %s</string>
+    <string name="muscles_tap_hint">Tap a muscle to see its status</string>
+    <string name="muscle_ready_now">ready to train</string>
+    <string name="muscle_stale_long">not trained for a long time</string>
 </resources>
