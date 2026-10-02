@@ -75,7 +75,7 @@ fun ProgressLines(
         // Расчётный максимум честен только для подходов до 12 повторов.
         val e1rm = record.set.reps?.takeIf { it in 2..MAX_E1RM_REPS }
             ?.let { setValue(record.toRecord(), Metric.E1RM) }
-            ?.let { " · " + stringResource(R.string.e1rm_short, formatNumber(it, 1)) }
+            ?.let { " · " + stringResource(R.string.e1rm_short, (if (record.set.pair) "2 × " else "") + formatNumber(it, 1)) }
         Text(
             stringResource(
                 R.string.record_line,
