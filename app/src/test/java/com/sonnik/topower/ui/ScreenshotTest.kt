@@ -19,7 +19,12 @@ import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseEntity
+import android.os.Looper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import org.robolectric.Shadows.shadowOf
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -44,11 +49,19 @@ class ScreenshotTest {
     val compose = createAndroidComposeRule<MainActivity>()
 
     @Before
-    fun seed() = runBlocking {
+    fun seed() {
         // Скриншоты нужны только при ручном запуске сборки (SCREENSHOTS=1), релизную сборку не задерживают.
         assumeTrue(System.getenv("SCREENSHOTS") == "1")
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
-        seedDemoData(app)
+        // Приложение при старте само заполняет упражнения в главном потоке. Блокировать его
+        // ожиданием нельзя (взаимная блокировка), поэтому готовим данные в фоне, прокручивая очередь.
+        val job = CoroutineScope(Dispatchers.IO).async { seedDemoData(app) }
+        val looper = shadowOf(Looper.getMainLooper())
+        while (!job.isCompleted) {
+            looper.idle()
+            Thread.sleep(5)
+        }
+        runBlocking { job.await() }
     }
 
     @Test fun home() = shoot("01-home") { waitText("Можно тренировать", substring = true) }
