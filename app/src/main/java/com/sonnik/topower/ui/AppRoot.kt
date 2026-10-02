@@ -27,7 +27,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,14 +43,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -74,11 +78,8 @@ val LocalAppSettings = staticCompositionLocalOf<AppSettings> { error("Settings a
 val LocalRestTimer = staticCompositionLocalOf<RestTimer> { error("Rest timer is not provided") }
 
 object Routes {
-    const val WORKOUT_HOME = "workout_home"
-    const val HISTORY = "history"
-    const val STATS = "stats"
-    const val EXERCISES = "exercises"
-    const val INVENTORY = "inventory"
+    /** Пять основных вкладок — страницы одного пейджера (переключаются свайпом). */
+    const val WORKOUT_HOME = "tabs"
     const val SETTINGS = "settings"
     const val CHANGELOG = "changelog"
     const val WORKOUT = "workout/{id}"
@@ -90,26 +91,36 @@ object Routes {
     fun exerciseStats(id: String) = "exercise_stats/$id"
 }
 
-private enum class Tab(val route: String, @StringRes val label: Int, val icon: ImageVector) {
-    Workout(Routes.WORKOUT_HOME, R.string.nav_workout, Icons.Filled.PlayArrow),
-    History(Routes.HISTORY, R.string.nav_history, Icons.Filled.DateRange),
-    Stats(Routes.STATS, R.string.nav_stats, Icons.Filled.Star),
-    Exercises(Routes.EXERCISES, R.string.nav_exercises, Icons.AutoMirrored.Filled.List),
-    Inventory(Routes.INVENTORY, R.string.nav_inventory, Icons.Filled.Build),
+private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
+    Workout(R.string.nav_workout, Icons.Filled.PlayArrow),
+    History(R.string.nav_history, Icons.Filled.DateRange),
+    Stats(R.string.nav_stats, Icons.Filled.Star),
+    Exercises(R.string.nav_exercises, Icons.AutoMirrored.Filled.List),
+    Inventory(R.string.nav_inventory, Icons.Filled.Build),
 }
 
+/** Вкладка, к которой относится экран вне пейджера (для подсветки в нижней панели). */
 private fun tabFor(route: String?): Tab? = when {
     route == null -> null
     route.startsWith("workout") || route.startsWith("template") -> Tab.Workout
     route.startsWith("exercise_stats") -> Tab.Stats
-    else -> Tab.entries.firstOrNull { it.route == route }
+    else -> null
 }
 
 @Composable
 fun AppRoot() {
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
-    val currentTab = tabFor(backStack?.destination?.route)
+    val pager = rememberPagerState(pageCount = { Tab.entries.size })
+    val scope = rememberCoroutineScope()
+    val route = backStack?.destination?.route
+    val currentTab = if (route == Routes.WORKOUT_HOME) Tab.entries[pager.currentPage] else tabFor(route)
+
+    // Нажатие на вкладку: с другого экрана — назад к вкладкам, затем пролистать к нужной.
+    val openTab: (Tab) -> Unit = { tab ->
+        if (route != Routes.WORKOUT_HOME) nav.popBackStack(Routes.WORKOUT_HOME, inclusive = false)
+        scope.launch { pager.animateScrollToPage(tab.ordinal) }
+    }
 
     val openSettings: () -> Unit = { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } }
     WhatsNewOnUpdate(openChangelog = { nav.navigate(Routes.CHANGELOG) })
@@ -117,7 +128,7 @@ fun AppRoot() {
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            bottomBar = { BottomBar(currentTab, onSelect = { nav.openTab(it.route) }) },
+            bottomBar = { BottomBar(currentTab, onSelect = openTab) },
         ) { padding ->
             NavHost(
                 navController = nav,
@@ -125,22 +136,22 @@ fun AppRoot() {
                 modifier = Modifier.padding(padding),
             ) {
                 composable(Routes.WORKOUT_HOME) {
-                    WorkoutHomeScreen(
-                        openWorkout = { nav.navigate(Routes.workout(it)) },
-                        openTemplate = { nav.navigate(Routes.template(it)) },
-                    )
-                }
-                composable(Routes.HISTORY) {
-                    HistoryScreen(openWorkout = { nav.navigate(Routes.workout(it)) })
-                }
-                composable(Routes.STATS) {
-                    StatsScreen(openExercise = { nav.navigate(Routes.exerciseStats(it)) })
-                }
-                composable(Routes.EXERCISES) {
-                    ExercisesScreen(openStats = { nav.navigate(Routes.exerciseStats(it)) })
-                }
-                composable(Routes.INVENTORY) {
-                    InventoryScreen()
+                    // «Назад» на любой вкладке, кроме первой, возвращает на «Тренировку».
+                    BackHandler(enabled = pager.currentPage != 0) {
+                        scope.launch { pager.animateScrollToPage(0) }
+                    }
+                    HorizontalPager(state = pager, beyondViewportPageCount = 1) { page ->
+                        when (Tab.entries[page]) {
+                            Tab.Workout -> WorkoutHomeScreen(
+                                openWorkout = { nav.navigate(Routes.workout(it)) },
+                                openTemplate = { nav.navigate(Routes.template(it)) },
+                            )
+                            Tab.History -> HistoryScreen(openWorkout = { nav.navigate(Routes.workout(it)) })
+                            Tab.Stats -> StatsScreen(openExercise = { nav.navigate(Routes.exerciseStats(it)) })
+                            Tab.Exercises -> ExercisesScreen(openStats = { nav.navigate(Routes.exerciseStats(it)) })
+                            Tab.Inventory -> InventoryScreen()
+                        }
+                    }
                 }
                 composable(Routes.SETTINGS) {
                     SettingsScreen(
@@ -177,14 +188,6 @@ fun AppRoot() {
                 }
             }
         }
-    }
-}
-
-private fun NavHostController.openTab(route: String) {
-    navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
     }
 }
 
@@ -233,6 +236,7 @@ private fun BottomBar(current: Tab?, onSelect: (Tab) -> Unit) {
                         Modifier
                             .weight(1f)
                             .fillMaxHeight()
+                            .testTag("tab_" + tab.name)
                             .clickable { onSelect(tab) },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,

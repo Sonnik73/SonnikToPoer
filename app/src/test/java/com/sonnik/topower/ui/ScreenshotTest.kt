@@ -10,6 +10,10 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sonnik.topower.MainActivity
@@ -112,18 +116,30 @@ class ScreenshotTest {
         waitText("Лёжа на скамье", substring = true)
     }
 
+    @Test fun swipeToHistory() = shoot("19-swipe-history") {
+        waitText("Можно тренировать", substring = true)
+        compose.onRoot().performTouchInput { swipeLeft() }
+        // Соседние страницы пейджера уже собраны, поэтому ждём, когда заголовок «История»
+        // окажется на экране (вторым видимым текстом рядом с подписью вкладки).
+        val width = compose.onRoot().fetchSemanticsNode().size.width
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("История").fetchSemanticsNodes()
+                .count { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width } >= 2
+        }
+    }
+
     @Test fun history() = shoot("03-history") {
-        click("История")
+        tab("History")
         waitText("Подтягивания", substring = true)
     }
 
     @Test fun stats() = shoot("04-stats") {
-        click("Статистика")
+        tab("Stats")
         waitText("Общая статистика")
     }
 
     @Test fun exerciseStats() = shoot("05-exercise-stats") {
-        click("Статистика")
+        tab("Stats")
         waitText("Общая статистика")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Жим гантелей лёжа"))
         click("Жим гантелей лёжа")
@@ -135,16 +151,16 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.18")
+        waitText("Версия 1.19")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
-        click("Упражнения")
+        tab("Exercises")
         waitText("Планка")
     }
 
     @Test fun inventory() = shoot("07-inventory") {
-        click("Инвентарь")
+        tab("Inventory")
         waitText("Красная")
     }
 
@@ -165,6 +181,12 @@ class ScreenshotTest {
         waitText("Можно тренировать", substring = true)
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Продолжить"))
         click("Продолжить")
+    }
+
+    /** Нажатие на вкладку в нижней панели. */
+    private fun tab(name: String) {
+        compose.waitForIdle()
+        compose.onNodeWithTag("tab_$name").performClick()
     }
 
     private fun click(text: String) {

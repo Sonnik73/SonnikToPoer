@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.19
+- Swipe left and right to switch between Workout, History, Statistics, Exercises and Inventory; Back returns to Workout
+
 ## 1.18
 - How-to for all 63 default exercises: setup, movement and the main mistake to avoid. Your exercises with the same names got it automatically
 - The ⓘ icon next to an exercise in a workout shows the technique; edit it in the exercise dialog
