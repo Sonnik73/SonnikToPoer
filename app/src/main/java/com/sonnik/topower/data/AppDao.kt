@@ -165,17 +165,25 @@ interface AppDao {
     @Query("SELECT * FROM workouts ORDER BY startedAt")
     fun observeWorkouts(): Flow<List<WorkoutEntity>>
 
-    /** Упражнения с рабочими подходами и заданными мышцами — для схемы восстановления. */
-    @Query(
-        """SELECT we.workoutId AS workoutId, COALESCE(w.finishedAt, w.startedAt) AS time,
-                  e.muscles AS muscles, we.recoveryHours AS recoveryHours
-           FROM workout_exercises we
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           WHERE e.muscles != ''
-             AND EXISTS (SELECT 1 FROM sets s WHERE s.workoutExerciseId = we.id AND s.isWarmup = 0)"""
-    )
+    /** Упражнения с рабочими подходами и заданными мышцами — для схемы восстановления и объёма. */
+    @Query(MUSCLE_WORK)
     fun observeMuscleWork(): Flow<List<MuscleWorkRow>>
+
+    @Query(MUSCLE_WORK)
+    suspend fun muscleWork(): List<MuscleWorkRow>
+
+    @Query("SELECT MAX(startedAt) FROM workouts")
+    fun observeLastWorkoutStart(): Flow<Long?>
+
+    @Query("SELECT MAX(startedAt) FROM workouts")
+    suspend fun lastWorkoutStart(): Long?
+
+    /** Мышцы упражнений каждого шаблона. */
+    @Query(
+        """SELECT te.templateId AS templateId, e.muscles AS muscles FROM template_exercises te
+           JOIN exercises e ON e.id = te.exerciseId WHERE e.muscles != ''"""
+    )
+    fun observeTemplateMuscles(): Flow<List<TemplateMuscleRow>>
 
     @Query("UPDATE workout_exercises SET recoveryHours = :hours, updatedAt = :now WHERE id = :id")
     suspend fun setRecoveryHours(id: String, hours: Int?, now: Long)
@@ -248,3 +256,13 @@ interface AppDao {
     @Query("DELETE FROM exercises") suspend fun clearExercises()
     @Query("DELETE FROM equipment") suspend fun clearEquipment()
 }
+
+private const val MUSCLE_WORK =
+    """SELECT we.workoutId AS workoutId, COALESCE(w.finishedAt, w.startedAt) AS time,
+              e.muscles AS muscles, we.recoveryHours AS recoveryHours,
+              (SELECT COUNT(*) FROM sets s WHERE s.workoutExerciseId = we.id AND s.isWarmup = 0) AS sets
+       FROM workout_exercises we
+       JOIN workouts w ON w.id = we.workoutId
+       JOIN exercises e ON e.id = we.exerciseId
+       WHERE e.muscles != ''
+         AND EXISTS (SELECT 1 FROM sets s WHERE s.workoutExerciseId = we.id AND s.isWarmup = 0)"""

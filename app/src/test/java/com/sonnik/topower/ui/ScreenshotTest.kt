@@ -79,6 +79,21 @@ class ScreenshotTest {
         compose.onAllNodesWithText("Широчайшие").onLast().performClick()
     }
 
+    @Test fun muscleVolume() = shoot("12-muscle-volume") {
+        waitText("Можно тренировать", substring = true)
+        click("Объём за 7 дней")
+        waitText("Рабочие подходы за последние", substring = true)
+    }
+
+    @Test fun reminders() = shoot("13-reminders") {
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Таймер отдыха")
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("О восстановлении мышц"))
+        click("О восстановлении мышц")
+        waitText("Когда восстановились все мышцы")
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Тихие часы"))
+    }
+
     @Test fun history() = shoot("03-history") {
         click("История")
         waitText("Подтягивания", substring = true)
@@ -102,7 +117,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.8")
+        waitText("Версия 1.9")
     }
 
     @Test fun exercises() = shoot("06-exercises") {

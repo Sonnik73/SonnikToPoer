@@ -298,4 +298,43 @@
     <string name="target_more_load">следующий вес</string>
     <string name="target_harder">добавьте вес или возьмите вариант сложнее</string>
     <string name="e1rm_short">1ПМ ≈ %s кг</string>
+    <string name="reminder_channel">Напоминания о тренировках</string>
+    <string name="reminder_all_title">Мышцы восстановились</string>
+    <string name="reminder_groups_title">Восстановились: %s</string>
+    <string name="reminder_all_text">Можно тренироваться</string>
+    <string name="reminder_daily_title">Готовы к тренировке</string>
+    <string name="reminder_idle_title">Пора на тренировку</string>
+    <string name="reminders_section">Уведомления</string>
+    <string name="reminder_recovery_on">О восстановлении мышц</string>
+    <string name="reminder_mode_all">Когда восстановились все мышцы</string>
+    <string name="reminder_mode_groups">Когда восстановились выбранные мышцы</string>
+    <string name="reminder_mode_daily">Каждый день в заданное время — какие мышцы готовы</string>
+    <string name="reminder_daily_time">Время: %s</string>
+    <string name="reminder_idle_on">Напоминать о перерыве в тренировках</string>
+    <string name="reminder_quiet_on">Тихие часы</string>
+    <string name="reminder_quiet_from">с</string>
+    <string name="reminder_quiet_to">до</string>
+    <string name="reminders_hint">Уведомление, попавшее на тихие часы, придёт после них.</string>
+    <string name="muscles_mode_recovery">Восстановление</string>
+    <string name="muscles_mode_volume">Объём за 7 дней</string>
+    <string name="volume_optimal">10–20 — норма</string>
+    <string name="volume_hint">Рабочие подходы за последние 7 дней. Для роста мышцы обычно нужно 10–20 подходов в неделю.</string>
+    <string name="volume_low">Мало нагрузки: %s</string>
+    <string name="volume_none">Без нагрузки: %s</string>
+    <string name="volume_sets">%d подх.</string>
+    <string name="template_ready">Все мышцы готовы</string>
+    <string name="template_recovering">Ещё восстанавливаются: %s</string>
+    <string name="hours_short">%d ч</string>
+    <plurals name="reminder_idle_text">
+        <item quantity="one">Вы не тренировались %d день</item>
+        <item quantity="few">Вы не тренировались %d дня</item>
+        <item quantity="many">Вы не тренировались %d дней</item>
+        <item quantity="other">Вы не тренировались %d дня</item>
+    </plurals>
+    <plurals name="reminder_idle_days">
+        <item quantity="one">Через %d день без тренировок</item>
+        <item quantity="few">Через %d дня без тренировок</item>
+        <item quantity="many">Через %d дней без тренировок</item>
+        <item quantity="other">Через %d дня без тренировок</item>
+    </plurals>
 </resources>

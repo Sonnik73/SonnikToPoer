@@ -87,6 +87,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             TrainingSettings()
+            ReminderSettingsCard()
             SectionCard {
                 Text(stringResource(R.string.backup_title), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.backup_description), style = MaterialTheme.typography.bodyMedium)
@@ -190,7 +191,7 @@ private fun TrainingSettings() {
 }
 
 @Composable
-private fun Stepper(
+internal fun Stepper(
     value: String,
     onMinus: () -> Unit,
     onPlus: () -> Unit,

@@ -45,6 +45,13 @@ import com.sonnik.topower.data.TemplateSummary
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.muscles.MuscleStatusCard
+import com.sonnik.topower.ui.muscles.muscleName
+import com.sonnik.topower.ui.muscles.rememberNow
+import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.domain.MuscleStatus
+import com.sonnik.topower.domain.blockingMuscles
+import com.sonnik.topower.domain.hoursLeft
+import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.ui.common.SectionTitle
 import com.sonnik.topower.ui.common.TextInputDialog
 import com.sonnik.topower.ui.common.formatDateTime
@@ -60,6 +67,19 @@ fun WorkoutHomeScreen(
     val active by remember { repo.dao.observeActiveWorkouts() }.collectAsStateWithLifecycle(emptyList())
     val templates by remember { repo.dao.observeTemplateSummaries() }.collectAsStateWithLifecycle(emptyList())
     var newTemplateDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Готовность мышц шаблонов: готовые к тренировке шаблоны — первыми.
+    val muscleRows by remember { repo.dao.observeMuscleWork() }.collectAsStateWithLifecycle(emptyList())
+    val templateMuscleRows by remember { repo.dao.observeTemplateMuscles() }.collectAsStateWithLifecycle(emptyList())
+    val statuses = remember(muscleRows) { muscleStatuses(muscleRows) }
+    val templateMuscles = remember(templateMuscleRows) {
+        templateMuscleRows.groupBy { it.templateId }.mapValues { (_, rows) -> rows.flatMap { Muscle.parse(it.muscles) }.toSet() }
+    }
+    val now = rememberNow()
+    val blocking = templates.associate { t ->
+        t.template.id to templateMuscles[t.template.id]?.let { blockingMuscles(it, statuses, now) }
+    }
+    val sortedTemplates = templates.sortedBy { blocking[it.template.id]?.isNotEmpty() == true }
 
     fun start(templateId: String?) {
         scope.launch { openWorkout(repo.startWorkout(templateId)) }
@@ -123,9 +143,11 @@ fun WorkoutHomeScreen(
                     )
                 }
             }
-            items(templates, key = { it.template.id }) { summary ->
+            items(sortedTemplates, key = { it.template.id }) { summary ->
                 TemplateCard(
                     summary = summary,
+                    blocking = blocking[summary.template.id],
+                    now = now,
                     onStart = { start(summary.template.id) },
                     onEdit = { openTemplate(summary.template.id) },
                 )
@@ -144,7 +166,13 @@ fun WorkoutHomeScreen(
 }
 
 @Composable
-private fun TemplateCard(summary: TemplateSummary, onStart: () -> Unit, onEdit: () -> Unit) {
+private fun TemplateCard(
+    summary: TemplateSummary,
+    blocking: List<MuscleStatus>?,
+    now: Long,
+    onStart: () -> Unit,
+    onEdit: () -> Unit,
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,6 +188,22 @@ private fun TemplateCard(summary: TemplateSummary, onStart: () -> Unit, onEdit: 
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                when {
+                    blocking == null -> Unit
+                    blocking.isEmpty() -> Text(
+                        stringResource(R.string.template_ready),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                    else -> Text(
+                        stringResource(
+                            R.string.template_recovering,
+                            blocking.joinToString(", ") { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) },
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }
         }

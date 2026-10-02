@@ -1,5 +1,10 @@
 # What's new in SonnikToPower
 
+## 1.9
+- “Volume, 7 days” mode on the muscle map: working sets per muscle and which muscles lack volume (target: 10–20 a week)
+- Templates on the home screen show whether their muscles are ready; ready templates come first
+- Notifications (Settings → Notifications): when all or selected muscles have recovered, or daily at a set time; a reminder after a break in training; quiet hours
+
 ## 1.8
 - Today's target under each exercise: +1 rep over the last workout, and the next weight from your inventory at the top of the rep range
 - A new set is prefilled with the target — just tap Save

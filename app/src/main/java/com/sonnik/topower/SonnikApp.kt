@@ -4,7 +4,11 @@ import android.app.Application
 import com.sonnik.topower.data.AppDatabase
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
+import com.sonnik.topower.reminders.Reminders
+import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.timer.RestTimer
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,11 +21,21 @@ class SonnikApp : Application() {
     val repository: Repository by lazy { Repository(AppDatabase.build(this), appScope) }
     val settings: AppSettings by lazy { AppSettings(this) }
     val restTimer: RestTimer by lazy { RestTimer(this) }
+    val reminders: Reminders by lazy { Reminders(this, settings) }
 
     override fun onCreate() {
         super.onCreate()
         appScope.launch {
             repository.seedDefaultsIfNeeded(settings, russian = Locale.getDefault().language == "ru")
+        }
+        // Уведомления перепланируются при любом изменении тренировок или их настроек.
+        appScope.launch {
+            combine(
+                settings.reminders,
+                repository.dao.observeMuscleWork(),
+                repository.dao.observeLastWorkoutStart(),
+            ) { _, rows, last -> muscleStatuses(rows) to last }
+                .collectLatest { (statuses, last) -> reminders.reschedule(statuses, last) }
         }
     }
 }

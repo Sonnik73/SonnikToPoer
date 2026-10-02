@@ -245,7 +245,11 @@ data class MuscleWorkRow(
     val time: Long,
     val muscles: String,
     val recoveryHours: Int?,
+    /** Рабочих подходов упражнения в тренировке. */
+    val sets: Int = 0,
 )
+
+data class TemplateMuscleRow(val templateId: String, val muscles: String)
 
 data class BodyWeightPoint(
     val startedAt: Long,

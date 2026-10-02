@@ -4,6 +4,9 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.domain.RecoveryNotifyMode
+import com.sonnik.topower.domain.ReminderSettings
 
 /** Настройки приложения в SharedPreferences с наблюдаемыми значениями. */
 class AppSettings(context: Context) {
@@ -17,6 +20,49 @@ class AppSettings(context: Context) {
 
     private val _plateauSessions = MutableStateFlow(prefs.getInt(KEY_PLATEAU_N, DEFAULT_PLATEAU_SESSIONS))
     val plateauSessions: StateFlow<Int> = _plateauSessions.asStateFlow()
+
+    private val _reminders = MutableStateFlow(readReminders())
+    val reminders: StateFlow<ReminderSettings> = _reminders.asStateFlow()
+
+    /** Ключи уже показанных уведомлений (см. [com.sonnik.topower.domain.plannedReminders]). */
+    var notifiedRecovery: Long
+        get() = prefs.getLong(KEY_NOTIFIED_RECOVERY, 0)
+        set(value) = prefs.edit().putLong(KEY_NOTIFIED_RECOVERY, value).apply()
+
+    var notifiedInactivity: Long
+        get() = prefs.getLong(KEY_NOTIFIED_INACTIVITY, 0)
+        set(value) = prefs.edit().putLong(KEY_NOTIFIED_INACTIVITY, value).apply()
+
+    private fun readReminders(): ReminderSettings {
+        val d = ReminderSettings()
+        return ReminderSettings(
+            recoveryOn = prefs.getBoolean(KEY_R_ON, d.recoveryOn),
+            mode = RecoveryNotifyMode.entries.firstOrNull { it.name == prefs.getString(KEY_R_MODE, null) } ?: d.mode,
+            groups = Muscle.parse(prefs.getString(KEY_R_GROUPS, "") ?: ""),
+            dailyMinutes = prefs.getInt(KEY_R_DAILY, d.dailyMinutes),
+            quietOn = prefs.getBoolean(KEY_R_QUIET_ON, d.quietOn),
+            quietStart = prefs.getInt(KEY_R_QUIET_START, d.quietStart),
+            quietEnd = prefs.getInt(KEY_R_QUIET_END, d.quietEnd),
+            inactivityOn = prefs.getBoolean(KEY_R_IDLE_ON, d.inactivityOn),
+            inactivityDays = prefs.getInt(KEY_R_IDLE_DAYS, d.inactivityDays),
+        )
+    }
+
+    fun setReminders(value: ReminderSettings) {
+        val v = value.copy(inactivityDays = value.inactivityDays.coerceIn(MIN_IDLE_DAYS, MAX_IDLE_DAYS))
+        prefs.edit()
+            .putBoolean(KEY_R_ON, v.recoveryOn)
+            .putString(KEY_R_MODE, v.mode.name)
+            .putString(KEY_R_GROUPS, Muscle.format(v.groups))
+            .putInt(KEY_R_DAILY, v.dailyMinutes)
+            .putBoolean(KEY_R_QUIET_ON, v.quietOn)
+            .putInt(KEY_R_QUIET_START, v.quietStart)
+            .putInt(KEY_R_QUIET_END, v.quietEnd)
+            .putBoolean(KEY_R_IDLE_ON, v.inactivityOn)
+            .putInt(KEY_R_IDLE_DAYS, v.inactivityDays)
+            .apply()
+        _reminders.value = v
+    }
 
     /** Версия, новинки которой пользователь уже видел (окно «Что нового»). */
     var lastSeenVersion: String?
@@ -53,11 +99,24 @@ class AppSettings(context: Context) {
         const val DEFAULT_PLATEAU_SESSIONS = 7
         const val MIN_PLATEAU_SESSIONS = 2
         const val MAX_PLATEAU_SESSIONS = 30
+        const val MIN_IDLE_DAYS = 1
+        const val MAX_IDLE_DAYS = 30
 
         private const val KEY_REST = "default_rest_sec"
         private const val KEY_PLATEAU_ON = "plateau_enabled"
         private const val KEY_PLATEAU_N = "plateau_sessions"
         private const val KEY_LAST_SEEN_VERSION = "last_seen_version"
         private const val KEY_DEFAULTS_SEEDED = "defaults_seeded"
+        private const val KEY_R_ON = "reminder_recovery_on"
+        private const val KEY_R_MODE = "reminder_recovery_mode"
+        private const val KEY_R_GROUPS = "reminder_recovery_groups"
+        private const val KEY_R_DAILY = "reminder_daily_minutes"
+        private const val KEY_R_QUIET_ON = "reminder_quiet_on"
+        private const val KEY_R_QUIET_START = "reminder_quiet_start"
+        private const val KEY_R_QUIET_END = "reminder_quiet_end"
+        private const val KEY_R_IDLE_ON = "reminder_idle_on"
+        private const val KEY_R_IDLE_DAYS = "reminder_idle_days"
+        private const val KEY_NOTIFIED_RECOVERY = "notified_recovery"
+        private const val KEY_NOTIFIED_INACTIVITY = "notified_inactivity"
     }
 }

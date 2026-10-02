@@ -53,8 +53,11 @@ import com.sonnik.topower.R
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.MuscleState
 import com.sonnik.topower.domain.MuscleStatus
-import com.sonnik.topower.domain.MuscleWork
-import com.sonnik.topower.domain.computeMuscleStatus
+import com.sonnik.topower.domain.MuscleSets
+import com.sonnik.topower.domain.VolumeLevel
+import com.sonnik.topower.domain.volumeLevel
+import com.sonnik.topower.domain.weeklySets
+import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.domain.recoveredFraction
 import com.sonnik.topower.domain.state
 import com.sonnik.topower.ui.LocalRepository
@@ -64,8 +67,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
-@Composable
-fun muscleName(muscle: Muscle): String = stringResource(
+/** Строка с названием мышцы. */
+fun muscleNameRes(muscle: Muscle): Int =
     when (muscle) {
         Muscle.CHEST -> R.string.m_chest
         Muscle.FRONT_DELTS -> R.string.m_front_delts
@@ -85,7 +88,9 @@ fun muscleName(muscle: Muscle): String = stringResource(
         Muscle.ADDUCTORS -> R.string.m_adductors
         Muscle.CALVES -> R.string.m_calves
     }
-)
+
+@Composable
+fun muscleName(muscle: Muscle): String = stringResource(muscleNameRes(muscle))
 
 @Composable
 fun muscleNames(muscles: Collection<Muscle>): String =
@@ -197,13 +202,19 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val repo = LocalRepository.current
     val rows by remember { repo.dao.observeMuscleWork() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val now = rememberNow()
-    val statuses = remember(rows) {
-        computeMuscleStatus(rows.map { MuscleWork(it.workoutId, it.time, Muscle.parse(it.muscles), it.recoveryHours) })
+    val statuses = remember(rows) { muscleStatuses(rows) }
+    var volumeMode by rememberSaveable { mutableStateOf(false) }
+    val volume = remember(rows, now / VOLUME_REFRESH_MS) {
+        weeklySets(rows.map { MuscleSets(it.time, Muscle.parse(it.muscles), it.sets) }, now)
     }
     val idle = if (isSystemInDarkTheme()) Color(0xFF4A515B) else Color(0xFFC3C9D1)
     val bodyColor = MaterialTheme.colorScheme.surfaceVariant
     val gapColor = MaterialTheme.colorScheme.surfaceContainerHighest
-    val colorOf: (Muscle) -> Color = { m -> statuses[m]?.let { muscleColor(it, now, idle) } ?: idle }
+    val colorOf: (Muscle) -> Color = if (volumeMode) {
+        { m -> volumeColor(volumeLevel(volume[m] ?: 0), idle) }
+    } else {
+        { m -> statuses[m]?.let { muscleColor(it, now, idle) } ?: idle }
+    }
 
     var guide by rememberSaveable { mutableStateOf(false) }
     if (guide) MuscleGuideDialog(onDismiss = { guide = false })
@@ -216,6 +227,18 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                 modifier = Modifier.weight(1f),
             )
             MuscleGuideButton { guide = true }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = !volumeMode,
+                onClick = { volumeMode = false },
+                label = { Text(stringResource(R.string.muscles_mode_recovery)) },
+            )
+            FilterChip(
+                selected = volumeMode,
+                onClick = { volumeMode = true },
+                label = { Text(stringResource(R.string.muscles_mode_volume)) },
+            )
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             listOf(false to R.string.muscles_front, true to R.string.muscles_back).forEach { (back, label) ->
@@ -234,6 +257,11 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                     )
                 }
             }
+        }
+        if (volumeMode) {
+            VolumeLegend(idle)
+            VolumeDetails(volume)
+            return@SectionCard
         }
         RecoveryLegend(idle)
 
@@ -284,6 +312,76 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
                     }
                 }
             }
+        }
+    }
+}
+
+/** Объём пересчитывается раз в минуту — точнее не нужно. */
+private const val VOLUME_REFRESH_MS = 60_000L
+
+private val VolumeLow = Color(0xFFFFD54F)
+private val VolumeModerate = Color(0xFFAED581)
+private val VolumeHigh = Color(0xFF8E24AA)
+
+/** Цвет мышцы по недельному объёму: мало — жёлтый, норма — зелёный, много — фиолетовый. */
+fun volumeColor(level: VolumeLevel, idle: Color): Color = when (level) {
+    VolumeLevel.NONE -> idle
+    VolumeLevel.LOW -> VolumeLow
+    VolumeLevel.MODERATE -> VolumeModerate
+    VolumeLevel.OPTIMAL -> Green
+    VolumeLevel.HIGH -> VolumeHigh
+}
+
+@Composable
+private fun VolumeLegend(idle: Color) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        LegendDot(idle, "0")
+        LegendDot(VolumeLow, "1–5")
+        LegendDot(VolumeModerate, "6–9")
+        LegendDot(Green, stringResource(R.string.volume_optimal))
+        LegendDot(VolumeHigh, "21+")
+    }
+}
+
+/** Подходы за неделю по мышцам: кому не хватает нагрузки и сколько у остальных. */
+@Composable
+private fun VolumeDetails(volume: Map<Muscle, Int>) {
+    Text(
+        stringResource(R.string.volume_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    val none = volume.filterValues { it == 0 }.keys.sortedBy { it.ordinal }
+    val low = volume.filterValues { it in 1..9 }.keys.sortedBy { volume[it] }
+    if (low.isNotEmpty()) {
+        Text(stringResource(R.string.volume_low, muscleNames(low)), style = MaterialTheme.typography.bodyMedium)
+    }
+    if (none.isNotEmpty() && none.size < Muscle.entries.size) {
+        Text(
+            stringResource(R.string.volume_none, muscleNames(none)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    volume.filterValues { it > 0 }.entries.sortedByDescending { it.value }.forEach { (muscle, sets) ->
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .background(volumeColor(volumeLevel(sets), Color.Gray), CircleShape)
+            )
+            Text(
+                muscleName(muscle),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp),
+            )
+            Text(
+                stringResource(R.string.volume_sets, sets),
+                style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

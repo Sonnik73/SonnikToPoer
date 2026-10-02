@@ -313,4 +313,39 @@
     <string name="target_more_load">next weight</string>
     <string name="target_harder">add weight or pick a harder variation</string>
     <string name="e1rm_short">1RM ≈ %s kg</string>
+    <string name="reminder_channel">Workout reminders</string>
+    <string name="reminder_all_title">Muscles recovered</string>
+    <string name="reminder_groups_title">Recovered: %s</string>
+    <string name="reminder_all_text">Ready to train</string>
+    <string name="reminder_daily_title">Ready to train</string>
+    <string name="reminder_idle_title">Time to train</string>
+    <string name="reminders_section">Notifications</string>
+    <string name="reminder_recovery_on">Muscle recovery</string>
+    <string name="reminder_mode_all">When all muscles have recovered</string>
+    <string name="reminder_mode_groups">When selected muscles have recovered</string>
+    <string name="reminder_mode_daily">Daily at a set time — which muscles are ready</string>
+    <string name="reminder_daily_time">Time: %s</string>
+    <string name="reminder_idle_on">Remind me after a break in training</string>
+    <string name="reminder_quiet_on">Quiet hours</string>
+    <string name="reminder_quiet_from">from</string>
+    <string name="reminder_quiet_to">to</string>
+    <string name="reminders_hint">A notification that falls into quiet hours arrives after them.</string>
+    <string name="muscles_mode_recovery">Recovery</string>
+    <string name="muscles_mode_volume">Volume, 7 days</string>
+    <string name="volume_optimal">10–20 — optimal</string>
+    <string name="volume_hint">Working sets over the last 7 days. Muscle growth usually needs 10–20 sets a week.</string>
+    <string name="volume_low">Low volume: %s</string>
+    <string name="volume_none">Not trained: %s</string>
+    <string name="volume_sets">%d sets</string>
+    <string name="template_ready">All muscles ready</string>
+    <string name="template_recovering">Still recovering: %s</string>
+    <string name="hours_short">%d h</string>
+    <plurals name="reminder_idle_text">
+        <item quantity="one">You haven\'t trained for %d day</item>
+        <item quantity="other">You haven\'t trained for %d days</item>
+    </plurals>
+    <plurals name="reminder_idle_days">
+        <item quantity="one">After %d day without training</item>
+        <item quantity="other">After %d days without training</item>
+    </plurals>
 </resources>
