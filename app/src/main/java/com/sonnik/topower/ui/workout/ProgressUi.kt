@@ -13,7 +13,9 @@ import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetWithContext
+import com.sonnik.topower.domain.Metric
 import com.sonnik.topower.domain.computeProgress
+import com.sonnik.topower.domain.setValue
 import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.domain.setScore
 import com.sonnik.topower.ui.common.formatDate
@@ -36,6 +38,9 @@ data class ProgressUi(
     val isNewRecord: Boolean
         get() = currentBest != null && (recordScore == null || currentBest > recordScore + 1e-9) && record != null
 }
+
+/** Больше повторов — формула Эпли сильно завышает максимум. */
+private const val MAX_E1RM_REPS = 12
 
 /** Рассчитывает [ProgressUi] по всем подходам упражнения. */
 fun progressFor(
@@ -67,12 +72,16 @@ fun ProgressLines(
     progress ?: return
     val modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
     progress.record?.let { record ->
+        // Расчётный максимум честен только для подходов до 12 повторов.
+        val e1rm = record.set.reps?.takeIf { it in 2..MAX_E1RM_REPS }
+            ?.let { setValue(record.toRecord(), Metric.E1RM) }
+            ?.let { " · " + stringResource(R.string.e1rm_short, formatNumber(it, 1)) }
         Text(
             stringResource(
                 R.string.record_line,
                 formatSet(record.set, exercise, record.bodyWeight, equipment),
                 formatDate(record.workoutDate),
-            ),
+            ) + e1rm.orEmpty(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = modifier,

@@ -1,5 +1,11 @@
 # What's new in SonnikToPower
 
+## 1.8
+- Today's target under each exercise: +1 rep over the last workout, and the next weight from your inventory at the top of the rep range
+- A new set is prefilled with the target — just tap Save
+- Rep range per exercise (e.g. 8–12 or 20–40) in the exercise dialog
+- Estimated one-rep max (1RM) next to the record
+
 ## 1.7
 - “Muscle names” guide: the ⓘ button next to the body map and in the exercise dialog — tap a muscle on the figure or a name to see where it is
 

@@ -46,6 +46,7 @@ import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.EquipmentType
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.parseInt
+import com.sonnik.topower.domain.repRange
 import com.sonnik.topower.domain.suggestMuscles
 import com.sonnik.topower.ui.muscles.MuscleGuideButton
 import com.sonnik.topower.ui.muscles.MuscleGuideDialog
@@ -92,6 +93,8 @@ fun ExerciseEditDialog(
     var equipmentType by rememberSaveable { mutableStateOf(EquipmentType.of(initial?.equipmentType)) }
     var bandAssist by rememberSaveable { mutableStateOf(initial?.bandAssist ?: false) }
     var rest by rememberSaveable { mutableStateOf(initial?.restSec?.toString() ?: "") }
+    var repMin by rememberSaveable { mutableStateOf(initial?.repMin?.toString() ?: "") }
+    var repMax by rememberSaveable { mutableStateOf(initial?.repMax?.toString() ?: "") }
     // Новому упражнению мышцы сразу подбираются по названию (если оно уже известно).
     var muscles by rememberSaveable {
         mutableStateOf(initial?.muscles ?: Muscle.format(suggestMuscles(initialName)))
@@ -191,6 +194,32 @@ fun ExerciseEditDialog(
                 if (equipmentType == EquipmentType.BAND && bodyWeight) {
                     CheckRow(bandAssist, stringResource(R.string.band_assist), { bandAssist = it })
                 }
+                if (reps) {
+                    Row(
+                        Modifier.padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        NumberField(
+                            value = repMin,
+                            onValueChange = { repMin = it },
+                            label = stringResource(R.string.rep_range_from),
+                            decimal = false,
+                            modifier = Modifier.weight(1f),
+                        )
+                        NumberField(
+                            value = repMax,
+                            onValueChange = { repMax = it },
+                            label = stringResource(R.string.rep_range_to),
+                            decimal = false,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.rep_range_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 NumberField(
                     value = rest,
                     onValueChange = { rest = it },
@@ -218,6 +247,7 @@ fun ExerciseEditDialog(
                     return@TextButton
                 }
                 val base = initial ?: ExerciseEntity(name = name)
+                val range = repRange(parseInt(repMin)?.coerceIn(1, 999), parseInt(repMax)?.coerceIn(1, 999))
                 val exercise = base.copy(
                     name = name.trim(),
                     category = category.trim(),
@@ -231,6 +261,8 @@ fun ExerciseEditDialog(
                     bandAssist = equipmentType == EquipmentType.BAND && bodyWeight && bandAssist,
                     restSec = parseInt(rest)?.coerceIn(AppSettings.MIN_REST_SEC, AppSettings.MAX_REST_SEC),
                     muscles = muscles,
+                    repMin = if (reps) range?.first else null,
+                    repMax = if (reps) range?.last else null,
                 )
                 repo.launch {
                     saveExercise(exercise)

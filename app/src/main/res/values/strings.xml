@@ -306,4 +306,11 @@
     <string name="muscles_legend_fresh">Just trained</string>
     <string name="muscles_guide">Muscle names</string>
     <string name="muscles_guide_hint">Tap a muscle on the figure or its name below</string>
+    <string name="rep_range_from">Reps from</string>
+    <string name="rep_range_to">to</string>
+    <string name="rep_range_hint">Working rep range. When every set reaches the top, the app suggests the next weight and drops reps back to the bottom.</string>
+    <string name="target_line">Today: %s</string>
+    <string name="target_more_load">next weight</string>
+    <string name="target_harder">add weight or pick a harder variation</string>
+    <string name="e1rm_short">1RM ≈ %s kg</string>
 </resources>

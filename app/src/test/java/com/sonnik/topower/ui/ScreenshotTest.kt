@@ -89,7 +89,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.7")
+        waitText("Версия 1.8")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -171,8 +171,8 @@ suspend fun seedDemoData(app: SonnikApp) {
     val blue = EquipmentEntity(name = "Синяя", type = "BAND", minResistance = 11.0, maxResistance = 23.0, color = 0xFF1E88E5)
     dao.insertEquipment(listOf(d10, d12, d14, red, blue))
 
-    val press = ExerciseEntity(name = "Жим гантелей лёжа", trackWeight = true, equipmentType = "DUMBBELL", muscles = "CHEST,FRONT_DELTS,TRICEPS")
-    val pull = ExerciseEntity(name = "Подтягивания", trackWeight = true, useBodyWeight = true, muscles = "LATS,BICEPS")
+    val press = ExerciseEntity(name = "Жим гантелей лёжа", trackWeight = true, equipmentType = "DUMBBELL", muscles = "CHEST,FRONT_DELTS,TRICEPS", repMin = 8, repMax = 12)
+    val pull = ExerciseEntity(name = "Подтягивания", trackWeight = true, useBodyWeight = true, muscles = "LATS,BICEPS", repMin = 5, repMax = 8)
     val row = ExerciseEntity(name = "Тяга резины к поясу", trackWeight = true, equipmentType = "BAND", muscles = "LATS,REAR_DELTS")
     val plank = ExerciseEntity(name = "Планка", trackReps = false, trackTime = true, muscles = "ABS")
     val squat = ExerciseEntity(name = "Приседания", trackWeight = true, useBodyWeight = true, muscles = "QUADS,GLUTES")

@@ -291,4 +291,11 @@
     <string name="muscles_legend_fresh">Только что</string>
     <string name="muscles_guide">Названия мышц</string>
     <string name="muscles_guide_hint">Нажмите на мышцу на схеме или на название ниже</string>
+    <string name="rep_range_from">Повторы от</string>
+    <string name="rep_range_to">до</string>
+    <string name="rep_range_hint">Рабочий диапазон повторов. Когда во всех подходах дойдёте до верхней границы, приложение предложит следующий вес и вернёт повторы к нижней.</string>
+    <string name="target_line">Цель: %s</string>
+    <string name="target_more_load">следующий вес</string>
+    <string name="target_harder">добавьте вес или возьмите вариант сложнее</string>
+    <string name="e1rm_short">1ПМ ≈ %s кг</string>
 </resources>

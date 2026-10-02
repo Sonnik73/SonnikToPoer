@@ -48,7 +48,8 @@ jobs:
             mkdir -p docs/screenshots && cp app/build/screenshots/*.png docs/screenshots/
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add docs/screenshots
+            # Новые схемы базы Room тоже сохраняем — по ним проверяются миграции.
+            git add docs/screenshots app/schemas
             git commit -m "Скриншоты интерфейса (сборка ${{ github.run_number }})" && git push || true
           fi
 

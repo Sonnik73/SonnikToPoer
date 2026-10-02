@@ -246,6 +246,9 @@ private fun WorkoutContent(
     LaunchedEffect(exerciseIds, workout.startedAt) {
         previous = exerciseIds.associateWith { repo.previousSets(it, latestWorkout) }
     }
+    // Цель на сегодня — только для идущей тренировки.
+    val targets = if (workout.finishedAt != null) emptyMap() else items.map { it.exercise }.distinctBy { it.id }
+        .associate { e -> e.id to targetFor(e, previous[e.id].orEmpty(), allEquipment) }
 
     LazyColumn(
         modifier.fillMaxSize(),
@@ -310,6 +313,7 @@ private fun WorkoutContent(
                 bodyWeight = workout.bodyWeight,
                 equipment = equipmentById,
                 previous = previous[entry.exercise.id].orEmpty(),
+                target = targets[entry.exercise.id],
                 progress = progress[entry.exercise.id],
                 plateauSessions = if (plateauEnabled) plateauSessions else null,
                 isFirst = entry == items.first(),
@@ -370,8 +374,10 @@ private fun WorkoutContent(
         val sorted = state.item.sets.sortedBy { it.position }
         val index = if (state.set == null) sorted.size else sorted.indexOf(state.set)
         val prev = previous[state.item.exercise.id].orEmpty()
-        // Новый подход заполняем по прошлому подходу этой тренировки или по прошлой тренировке.
-        val prefill = state.set ?: sorted.lastOrNull() ?: prev.getOrNull(index) ?: prev.lastOrNull()
+        // Новый подход заполняем по прошлому рабочему подходу этой тренировки, по цели на сегодня
+        // или по прошлой тренировке.
+        val prefill = state.set ?: sorted.lastOrNull { !it.isWarmup } ?: targets[state.item.exercise.id]?.set
+            ?: sorted.lastOrNull() ?: prev.getOrNull(index) ?: prev.lastOrNull()
         SetDialog(
             exercise = state.item.exercise,
             setNumber = index + 1,
@@ -471,6 +477,7 @@ private fun ExerciseCard(
     bodyWeight: Double?,
     equipment: Map<String, EquipmentEntity>,
     previous: List<SetEntity>,
+    target: TargetUi?,
     progress: ProgressUi?,
     plateauSessions: Int?,
     isFirst: Boolean,
@@ -555,6 +562,7 @@ private fun ExerciseCard(
                     modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
                 )
             }
+            target?.let { TargetLine(it, exercise, equipment) }
 
             sets.forEachIndexed { i, set ->
                 Row(

@@ -42,6 +42,9 @@ data class ExerciseEntity(
     /** Основные мышцы через запятую (имена [com.sonnik.topower.domain.Muscle]). */
     @ColumnInfo(defaultValue = "''")
     val muscles: String = "",
+    /** Рабочий диапазон повторов для подсказки цели; null — не задан. */
+    val repMin: Int? = null,
+    val repMax: Int? = null,
 )
 
 @Serializable

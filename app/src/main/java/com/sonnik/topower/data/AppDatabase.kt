@@ -18,7 +18,7 @@ import com.sonnik.topower.domain.Muscle
         TemplateExerciseEntity::class,
         EquipmentEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -84,4 +84,11 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
-val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `exercises` ADD COLUMN `repMin` INTEGER")
+        db.execSQL("ALTER TABLE `exercises` ADD COLUMN `repMax` INTEGER")
+    }
+}
+
+val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
