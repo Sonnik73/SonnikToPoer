@@ -194,14 +194,17 @@ class ScreenshotTest {
         val vertical = hasScrollAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
         val width = compose.onRoot().fetchSemanticsNode().size.width
         val nodes = compose.onAllNodes(vertical)
-        val index = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
-        return nodes[index.coerceAtLeast(0)]
+        fun visibleIndex() = nodes.fetchSemanticsNodes().indexOfFirst { it.boundsInRoot.left >= 0f && it.boundsInRoot.left < width }
+        // Пока страница доезжает после перелистывания, видимого списка ещё может не быть.
+        compose.waitUntil(10_000) { visibleIndex() >= 0 }
+        return nodes[visibleIndex()]
     }
 
     /** Нажатие на вкладку в нижней панели. */
     private fun tab(name: String) {
         compose.waitForIdle()
         compose.onNodeWithTag("tab_$name").performClick()
+        compose.waitForIdle()
     }
 
     private fun click(text: String) {
