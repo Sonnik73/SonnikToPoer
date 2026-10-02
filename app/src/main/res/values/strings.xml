@@ -368,4 +368,20 @@
     <string name="generate_template">Build a workout for rested muscles</string>
     <string name="generated_template_name">Auto: %s</string>
     <string name="generate_template_nothing">Nothing to suggest: muscles are still recovering, or exercises have no muscles set</string>
+    <string name="share_title">SonnikToPower · my week</string>
+    <string name="share_period">%1$s — %2$s</string>
+    <string name="share_workouts_week">workouts this week</string>
+    <string name="share_workouts_month">in 30 days</string>
+    <string name="share_workouts_total">workouts total</string>
+    <string name="share_streak">weeks in a row</string>
+    <string name="share_tonnage">volume this week, kg</string>
+    <string name="share_calories">kcal this week</string>
+    <string name="share_sets">sets this week</string>
+    <string name="share_muscles">Muscles this week</string>
+    <string name="share_records">Records this week</string>
+    <string name="share_no_records">No new records this week — they are coming</string>
+    <string name="share_footer">Logged in SonnikToPower</string>
+    <string name="share_text">My week in SonnikToPower: %1$d workouts, %2$d weeks in a row</string>
+    <string name="share_results">Share results</string>
+    <string name="share_error">Could not prepare the image</string>
 </resources>

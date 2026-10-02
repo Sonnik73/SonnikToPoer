@@ -31,6 +31,7 @@ import com.sonnik.topower.ui.common.SectionCard
 import com.sonnik.topower.ui.common.SectionTitle
 import com.sonnik.topower.ui.common.StatRow
 import com.sonnik.topower.ui.common.kg
+import com.sonnik.topower.ui.share.ShareResultsButton
 import com.sonnik.topower.ui.workout.formatHoursMinutes
 import java.time.LocalDate
 import java.time.ZoneId
@@ -46,7 +47,11 @@ fun StatsScreen(openExercise: (String) -> Unit) {
     val exercises by remember { repo.dao.observeExercises(includeArchived = true) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
-    ScreenScaffold(title = stringResource(R.string.nav_stats), showSettings = true) { padding ->
+    ScreenScaffold(
+        title = stringResource(R.string.nav_stats),
+        showSettings = true,
+        actions = { ShareResultsButton(dates.orEmpty(), sets, workouts, exercises) },
+    ) { padding ->
         val workoutDates = dates ?: return@ScreenScaffold
         if (workoutDates.isEmpty()) {
             EmptyState(stringResource(R.string.no_stats), Modifier.padding(padding))

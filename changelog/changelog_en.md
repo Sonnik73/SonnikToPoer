@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.16
+- “Share results” on the Statistics screen: an image with your week — workouts this week, in 30 days and in total, weeks in a row, volume and kcal, muscles trained this week and the week's records. Sent via the regular Share menu to any messenger
+
 ## 1.15
 - More detailed muscle map: fibers follow each muscle's shape (fanning on the chest, delts, lats and glutes, arcing along the limbs), veins on the arms, lower abdomen and calves, light tendons — kneecap, Achilles, elbow and back of the knee
 

@@ -357,4 +357,20 @@
     <string name="generate_template">Подобрать на отдохнувшие мышцы</string>
     <string name="generated_template_name">Подбор: %s</string>
     <string name="generate_template_nothing">Нечего предложить: мышцы ещё восстанавливаются или у упражнений не заданы мышцы</string>
+    <string name="share_title">SonnikToPower · моя неделя</string>
+    <string name="share_period">%1$s — %2$s</string>
+    <string name="share_workouts_week">тренировок за неделю</string>
+    <string name="share_workouts_month">за 30 дней</string>
+    <string name="share_workouts_total">всего тренировок</string>
+    <string name="share_streak">недель подряд</string>
+    <string name="share_tonnage">тоннаж за неделю, кг</string>
+    <string name="share_calories">ккал за неделю</string>
+    <string name="share_sets">подходов за неделю</string>
+    <string name="share_muscles">Мышцы за неделю</string>
+    <string name="share_records">Рекорды недели</string>
+    <string name="share_no_records">На этой неделе без новых рекордов — всё впереди</string>
+    <string name="share_footer">Записано в SonnikToPower</string>
+    <string name="share_text">Моя неделя в SonnikToPower: тренировок — %1$d, недель подряд — %2$d</string>
+    <string name="share_results">Поделиться результатами</string>
+    <string name="share_error">Не удалось подготовить картинку</string>
 </resources>
