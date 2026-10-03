@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.20
+- GPL-3.0 license: the app is now open source and being prepared for F-Droid and IzzyOnDroid
+- Version code is now fixed (1.20 → 120) instead of the build number — updates install as before
+
 ## 1.19
 - Swipe left and right to switch between Workout, History, Statistics, Exercises and Inventory; Back returns to Workout
 

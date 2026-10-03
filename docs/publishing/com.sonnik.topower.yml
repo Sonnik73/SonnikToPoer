@@ -1,0 +1,27 @@
+# Файл для репозитория https://gitlab.com/fdroid/fdroiddata → metadata/com.sonnik.topower.yml
+Categories:
+  - Sports & Health
+License: GPL-3.0-only
+AuthorName: Sonnik73
+SourceCode: https://github.com/Sonnik73/SonnikToPoer
+IssueTracker: https://github.com/Sonnik73/SonnikToPoer/issues
+Changelog: https://github.com/Sonnik73/SonnikToPoer/blob/HEAD/changelog/changelog_en.md
+
+AutoName: SonnikToPower
+
+RepoType: git
+Repo: https://github.com/Sonnik73/SonnikToPoer.git
+
+Builds:
+  - versionName: '1.20'
+    versionCode: 120
+    commit: v1.20
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: gradle.properties|appVersionCode=(\d+)|.|appVersion=(.+)
+CurrentVersion: '1.20'
+CurrentVersionCode: 120

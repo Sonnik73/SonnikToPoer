@@ -1,0 +1,2 @@
+• GPL-3.0 license: the app is now open source and being prepared for F-Droid and IzzyOnDroid
+• Version code is now fixed (1.20 → 120) instead of the build number — updates install as before

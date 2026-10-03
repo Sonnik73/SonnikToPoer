@@ -1,0 +1,29 @@
+A strength training log with no internet, ads or sign-up. All data stays on your phone.
+
+<b>Workouts</b>
+<ul>
+<li>Exercises with any mix of reps, weight, time, distance and bodyweight</li>
+<li>Workout templates, plus a template built for your most rested muscles</li>
+<li>Today's target: +1 rep over the last workout, and the next weight from your inventory at the top of the rep range</li>
+<li>Rest timer that works with the screen locked</li>
+<li>Inventory: dumbbells, kettlebells, resistance bands with a from–to range, weight vests</li>
+<li>How-to for 63 default exercises</li>
+</ul>
+
+<b>Muscles</b>
+<ul>
+<li>Anatomical body map colored from red to green by each muscle's recovery</li>
+<li>Live countdown to full recovery and a 7-day volume mode</li>
+<li>Template readiness based on their muscles' recovery</li>
+<li>Configurable notifications and a home screen widget</li>
+</ul>
+
+<b>Statistics</b>
+<ul>
+<li>Records, estimated 1RM, progress charts, volume, plateau hints</li>
+<li>Smartwatch data entered manually: heart rate, duration, calories</li>
+<li>A "Share results" card with your week</li>
+<li>JSON backup and CSV export</li>
+</ul>
+
+Russian and English interface.

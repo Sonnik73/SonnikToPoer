@@ -32,12 +32,14 @@ Offline Android workout tracker with progress statistics (Russian and English UI
 ## Что нового
 
 Журнал изменений: [`changelog/changelog_ru.md`](changelog/changelog_ru.md) ([English](changelog/changelog_en.md)).
-Он же доступен в приложении: «Настройки → Что нового». Версия задаётся в `gradle.properties` (`appVersion`);
-при каждом выпуске нужно добавить раздел в оба файла журнала — это проверяет тест `ChangelogTest`.
+Он же доступен в приложении: «Настройки → Что нового». Версия задаётся в `gradle.properties`
+(`appVersion` и `appVersionCode` = major × 100 + minor); при каждом выпуске нужно добавить раздел в оба файла
+журнала и `fastlane/metadata/android/*/changelogs/<appVersionCode>.txt` — это проверяет тест `ChangelogTest`.
 
 ## Установка
 
 Готовый APK лежит в разделе [Releases](../../releases): каждая сборка ветки `main` публикуется автоматически.
+Подготовка к публикации в F-Droid и IzzyOnDroid описана в [`docs/publishing`](docs/publishing).
 Скачайте `SonnikToPower-*.apk` на телефон и установите (нужно разрешить установку из этого источника).
 Новые версии ставятся поверх старых с сохранением данных, если задан ключ подписи (см. ниже).
 
@@ -65,3 +67,8 @@ Offline Android workout tracker with progress statistics (Russian and English UI
 
 Всё хранится локально в базе SQLite (Room). Схемы базы лежат в `app/schemas`, миграции проверяются тестом `MigrationTest`. У каждой записи есть UUID и время изменения —
 это задел для будущей синхронизации с сервером.
+
+## Лицензия
+
+SonnikToPower — свободная программа: её можно распространять и изменять на условиях
+[GNU General Public License v3.0](LICENSE).

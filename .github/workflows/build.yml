@@ -30,7 +30,7 @@ jobs:
             echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/sonnik.keystore"
             echo "SIGNING_STORE_FILE=$RUNNER_TEMP/sonnik.keystore" >> "$GITHUB_ENV"
           else
-            echo "::warning::Signing secrets are not set: the APK is signed with a temporary key and will not update an installed app."
+            echo "::warning::Signing secrets are not set: the release APK is unsigned and cannot be installed."
           fi
 
       - name: Test and build
@@ -58,7 +58,7 @@ jobs:
           VERSION=$(grep '^appVersion=' gradle.properties | cut -d= -f2)
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/SonnikToPower-$VERSION.apk"
+          cp app/build/outputs/apk/release/app-release*.apk "dist/SonnikToPower-$VERSION.apk"
           awk '/^## /{n++} n==1' changelog/changelog_ru.md > release-notes.md
 
       - uses: actions/upload-artifact@v4

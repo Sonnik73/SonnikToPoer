@@ -36,4 +36,34 @@ class ChangelogTest {
             .first { it.startsWith("appVersion=") }.substringAfter("=").trim()
         assertEquals(appVersion, ru.first().version)
     }
+
+    /**
+     * Для F-Droid у каждой версии есть changelogs/<код>.txt (код = 1.20 → 120) с теми же пунктами,
+     * что и в журнале, не длиннее 500 символов.
+     */
+    @Test
+    fun fastlaneChangelogMatchesCurrentVersion() {
+        val appVersion = File("../gradle.properties").readLines()
+            .first { it.startsWith("appVersion=") }.substringAfter("=").trim()
+        val code = appVersion.split(".").let { (major, minor) -> major.toInt() * 100 + minor.toInt() }
+        val declared = File("../gradle.properties").readLines()
+            .first { it.startsWith("appVersionCode=") }.substringAfter("=").trim().toInt()
+        assertEquals("appVersionCode в gradle.properties", code, declared)
+        listOf("ru-RU" to "changelog_ru.md", "en-US" to "changelog_en.md").forEach { (locale, journal) ->
+            val file = File("../fastlane/metadata/android/$locale/changelogs/$code.txt")
+            assertTrue("нет ${file.path}", file.exists())
+            val text = file.readText()
+            assertTrue("${file.path}: ${text.length} > 500", text.length <= 500)
+            val items = parseChangelog(File("../changelog/$journal").readText()).first().items
+            assertEquals(items, text.lines().filter { it.isNotBlank() }.map { it.removePrefix("• ") })
+        }
+    }
+
+    @Test
+    fun shortDescriptionsFit() {
+        listOf("ru-RU", "en-US").forEach { locale ->
+            val text = File("../fastlane/metadata/android/$locale/short_description.txt").readText()
+            assertTrue("$locale: ${text.length}", text.isNotBlank() && text.length <= 80)
+        }
+    }
 }

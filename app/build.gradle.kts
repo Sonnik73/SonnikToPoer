@@ -10,8 +10,10 @@ plugins {
     alias(libs.plugins.room)
 }
 
-// На GitHub Actions номер версии растёт с каждой сборкой, чтобы APK ставился поверх старого.
-val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
+// Версия и код версии задаются в gradle.properties (appVersion=1.20, appVersionCode=120):
+// одинаково на любом сервере сборки, в том числе в F-Droid.
+val appVersion = providers.gradleProperty("appVersion").get()
+val appVersionCode = providers.gradleProperty("appVersionCode").get().toInt()
 
 // Ключ подписи передаётся через переменные окружения (секреты GitHub Actions),
 // чтобы все сборки были подписаны одинаково и обновляли установленное приложение.
@@ -25,8 +27,8 @@ android {
         applicationId = "com.sonnik.topower"
         minSdk = 26
         targetSdk = 35
-        versionCode = buildNumber
-        versionName = providers.gradleProperty("appVersion").get()
+        versionCode = appVersionCode
+        versionName = appVersion
     }
 
     signingConfigs {
@@ -43,11 +45,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = if (signingStoreFile != null) {
-                signingConfigs.getByName("sonnik")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // Без ключа релиз собирается неподписанным — так его подписывает F-Droid.
+            signingConfig = if (signingStoreFile != null) signingConfigs.getByName("sonnik") else null
         }
     }
 
@@ -60,6 +59,11 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    // Зашифрованный блок Google со списком зависимостей не нужен и мешает F-Droid / IzzyOnDroid.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
     // Журнал изменений (changelog/*.md) встраивается в приложение.
     sourceSets.getByName("main").assets.srcDir("$rootDir/changelog")
