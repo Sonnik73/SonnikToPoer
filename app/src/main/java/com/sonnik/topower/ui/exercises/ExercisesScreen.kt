@@ -2,7 +2,19 @@ package com.sonnik.topower.ui.exercises
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
+import com.sonnik.topower.ui.muscles.muscleName
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -73,6 +85,12 @@ fun ExercisesScreen(openStats: (String) -> Unit) {
     var menuOpen by remember { mutableStateOf(false) }
     val archivedMsg = stringResource(R.string.exercise_archived_msg)
 
+    // Фильтры: поиск, часть тела, инвентарь (ключ: имя типа или BODYWEIGHT — так сохраняется при повороте).
+    var query by rememberSaveable { mutableStateOf("") }
+    var area by rememberSaveable { mutableStateOf<BodyArea?>(null) }
+    var toolKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val muscleNamesMap = Muscle.entries.associateWith { muscleName(it) }
+
     ScreenScaffold(
         title = stringResource(R.string.nav_exercises),
         showSettings = true,
@@ -98,27 +116,53 @@ fun ExercisesScreen(openStats: (String) -> Unit) {
             }
         },
     ) { padding ->
-        val list = exercises
+        val all = exercises
         when {
-            list == null -> Unit
-            list.isEmpty() -> EmptyState(stringResource(R.string.no_exercises), Modifier.padding(padding))
-            else -> LazyColumn(
+            all == null -> Unit
+            all.isEmpty() -> EmptyState(stringResource(R.string.no_exercises), Modifier.padding(padding))
+            else -> Column(
                 Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(bottom = 88.dp),
             ) {
-                items(list, key = { it.id }) { exercise ->
-                    ExerciseRow(
-                        exercise = exercise,
-                        onClick = { editing = exercise },
-                        onStats = { openStats(exercise.id) },
-                        onDelete = { deleting = exercise },
-                        onToggleArchive = {
-                            repo.launch { saveExercise(exercise.copy(archived = !exercise.archived)) }
-                        },
+                val tools = ToolFilter.available(all)
+                val tool = tools.firstOrNull { it.key == toolKey }
+                val list = filterExercises(all, query, area, tool) { muscleNamesMap.getValue(it) }
+                ExerciseFilters(
+                    query = query,
+                    onQuery = { query = it },
+                    area = area,
+                    onArea = { area = if (area == it) null else it },
+                    tools = tools,
+                    tool = tool,
+                    onTool = { toolKey = if (tool == it) null else it.key },
+                    found = list.size,
+                    total = all.size,
+                    onReset = { query = ""; area = null; toolKey = null },
+                )
+                if (list.isEmpty()) {
+                    Text(
+                        stringResource(R.string.exercise_filter_nothing),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(16.dp),
                     )
-                    HorizontalDivider()
+                }
+                LazyColumn(
+                    Modifier.weight(1f),
+                    contentPadding = PaddingValues(bottom = 88.dp),
+                ) {
+                    items(list, key = { it.id }) { exercise ->
+                        ExerciseRow(
+                            exercise = exercise,
+                            onClick = { editing = exercise },
+                            onStats = { openStats(exercise.id) },
+                            onDelete = { deleting = exercise },
+                            onToggleArchive = {
+                                repo.launch { saveExercise(exercise.copy(archived = !exercise.archived)) }
+                            },
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }
@@ -138,6 +182,93 @@ fun ExercisesScreen(openStats: (String) -> Unit) {
             },
             onDismiss = { deleting = null },
         )
+    }
+}
+
+private val ToolFilter.key: String get() = type?.name ?: "BODYWEIGHT"
+
+@Composable
+private fun areaLabel(area: BodyArea): String = stringResource(
+    when (area) {
+        BodyArea.CHEST -> R.string.area_chest
+        BodyArea.BACK -> R.string.area_back
+        BodyArea.SHOULDERS -> R.string.area_shoulders
+        BodyArea.ARMS -> R.string.area_arms
+        BodyArea.CORE -> R.string.area_core
+        BodyArea.LEGS -> R.string.area_legs
+    }
+)
+
+/** Поиск, части тела и инвентарь над списком; повторное нажатие на чип снимает фильтр. */
+@Composable
+private fun ExerciseFilters(
+    query: String,
+    onQuery: (String) -> Unit,
+    area: BodyArea?,
+    onArea: (BodyArea) -> Unit,
+    tools: List<ToolFilter>,
+    tool: ToolFilter?,
+    onTool: (ToolFilter) -> Unit,
+    found: Int,
+    total: Int,
+    onReset: () -> Unit,
+) {
+    Column(Modifier.padding(top = 8.dp)) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQuery,
+            placeholder = { Text(stringResource(R.string.exercise_search)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = if (query.isNotEmpty()) {
+                { IconButton(onClick = { onQuery("") }) { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.exercise_filter_reset)) } }
+            } else null,
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(top = 4.dp),
+        ) {
+            items(BodyArea.entries) { a ->
+                FilterChip(selected = area == a, onClick = { onArea(a) }, label = { Text(areaLabel(a)) })
+            }
+        }
+        if (tools.isNotEmpty()) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(tools) { t ->
+                    FilterChip(
+                        selected = tool == t,
+                        onClick = { onTool(t) },
+                        label = {
+                            Text(t.type?.let { equipmentTypeLabel(it, plural = true) } ?: stringResource(R.string.body_weight_tag))
+                        },
+                    )
+                }
+            }
+        }
+        if (found != total) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(R.string.exercise_filter_found, found, total),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onReset) { Text(stringResource(R.string.exercise_filter_reset)) }
+            }
+        }
+        HorizontalDivider()
     }
 }
 

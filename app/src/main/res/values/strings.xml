@@ -385,4 +385,14 @@
     <string name="share_results">Share results</string>
     <string name="share_error">Could not prepare the image</string>
     <string name="exercise_technique">How to perform</string>
+    <string name="exercise_search">Search: name or muscle</string>
+    <string name="area_chest">Chest</string>
+    <string name="area_back">Back</string>
+    <string name="area_shoulders">Shoulders</string>
+    <string name="area_arms">Arms</string>
+    <string name="area_core">Core</string>
+    <string name="area_legs">Legs</string>
+    <string name="exercise_filter_found">Found: %1$d of %2$d</string>
+    <string name="exercise_filter_reset">Reset</string>
+    <string name="exercise_filter_nothing">Nothing found — change the filters</string>
 </resources>

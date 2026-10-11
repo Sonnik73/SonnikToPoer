@@ -1,0 +1,1 @@
+• Filters in the exercise list: search by name or muscle, body area (chest, back, shoulders, arms, core, legs) and equipment; a found counter and Reset

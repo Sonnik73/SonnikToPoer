@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.21
+- Filters in the exercise list: search by name or muscle, body area (chest, back, shoulders, arms, core, legs) and equipment; a found counter and Reset
+
 ## 1.20
 - GPL-3.0 license: the app is now open source and being prepared for F-Droid and IzzyOnDroid
 - Version code is now fixed (1.20 → 120) instead of the build number — updates install as before
