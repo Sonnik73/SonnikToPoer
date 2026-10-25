@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.23
+- Statistics → By exercise is sorted by the number of workouts in the selected period, most frequent first
+
 ## 1.22
 - Value labels on charts: numbers above points and bars; tap or drag to see the exact value and date
 - Period selection in statistics: Week, Month, Year, All — for overall and per-exercise stats

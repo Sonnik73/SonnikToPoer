@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.domain.BucketUnit
 import com.sonnik.topower.domain.StatsPeriod
 import com.sonnik.topower.domain.activityBuckets
@@ -83,7 +84,9 @@ fun StatsScreen(openExercise: (String) -> Unit) {
         val workoutsPerExercise = remember(periodSets) {
             periodSets.filter { !it.set.isWarmup }.groupBy { it.exerciseId }.mapValues { (_, v) -> v.map { it.workoutId }.distinct().size }
         }
+        // Чаще выполняемые — выше; при равенстве — по алфавиту.
         val exercisesWithData = exercises.filter { it.id in workoutsPerExercise }
+            .sortedWith(compareByDescending<ExerciseEntity> { workoutsPerExercise[it.id] }.thenBy { it.name.lowercase() })
         val dayFormat = remember { DateTimeFormatter.ofPattern("dd.MM") }
         val monthFormat = remember { DateTimeFormatter.ofPattern("LLL yyyy", Locale.getDefault()) }
 
