@@ -203,14 +203,14 @@ fun BarChart(
         Canvas(
             Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(130.dp)
                 .pointerInput(values) {
                     detectTapGestures { o ->
                         selected = (o.x / (size.width.toFloat() / values.size)).toInt().coerceIn(0, values.lastIndex)
                     }
                 }
         ) {
-            val top = 18.dp.toPx()
+            val top = 24.dp.toPx() // место под подпись над самым высоким столбцом
             val slot = size.width / values.size
             val barWidth = slot * 0.6f
             val anchors = values.mapIndexed { i, v ->
