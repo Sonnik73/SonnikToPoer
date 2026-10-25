@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
@@ -88,6 +90,16 @@ fun SetDialog(
     var pair by rememberSaveable { mutableStateOf(prefill?.pair ?: false) }
     var showError by rememberSaveable { mutableStateOf(false) }
 
+    // Клавиатура открыта из окна диалога: без явного скрытия она остаётся на экране тренировки.
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    fun close(action: () -> Unit = {}) {
+        focusManager.clearFocus(force = true)
+        keyboard?.hide()
+        action()
+        onDismiss()
+    }
+
     val selectedBands = if (isBand) selected.mapNotNull { byId[it] } else emptyList()
     val bandMin = selectedBands.sumOf { it.minResistance ?: 0.0 }
     val bandMax = selectedBands.sumOf { it.maxResistance ?: 0.0 }
@@ -133,7 +145,7 @@ fun SetDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { close() },
         title = {
             Column {
                 Text(if (isNew) stringResource(R.string.new_set) else stringResource(R.string.set_title, setNumber))
@@ -255,7 +267,7 @@ fun SetDialog(
                     )
                 }
                 if (onDelete != null) {
-                    TextButton(onClick = { onDelete(); onDismiss() }) {
+                    TextButton(onClick = { close(onDelete) }) {
                         Text(stringResource(R.string.delete_set), color = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -269,11 +281,10 @@ fun SetDialog(
                 if (empty) {
                     showError = true
                 } else {
-                    onSave(values)
-                    onDismiss()
+                    close { onSave(values) }
                 }
             }) { Text(stringResource(R.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = { TextButton(onClick = { close() }) { Text(stringResource(R.string.cancel)) } },
     )
 }

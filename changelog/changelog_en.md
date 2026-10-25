@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.24
+- Fixed: the keyboard no longer stays open on the workout screen after saving a set
+
 ## 1.23
 - Statistics → By exercise is sorted by the number of workouts in the selected period, most frequent first
 

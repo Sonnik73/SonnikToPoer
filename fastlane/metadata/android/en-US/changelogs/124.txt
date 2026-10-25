@@ -1,0 +1,1 @@
+• Fixed: the keyboard no longer stays open on the workout screen after saving a set
