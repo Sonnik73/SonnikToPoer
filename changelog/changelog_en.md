@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.22
+- Value labels on charts: numbers above points and bars; tap or drag to see the exact value and date
+- Period selection in statistics: Week, Month, Year, All time — for overall and per-exercise stats
+
 ## 1.21
 - Filters in the exercise list: search by name or muscle, body area (chest, back, shoulders, arms, core, legs) and equipment; a found counter and Reset
 

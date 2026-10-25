@@ -2,6 +2,7 @@ package com.sonnik.topower.ui.stats
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.domain.Metric
+import com.sonnik.topower.domain.StatsPeriod
 import com.sonnik.topower.domain.computeExerciseStats
 import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.ui.LocalRepository
@@ -33,6 +35,8 @@ import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.common.SectionCard
 import com.sonnik.topower.ui.common.StatRow
 import com.sonnik.topower.ui.common.formatDate
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
@@ -42,12 +46,24 @@ fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
     val sets by remember(exerciseId) { repo.dao.observeSetsForExercise(exerciseId) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
     var selectedMetric by rememberSaveable { mutableStateOf<Metric?>(null) }
+    var period by rememberSaveable { mutableStateOf(StatsPeriod.ALL) }
 
     ScreenScaffold(title = exercise?.name ?: stringResource(R.string.statistics), onBack = onBack) { padding ->
         val ex = exercise ?: return@ScreenScaffold
-        val stats = remember(sets, ex) { computeExerciseStats(sets.map { it.toRecord() }, ex.config()) }
-        if (stats == null) {
+        if (sets.isEmpty()) {
             EmptyState(stringResource(R.string.no_stats), Modifier.padding(padding))
+            return@ScreenScaffold
+        }
+        val zone = ZoneId.systemDefault()
+        val start = period.start(LocalDate.now(zone), zone) ?: Long.MIN_VALUE
+        val stats = remember(sets, ex, start) {
+            computeExerciseStats(sets.filter { it.workoutDate >= start }.map { it.toRecord() }, ex.config())
+        }
+        if (stats == null) {
+            Column(Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PeriodChips(period, onSelect = { period = it })
+                Text(stringResource(R.string.no_data_in_period), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             return@ScreenScaffold
         }
         val summary = stats.metrics.firstOrNull { it.metric == selectedMetric } ?: stats.metrics.firstOrNull()
@@ -59,6 +75,7 @@ fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item { PeriodChips(period, onSelect = { period = it }) }
             item {
                 Text(
                     stringResource(R.string.period, formatDate(stats.firstDate), formatDate(stats.lastDate)),

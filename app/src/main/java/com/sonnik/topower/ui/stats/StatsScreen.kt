@@ -12,12 +12,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.domain.BucketUnit
+import com.sonnik.topower.domain.StatsPeriod
+import com.sonnik.topower.domain.activityBuckets
 import com.sonnik.topower.domain.computeOverallStats
 import com.sonnik.topower.domain.formatDuration
 import com.sonnik.topower.domain.formatNumber
@@ -36,6 +42,7 @@ import com.sonnik.topower.ui.workout.formatHoursMinutes
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun StatsScreen(openExercise: (String) -> Unit) {
@@ -46,6 +53,7 @@ fun StatsScreen(openExercise: (String) -> Unit) {
     val workouts by remember { repo.dao.observeWorkouts() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val exercises by remember { repo.dao.observeExercises(includeArchived = true) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
+    var period by rememberSaveable { mutableStateOf(StatsPeriod.ALL) }
 
     ScreenScaffold(
         title = stringResource(R.string.nav_stats),
@@ -58,14 +66,26 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             return@ScreenScaffold
         }
         val zone = ZoneId.systemDefault()
+        val today = LocalDate.now(zone)
+        // Всё, кроме плиток «На этой неделе» и «В этом месяце», считаем только за выбранный период.
+        val start = period.start(today, zone) ?: Long.MIN_VALUE
+        val periodDates = remember(workoutDates, start) { workoutDates.filter { it >= start } }
+        val periodSets = remember(sets, start) { sets.filter { it.workoutDate >= start } }
+        val periodWorkouts = workouts.filter { it.startedAt >= start }
+        val periodWeights = bodyWeights.filter { it.startedAt >= start }
         val overall = remember(workoutDates, sets) {
-            computeOverallStats(workoutDates, sets.map { it.toRecord() }, LocalDate.now(zone), zone)
+            computeOverallStats(workoutDates, sets.map { it.toRecord() }, today, zone)
         }
-        val workoutsPerExercise = remember(sets) {
-            sets.filter { !it.set.isWarmup }.groupBy { it.exerciseId }.mapValues { (_, v) -> v.map { it.workoutId }.distinct().size }
+        val inPeriod = remember(periodDates, periodSets) {
+            computeOverallStats(periodDates, periodSets.map { it.toRecord() }, today, zone)
+        }
+        val (bucketUnit, buckets) = remember(workoutDates, period) { activityBuckets(workoutDates, period, today, zone) }
+        val workoutsPerExercise = remember(periodSets) {
+            periodSets.filter { !it.set.isWarmup }.groupBy { it.exerciseId }.mapValues { (_, v) -> v.map { it.workoutId }.distinct().size }
         }
         val exercisesWithData = exercises.filter { it.id in workoutsPerExercise }
-        val weekFormat = remember { DateTimeFormatter.ofPattern("dd.MM") }
+        val dayFormat = remember { DateTimeFormatter.ofPattern("dd.MM") }
+        val monthFormat = remember { DateTimeFormatter.ofPattern("LLL yyyy", Locale.getDefault()) }
 
         LazyColumn(
             Modifier
@@ -75,23 +95,24 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item { SectionTitle(stringResource(R.string.stats_overview)) }
+            item { PeriodChips(period, onSelect = { period = it }) }
             item {
                 StatRow(
-                    stringResource(R.string.stat_total_workouts) to overall.totalWorkouts.toString(),
+                    stringResource(R.string.stat_total_workouts) to inPeriod.totalWorkouts.toString(),
                     stringResource(R.string.stat_this_week) to overall.workoutsThisWeek.toString(),
                     stringResource(R.string.stat_this_month) to overall.workoutsThisMonth.toString(),
                 )
             }
             item {
                 StatRow(
-                    stringResource(R.string.stat_total_sets) to overall.totalSets.toString(),
-                    stringResource(R.string.stat_tonnage) to formatNumber(overall.totalTonnage, 0),
+                    stringResource(R.string.stat_total_sets) to inPeriod.totalSets.toString(),
+                    stringResource(R.string.stat_tonnage) to formatNumber(inPeriod.totalTonnage, 0),
                 )
             }
             // Данные со смарт-часов: сумма ккал, средняя длительность и средний максимальный пульс.
-            val calories = workouts.mapNotNull { it.calories }
-            val durations = workouts.mapNotNull { it.watchDurationSec }
-            val maxHrs = workouts.mapNotNull { it.maxHeartRate }
+            val calories = periodWorkouts.mapNotNull { it.calories }
+            val durations = periodWorkouts.mapNotNull { it.watchDurationSec }
+            val maxHrs = periodWorkouts.mapNotNull { it.maxHeartRate }
             if (calories.isNotEmpty() || durations.isNotEmpty() || maxHrs.isNotEmpty()) {
                 item {
                     StatRow(
@@ -104,8 +125,8 @@ fun StatsScreen(openExercise: (String) -> Unit) {
                 }
             }
             val extraTiles = buildList {
-                if (overall.totalDistanceKm > 0) add(R.string.stat_distance to formatNumber(overall.totalDistanceKm))
-                if (overall.totalDurationSec > 0) add(R.string.stat_duration to formatDuration(overall.totalDurationSec.toInt()))
+                if (inPeriod.totalDistanceKm > 0) add(R.string.stat_distance to formatNumber(inPeriod.totalDistanceKm))
+                if (inPeriod.totalDurationSec > 0) add(R.string.stat_duration to formatDuration(inPeriod.totalDurationSec.toInt()))
             }
             if (extraTiles.isNotEmpty()) {
                 item {
@@ -114,20 +135,24 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             }
             item {
                 SectionCard {
-                    Text(stringResource(R.string.workouts_per_week), style = MaterialTheme.typography.titleSmall)
+                    val title = when (bucketUnit) {
+                        BucketUnit.DAY -> R.string.workouts_per_day
+                        BucketUnit.WEEK -> R.string.workouts_per_week
+                        BucketUnit.MONTH -> R.string.workouts_per_month
+                    }
+                    Text(stringResource(title), style = MaterialTheme.typography.titleSmall)
                     BarChart(
-                        values = overall.weekly.map { it.count },
-                        firstLabel = overall.weekly.first().weekStart.format(weekFormat),
-                        lastLabel = overall.weekly.last().weekStart.format(weekFormat),
+                        values = buckets.map { it.count },
+                        barLabels = buckets.map { it.start.format(if (bucketUnit == BucketUnit.MONTH) monthFormat else dayFormat) },
                     )
                 }
             }
-            if (bodyWeights.isNotEmpty()) {
+            if (periodWeights.isNotEmpty()) {
                 item {
                     SectionCard {
                         Text(stringResource(R.string.body_weight_chart), style = MaterialTheme.typography.titleSmall)
                         LineChart(
-                            points = bodyWeights.map { ChartPoint(it.startedAt, it.bodyWeight) },
+                            points = periodWeights.map { ChartPoint(it.startedAt, it.bodyWeight) },
                             formatY = { kg(it) },
                         )
                     }

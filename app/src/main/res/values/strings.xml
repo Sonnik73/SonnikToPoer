@@ -395,4 +395,12 @@
     <string name="exercise_filter_found">Found: %1$d of %2$d</string>
     <string name="exercise_filter_reset">Reset</string>
     <string name="exercise_filter_nothing">Nothing found — change the filters</string>
+    <string name="chart_tap_hint">Tap a point to see its value</string>
+    <string name="period_week">Week</string>
+    <string name="period_month">Month</string>
+    <string name="period_year">Year</string>
+    <string name="period_all">All time</string>
+    <string name="workouts_per_day">Workouts per day</string>
+    <string name="workouts_per_month">Workouts per month</string>
+    <string name="no_data_in_period">No workouts in this period</string>
 </resources>

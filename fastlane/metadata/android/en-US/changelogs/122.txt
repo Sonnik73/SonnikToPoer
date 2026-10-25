@@ -1,0 +1,2 @@
+• Value labels on charts: numbers above points and bars; tap or drag to see the exact value and date
+• Period selection in statistics: Week, Month, Year, All time — for overall and per-exercise stats

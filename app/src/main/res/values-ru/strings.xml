@@ -384,4 +384,12 @@
     <string name="exercise_filter_found">Найдено: %1$d из %2$d</string>
     <string name="exercise_filter_reset">Сбросить</string>
     <string name="exercise_filter_nothing">Ничего не найдено — измените фильтры</string>
+    <string name="chart_tap_hint">Нажмите на точку, чтобы увидеть значение</string>
+    <string name="period_week">Неделя</string>
+    <string name="period_month">Месяц</string>
+    <string name="period_year">Год</string>
+    <string name="period_all">Всё время</string>
+    <string name="workouts_per_day">Тренировок по дням</string>
+    <string name="workouts_per_month">Тренировок по месяцам</string>
+    <string name="no_data_in_period">За этот период тренировок нет</string>
 </resources>

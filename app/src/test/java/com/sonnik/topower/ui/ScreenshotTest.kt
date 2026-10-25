@@ -143,6 +143,14 @@ class ScreenshotTest {
         waitText("Общая статистика")
     }
 
+    @Test fun statsPeriod() = shoot("21-stats-period") {
+        tab("Stats")
+        waitText("Общая статистика")
+        listWith("Общая статистика")
+        click("Неделя", inList = true)
+        waitText("Тренировок по дням")
+    }
+
     @Test fun exerciseStats() = shoot("05-exercise-stats") {
         tab("Stats")
         waitText("Общая статистика")
@@ -156,7 +164,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.21")
+        waitText("Версия 1.22")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
