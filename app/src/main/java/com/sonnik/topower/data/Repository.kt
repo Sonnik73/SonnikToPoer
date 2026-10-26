@@ -1,5 +1,6 @@
 package com.sonnik.topower.data
 
+import androidx.room.InvalidationTracker
 import androidx.room.withTransaction
 import com.sonnik.topower.domain.ExerciseOption
 import com.sonnik.topower.domain.Muscle
@@ -25,6 +26,15 @@ class Repository(
     private val seedLock = Mutex()
 
     fun launch(block: suspend Repository.() -> Unit): Job = scope.launch { block() }
+
+    /** Вызывает [onChange] (в фоновом потоке) после любой записи в тренировки, подходы или упражнения. */
+    fun observeTrainingChanges(onChange: () -> Unit) {
+        db.invalidationTracker.addObserver(
+            object : InvalidationTracker.Observer(TRAINING_TABLES) {
+                override fun onInvalidated(tables: Set<String>) = onChange()
+            }
+        )
+    }
 
     // ---- Упражнения ----
 
@@ -301,3 +311,6 @@ class Repository(
         }
     }
 }
+
+/** Таблицы, изменения которых видны приложениям экосистемы. */
+private val TRAINING_TABLES = arrayOf("workouts", "workout_exercises", "sets", "exercises")

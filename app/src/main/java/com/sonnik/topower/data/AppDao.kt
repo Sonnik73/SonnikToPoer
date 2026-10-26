@@ -159,6 +159,29 @@ interface AppDao {
     )
     fun observeAllSets(): Flow<List<SetWithContext>>
 
+    @Query(
+        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
+                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
+           FROM sets s
+           JOIN workout_exercises we ON s.workoutExerciseId = we.id
+           JOIN workouts w ON w.id = we.workoutId
+           JOIN exercises e ON e.id = we.exerciseId
+           ORDER BY w.startedAt, we.position, s.position"""
+    )
+    suspend fun allSetsWithContext(): List<SetWithContext>
+
+    @Query("SELECT startedAt, bodyWeight FROM workouts WHERE bodyWeight IS NOT NULL ORDER BY startedAt")
+    suspend fun bodyWeights(): List<BodyWeightPoint>
+
+    /** Последнее изменение тренировок, упражнений в них и подходов (удаления сюда не попадают). */
+    @Query(
+        """SELECT MAX(t) FROM (
+              SELECT MAX(updatedAt) AS t FROM workouts
+              UNION ALL SELECT MAX(updatedAt) FROM workout_exercises
+              UNION ALL SELECT MAX(updatedAt) FROM sets)"""
+    )
+    suspend fun lastTrainingUpdate(): Long?
+
     @Query("SELECT startedAt FROM workouts ORDER BY startedAt")
     fun observeWorkoutDates(): Flow<List<Long>>
 

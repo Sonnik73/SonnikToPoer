@@ -23,8 +23,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sonnik.topower.MainActivity
 import com.sonnik.topower.SonnikApp
+import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.ExerciseEntity
+import com.sonnik.topower.data.Repository
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseEntity
@@ -64,7 +66,7 @@ class ScreenshotTest {
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
         // Приложение при старте само заполняет упражнения в главном потоке. Блокировать его
         // ожиданием нельзя (взаимная блокировка), поэтому готовим данные в фоне, прокручивая очередь.
-        inBackground { seedDemoData(app) }
+        inBackground { seedDemoData(app.repository, app.settings) }
     }
 
     /** Выполняет [block] в фоне, прокручивая очередь главного потока, пока он не закончится. */
@@ -164,7 +166,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.24")
+        waitText("Версия 1.25")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -275,11 +277,10 @@ class ScreenshotTest {
 }
 
 /** Демо-данные: инвентарь, упражнения, шаблон, восемь прошлых тренировок и одна текущая. */
-suspend fun seedDemoData(app: SonnikApp) {
-    val repo = app.repository
+suspend fun seedDemoData(repo: Repository, settings: AppSettings) {
     val dao = repo.dao
     // Упражнения по умолчанию заменяем демо-набором.
-    repo.seedDefaultsIfNeeded(app.settings, russian = true)
+    repo.seedDefaultsIfNeeded(settings, russian = true)
     dao.clearExercises()
     val day = 86_400_000L
     val now = System.currentTimeMillis()

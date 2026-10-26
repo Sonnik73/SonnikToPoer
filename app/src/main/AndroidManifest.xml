@@ -11,6 +11,13 @@
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
 
+    <!-- Чтение сводок тренировок приложениями экосистемы, подписанными тем же ключом -->
+    <permission
+        android:name="com.sonnik.ecosystem.permission.READ_DATA"
+        android:description="@string/ecosystem_permission_description"
+        android:label="@string/ecosystem_permission_label"
+        android:protectionLevel="signature" />
+
     <application
         android:name=".SonnikApp"
         android:allowBackup="true"
@@ -39,6 +46,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Сводки тренировок для приложений экосистемы: только чтение -->
+        <provider
+            android:name=".ecosystem.EcosystemProvider"
+            android:authorities="com.sonnik.topower.ecosystem"
+            android:exported="true"
+            android:readPermission="com.sonnik.ecosystem.permission.READ_DATA" />
 
         <receiver
             android:name=".timer.RestTimerReceiver"

@@ -4,6 +4,7 @@ import android.app.Application
 import com.sonnik.topower.data.AppDatabase
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
+import com.sonnik.topower.ecosystem.EcosystemChanges
 import com.sonnik.topower.reminders.Reminders
 import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.timer.RestTimer
@@ -29,6 +30,8 @@ class SonnikApp : Application() {
         appScope.launch {
             repository.seedDefaultsIfNeeded(settings, russian = Locale.getDefault().language == "ru")
         }
+        // Приложения экосистемы обновляются сами после любого изменения тренировок.
+        repository.observeTrainingChanges { EcosystemChanges.onDataChanged(this) }
         // Уведомления перепланируются при любом изменении тренировок или их настроек.
         appScope.launch {
             combine(
