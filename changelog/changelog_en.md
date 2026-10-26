@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.25
+- Preparing to share data with the author's other apps
+
 ## 1.24
 - Fixed: the keyboard no longer stays open on the workout screen after saving a set
 

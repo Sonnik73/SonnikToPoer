@@ -392,4 +392,6 @@
     <string name="workouts_per_day">Тренировок по дням</string>
     <string name="workouts_per_month">Тренировок по месяцам</string>
     <string name="no_data_in_period">За этот период тренировок нет</string>
+    <string name="ecosystem_permission_label">Данные тренировок SonnikToPower</string>
+    <string name="ecosystem_permission_description">Чтение сводок тренировок SonnikToPower приложениями того же автора</string>
 </resources>
