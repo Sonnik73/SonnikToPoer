@@ -20,7 +20,8 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /**
  * Цветовая палитра: основной акцент, второй акцент (столбцы графиков, достижения) и лёгкий оттенок
- * фона. [STEEL] — исходная палитра приложения, [DYNAMIC] — цвета обоев (Android 12+).
+ * фона; [tintStrength] — насколько сильно оттенок окрашивает фон и карточки (у тематических сильнее).
+ * [STEEL] — исходная палитра приложения, [DYNAMIC] — цвета обоев (Android 12+).
  */
 enum class ThemePalette(
     val lightPrimary: Color,
@@ -28,6 +29,7 @@ enum class ThemePalette(
     val lightTertiary: Color,
     val darkTertiary: Color,
     val tint: Color,
+    val tintStrength: Float = 1f,
 ) {
     STEEL(Color(0xFF2F5C8F), Color(0xFFA9C7F0), Color(0xFF2E7D5B), Color(0xFF8FD6AE), Color(0xFF2F5C8F)),
     FOREST(Color(0xFF2E6B3F), Color(0xFF94D3A2), Color(0xFF7A5A14), Color(0xFFE0C27A), Color(0xFF3F6B4A)),
@@ -36,10 +38,10 @@ enum class ThemePalette(
     GRAPHITE(Color(0xFF3C4043), Color(0xFFD0D3D6), Color(0xFF5B6B78), Color(0xFFB4C2CC), Color(0xFF6B6F73)),
 
     /** «Кузница»: тёмный металл и раскалённое железо. */
-    FORGE(Color(0xFFB8441A), Color(0xFFFF8A50), Color(0xFF8D6E2A), Color(0xFFE3B95C), Color(0xFF6B4A3A)),
+    FORGE(Color(0xFFB8441A), Color(0xFFFF8A50), Color(0xFF8D6E2A), Color(0xFFE3B95C), Color(0xFF7A4A30), tintStrength = 2.5f),
 
     /** «Гарнизон»: олива, бронза и пергамент — в тон «Крепости». */
-    GARRISON(Color(0xFF56682F), Color(0xFFBFD08A), Color(0xFF8C5A2B), Color(0xFFE2A66B), Color(0xFF9A8456)),
+    GARRISON(Color(0xFF56682F), Color(0xFFBFD08A), Color(0xFF8C5A2B), Color(0xFFE2A66B), Color(0xFFA68A4E), tintStrength = 3f),
 
     DYNAMIC(Color(0xFF2F5C8F), Color(0xFFA9C7F0), Color(0xFF2E7D5B), Color(0xFF8FD6AE), Color(0xFF2F5C8F));
 
@@ -124,15 +126,15 @@ private fun lightScheme(p: ThemePalette): ColorScheme = LightColors.copy(
     primary = p.lightPrimary,
     primaryContainer = lerp(p.lightPrimary, Color.White, 0.86f),
     onPrimaryContainer = lerp(p.lightPrimary, Color.Black, 0.55f),
-    secondary = lerp(LightColors.secondary, p.tint, 0.2f),
-    secondaryContainer = lerp(LightColors.secondaryContainer, p.tint, 0.1f),
+    secondary = lerp(LightColors.secondary, p.tint, 0.2f * p.tintStrength),
+    secondaryContainer = lerp(LightColors.secondaryContainer, p.tint, 0.1f * p.tintStrength),
     tertiary = p.lightTertiary,
     tertiaryContainer = lerp(p.lightTertiary, Color.White, 0.85f),
     onTertiaryContainer = lerp(p.lightTertiary, Color.Black, 0.6f),
-    background = lerp(Color(0xFFF4F5F7), p.tint, 0.05f),
-    surface = lerp(Color(0xFFF4F5F7), p.tint, 0.05f),
-    surfaceVariant = lerp(Color(0xFFE6E8EC), p.tint, 0.08f),
-    outlineVariant = lerp(Color(0xFFDDE0E4), p.tint, 0.06f),
+    background = lerp(Color(0xFFF4F5F7), p.tint, 0.05f * p.tintStrength),
+    surface = lerp(Color(0xFFF4F5F7), p.tint, 0.05f * p.tintStrength),
+    surfaceVariant = lerp(Color(0xFFE6E8EC), p.tint, 0.08f * p.tintStrength),
+    outlineVariant = lerp(Color(0xFFDDE0E4), p.tint, 0.06f * p.tintStrength),
 )
 
 private fun darkScheme(p: ThemePalette): ColorScheme = DarkColors.copy(
@@ -140,21 +142,21 @@ private fun darkScheme(p: ThemePalette): ColorScheme = DarkColors.copy(
     onPrimary = lerp(p.darkPrimary, Color.Black, 0.75f),
     primaryContainer = lerp(p.darkPrimary, DarkBase, 0.68f),
     onPrimaryContainer = lerp(p.darkPrimary, Color.White, 0.7f),
-    secondary = lerp(DarkColors.secondary, p.tint, 0.2f),
-    secondaryContainer = lerp(DarkColors.secondaryContainer, p.tint, 0.1f),
+    secondary = lerp(DarkColors.secondary, p.tint, 0.2f * p.tintStrength),
+    secondaryContainer = lerp(DarkColors.secondaryContainer, p.tint, 0.1f * p.tintStrength),
     tertiary = p.darkTertiary,
     onTertiary = lerp(p.darkTertiary, Color.Black, 0.75f),
     tertiaryContainer = lerp(p.darkTertiary, DarkBase, 0.7f),
     onTertiaryContainer = lerp(p.darkTertiary, Color.White, 0.7f),
-    background = lerp(DarkBase, p.tint, 0.04f),
-    surface = lerp(DarkBase, p.tint, 0.04f),
-    surfaceVariant = lerp(DarkColors.surfaceVariant, p.tint, 0.08f),
-    outlineVariant = lerp(DarkColors.outlineVariant, p.tint, 0.06f),
-    surfaceContainerLowest = lerp(DarkColors.surfaceContainerLowest, p.tint, 0.03f),
-    surfaceContainerLow = lerp(DarkColors.surfaceContainerLow, p.tint, 0.05f),
-    surfaceContainer = lerp(DarkColors.surfaceContainer, p.tint, 0.05f),
-    surfaceContainerHigh = lerp(DarkColors.surfaceContainerHigh, p.tint, 0.05f),
-    surfaceContainerHighest = lerp(DarkColors.surfaceContainerHighest, p.tint, 0.05f),
+    background = lerp(DarkBase, p.tint, 0.04f * p.tintStrength),
+    surface = lerp(DarkBase, p.tint, 0.04f * p.tintStrength),
+    surfaceVariant = lerp(DarkColors.surfaceVariant, p.tint, 0.08f * p.tintStrength),
+    outlineVariant = lerp(DarkColors.outlineVariant, p.tint, 0.06f * p.tintStrength),
+    surfaceContainerLowest = lerp(DarkColors.surfaceContainerLowest, p.tint, 0.03f * p.tintStrength),
+    surfaceContainerLow = lerp(DarkColors.surfaceContainerLow, p.tint, 0.05f * p.tintStrength),
+    surfaceContainer = lerp(DarkColors.surfaceContainer, p.tint, 0.05f * p.tintStrength),
+    surfaceContainerHigh = lerp(DarkColors.surfaceContainerHigh, p.tint, 0.05f * p.tintStrength),
+    surfaceContainerHighest = lerp(DarkColors.surfaceContainerHighest, p.tint, 0.05f * p.tintStrength),
 )
 
 /** Чёрный фон для AMOLED: экран не светится, карточки чуть светлее. */
