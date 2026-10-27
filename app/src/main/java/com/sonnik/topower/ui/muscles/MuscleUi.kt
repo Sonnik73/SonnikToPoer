@@ -5,7 +5,6 @@ package com.sonnik.topower.ui.muscles
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +49,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.ui.theme.isAppInDarkTheme
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.MuscleState
 import com.sonnik.topower.domain.MuscleStatus
@@ -208,7 +208,7 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
     val volume = remember(rows, now / VOLUME_REFRESH_MS) {
         weeklySets(rows.map { MuscleSets(it.time, Muscle.parse(it.muscles), it.sets) }, now)
     }
-    val idle = if (isSystemInDarkTheme()) Color(0xFF4A515B) else Color(0xFFC3C9D1)
+    val idle = if (isAppInDarkTheme) Color(0xFF4A515B) else Color(0xFFC3C9D1)
     val bodyColor = MaterialTheme.colorScheme.surfaceVariant
     val gapColor = MaterialTheme.colorScheme.surfaceContainerHighest
     val colorOf: (Muscle) -> Color = if (volumeMode) {
@@ -438,7 +438,7 @@ fun MuscleGuideDialog(onDismiss: () -> Unit, selected: Set<Muscle> = emptySet())
     var current by rememberSaveable { mutableStateOf<Muscle?>(null) }
     val accent = MaterialTheme.colorScheme.primary
     val tint = accent.copy(alpha = 0.35f)
-    val idle = if (isSystemInDarkTheme()) Color(0xFF4A515B) else Color(0xFFC3C9D1)
+    val idle = if (isAppInDarkTheme) Color(0xFF4A515B) else Color(0xFFC3C9D1)
     val bodyColor = MaterialTheme.colorScheme.surfaceVariant
     val gapColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val colorOf: (Muscle) -> Color = { m ->

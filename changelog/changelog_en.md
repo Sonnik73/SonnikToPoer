@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.26
+- Appearance settings: light, dark or system theme and seven color palettes — Steel, Forest, Sunset, Amethyst, Graphite and the themed Forge and Garrison; Wallpaper on Android 12+
+- Black background in the dark theme for AMOLED screens
+
 ## 1.25
 - Preparing to share data with the author's other apps
 

@@ -114,6 +114,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            AppearanceSettings()
             TrainingSettings()
             ReminderSettingsCard()
             SectionCard {

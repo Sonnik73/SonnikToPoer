@@ -394,4 +394,19 @@
     <string name="no_data_in_period">За этот период тренировок нет</string>
     <string name="ecosystem_permission_label">Данные тренировок SonnikToPower</string>
     <string name="ecosystem_permission_description">Чтение сводок тренировок SonnikToPower приложениями того же автора</string>
+    <string name="appearance_title">Оформление</string>
+    <string name="theme_mode_system">Системная</string>
+    <string name="theme_mode_light">Светлая</string>
+    <string name="theme_mode_dark">Тёмная</string>
+    <string name="theme_palette">Цветовая тема</string>
+    <string name="theme_pure_black">Чёрный фон</string>
+    <string name="theme_pure_black_hint">В тёмной теме — для AMOLED-экранов, бережёт заряд</string>
+    <string name="palette_steel">Сталь</string>
+    <string name="palette_forest">Лес</string>
+    <string name="palette_sunset">Закат</string>
+    <string name="palette_amethyst">Аметист</string>
+    <string name="palette_graphite">Графит</string>
+    <string name="palette_forge">Кузница</string>
+    <string name="palette_garrison">Гарнизон</string>
+    <string name="palette_dynamic">Обои</string>
 </resources>

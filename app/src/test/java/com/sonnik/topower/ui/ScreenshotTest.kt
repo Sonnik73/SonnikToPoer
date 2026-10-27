@@ -30,6 +30,8 @@ import com.sonnik.topower.data.Repository
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseEntity
+import com.sonnik.topower.ui.theme.ThemeMode
+import com.sonnik.topower.ui.theme.ThemePalette
 import android.os.Looper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -166,7 +168,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.25")
+        waitText("Версия 1.26")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -184,6 +186,37 @@ class ScreenshotTest {
     @Test fun inventory() = shoot("07-inventory") {
         tab("Inventory")
         waitText("Красная")
+    }
+
+    private fun theme(palette: ThemePalette, mode: ThemeMode, pureBlack: Boolean = false) {
+        val settings = ApplicationProvider.getApplicationContext<SonnikApp>().settings
+        settings.setThemePalette(palette)
+        settings.setThemeMode(mode)
+        settings.setPureBlack(pureBlack)
+        compose.waitForIdle()
+    }
+
+    @Test fun themeForgeDark() = shoot("22-theme-forge-dark") {
+        theme(ThemePalette.FORGE, ThemeMode.DARK)
+        waitText("Можно тренировать", substring = true)
+    }
+
+    @Test fun themeGarrisonLight() = shoot("23-theme-garrison-light") {
+        theme(ThemePalette.GARRISON, ThemeMode.LIGHT)
+        tab("Stats")
+        waitText("Общая статистика")
+    }
+
+    @Test fun themeAmethystBlack() = shoot("24-theme-amethyst-black") {
+        theme(ThemePalette.AMETHYST, ThemeMode.DARK, pureBlack = true)
+        tab("History")
+        waitText("Подтягивания", substring = true)
+    }
+
+    @Test fun appearanceSettings() = shoot("25-appearance") {
+        theme(ThemePalette.FOREST, ThemeMode.SYSTEM)
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Оформление")
     }
 
     @Test fun settings() = shoot("08-settings") {

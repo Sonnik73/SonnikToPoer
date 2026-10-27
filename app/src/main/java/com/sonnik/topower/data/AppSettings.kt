@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.domain.RecoveryNotifyMode
 import com.sonnik.topower.domain.ReminderSettings
+import com.sonnik.topower.ui.theme.ThemeMode
+import com.sonnik.topower.ui.theme.ThemePalette
 
 /** Настройки приложения в SharedPreferences с наблюдаемыми значениями. */
 class AppSettings(context: Context) {
@@ -20,6 +22,20 @@ class AppSettings(context: Context) {
 
     private val _plateauSessions = MutableStateFlow(prefs.getInt(KEY_PLATEAU_N, DEFAULT_PLATEAU_SESSIONS))
     val plateauSessions: StateFlow<Int> = _plateauSessions.asStateFlow()
+
+    private val _themeMode = MutableStateFlow(
+        ThemeMode.entries.firstOrNull { it.name == prefs.getString(KEY_THEME_MODE, null) } ?: ThemeMode.SYSTEM
+    )
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    private val _themePalette = MutableStateFlow(
+        ThemePalette.available.firstOrNull { it.name == prefs.getString(KEY_THEME_PALETTE, null) } ?: ThemePalette.STEEL
+    )
+    val themePalette: StateFlow<ThemePalette> = _themePalette.asStateFlow()
+
+    /** Чёрный фон в тёмной теме (AMOLED). */
+    private val _pureBlack = MutableStateFlow(prefs.getBoolean(KEY_PURE_BLACK, false))
+    val pureBlack: StateFlow<Boolean> = _pureBlack.asStateFlow()
 
     private val _reminders = MutableStateFlow(readReminders())
     val reminders: StateFlow<ReminderSettings> = _reminders.asStateFlow()
@@ -85,6 +101,21 @@ class AppSettings(context: Context) {
         _defaultRestSec.value = v
     }
 
+    fun setThemeMode(value: ThemeMode) {
+        prefs.edit().putString(KEY_THEME_MODE, value.name).apply()
+        _themeMode.value = value
+    }
+
+    fun setThemePalette(value: ThemePalette) {
+        prefs.edit().putString(KEY_THEME_PALETTE, value.name).apply()
+        _themePalette.value = value
+    }
+
+    fun setPureBlack(value: Boolean) {
+        prefs.edit().putBoolean(KEY_PURE_BLACK, value).apply()
+        _pureBlack.value = value
+    }
+
     fun setPlateauEnabled(value: Boolean) {
         prefs.edit().putBoolean(KEY_PLATEAU_ON, value).apply()
         _plateauEnabled.value = value
@@ -108,6 +139,9 @@ class AppSettings(context: Context) {
         const val MAX_IDLE_DAYS = 30
 
         private const val KEY_REST = "default_rest_sec"
+        private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_THEME_PALETTE = "theme_palette"
+        private const val KEY_PURE_BLACK = "theme_pure_black"
         private const val KEY_PLATEAU_ON = "plateau_enabled"
         private const val KEY_PLATEAU_N = "plateau_sessions"
         private const val KEY_LAST_SEEN_VERSION = "last_seen_version"

@@ -405,4 +405,19 @@
     <string name="no_data_in_period">No workouts in this period</string>
     <string name="ecosystem_permission_label">SonnikToPower workout data</string>
     <string name="ecosystem_permission_description">Read SonnikToPower workout summaries by apps from the same author</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_palette">Color theme</string>
+    <string name="theme_pure_black">Black background</string>
+    <string name="theme_pure_black_hint">In the dark theme — for AMOLED screens, saves battery</string>
+    <string name="palette_steel">Steel</string>
+    <string name="palette_forest">Forest</string>
+    <string name="palette_sunset">Sunset</string>
+    <string name="palette_amethyst">Amethyst</string>
+    <string name="palette_graphite">Graphite</string>
+    <string name="palette_forge">Forge</string>
+    <string name="palette_garrison">Garrison</string>
+    <string name="palette_dynamic">Wallpaper</string>
 </resources>
