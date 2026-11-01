@@ -172,7 +172,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.28")
+        waitText("Версия 1.29")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -234,8 +234,8 @@ class ScreenshotTest {
     @Test fun driveBackup() = shoot("27-drive-backup") {
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Таймер отдыха")
-        listWith("Таймер отдыха").performScrollToNode(hasText("Подключить Google Диск"))
-        waitText("Подключить Google Диск")
+        listWith("Таймер отдыха").performScrollToNode(hasText("Создать файл на Диске"))
+        waitText("Создать файл на Диске")
     }
 
     @Test fun updateOffer() = shoot("28-update-offer") {

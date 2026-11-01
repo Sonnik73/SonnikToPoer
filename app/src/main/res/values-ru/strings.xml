@@ -467,4 +467,24 @@
     <string name="drive_error_cancelled">Вход отменён</string>
     <string name="drive_error_io">Нет связи с Google Диском: %s</string>
     <string name="drive_no_play_services">На телефоне нет сервисов Google Play — вход в Google Диск невозможен. Экспорт копии в файл работает и без Google.</string>
+    <string name="file_backup_title">Файл на Диске — без входа в Google</string>
+    <string name="file_backup_description">Создайте файл и в окне сохранения выберите Google Диск. Приложение будет само обновлять его после тренировок, а в облако его отправит приложение Google Диска.</string>
+    <string name="file_backup_create">Создать файл на Диске</string>
+    <string name="file_backup_open">Подключить существующий файл</string>
+    <string name="file_backup_open_hint">Для нового телефона: выберите SonnikToPower.json, созданный на прежнем, — данные можно восстановить из него.</string>
+    <string name="file_backup_connected">Подключён: %s</string>
+    <string name="file_backup_last">%1$s · сохранено %2$s</string>
+    <string name="file_backup_auto_hint">Файл обновляется через минуту после изменений и раз в 6 часов.</string>
+    <string name="file_backup_save_now">Сохранить в файл сейчас</string>
+    <string name="file_backup_pick_again">Выбрать файл заново</string>
+    <string name="file_backup_detach">Отключить файл (он останется на Диске)</string>
+    <string name="file_backup_created">Файл создан. Приложение будет само сохранять в него изменения.</string>
+    <string name="file_backup_attached">Файл подключён — копия сохранится в него.</string>
+    <string name="file_backup_saved">Копия сохранена в файл</string>
+    <string name="file_backup_no_access">Нет доступа к файлу — выберите его заново</string>
+    <string name="file_backup_found_title">В файле уже есть копия</string>
+    <string name="file_backup_found_text">Копия от %1$s, тренировок: %2$d. Восстановить данные из неё (текущие заменятся) или перезаписать файл данными с этого телефона?</string>
+    <string name="file_backup_restore">Восстановить</string>
+    <string name="file_backup_overwrite">Перезаписать файл</string>
+    <string name="drive_account_title">Копии по датам — со входом в Google</string>
 </resources>

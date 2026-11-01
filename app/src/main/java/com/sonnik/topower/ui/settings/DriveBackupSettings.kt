@@ -16,6 +16,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -69,9 +71,12 @@ fun DriveBackupSettings() {
 
     SectionCard {
         Text(stringResource(R.string.drive_title), style = MaterialTheme.typography.titleMedium)
+        FileBackupSection()
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        Text(stringResource(R.string.drive_account_title), style = MaterialTheme.typography.titleSmall)
         if (!state.connected) {
             Text(stringResource(R.string.drive_description), style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = startSignIn, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.drive_connect)) }
+            OutlinedButton(onClick = startSignIn, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.drive_connect)) }
             return@SectionCard
         }
         Text(

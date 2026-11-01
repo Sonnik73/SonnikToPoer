@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.29
+- A backup file on Google Drive without Google sign-in, as in Pin: create it via the Save to… dialog and the app keeps it updated after workouts; on a new phone your data is restored from that file
+
 ## 1.28
 - Update checks, as in Pin: on start (at most every 6 hours) and with a button in Settings; the new version downloads from GitHub
 - Backups on Google Drive: automatically every 12 hours if data changed, and on demand; restore from a list of backups

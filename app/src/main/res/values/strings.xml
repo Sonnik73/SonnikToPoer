@@ -478,4 +478,24 @@
     <string name="drive_error_cancelled">Sign-in cancelled</string>
     <string name="drive_error_io">No connection to Google Drive: %s</string>
     <string name="drive_no_play_services">This phone has no Google Play services — Google Drive sign-in is impossible. Exporting a backup file works without Google.</string>
+    <string name="file_backup_title">A file on Drive — no Google sign-in</string>
+    <string name="file_backup_description">Create a file and pick Google Drive in the save dialog. The app keeps it updated after workouts, and the Google Drive app uploads it to the cloud.</string>
+    <string name="file_backup_create">Create a file on Drive</string>
+    <string name="file_backup_open">Connect an existing file</string>
+    <string name="file_backup_open_hint">For a new phone: pick the SonnikToPower.json created on the old one — your data can be restored from it.</string>
+    <string name="file_backup_connected">Connected: %s</string>
+    <string name="file_backup_last">%1$s · saved %2$s</string>
+    <string name="file_backup_auto_hint">The file is updated a minute after changes and every 6 hours.</string>
+    <string name="file_backup_save_now">Save to the file now</string>
+    <string name="file_backup_pick_again">Pick the file again</string>
+    <string name="file_backup_detach">Disconnect the file (it stays on Drive)</string>
+    <string name="file_backup_created">File created. The app will save changes to it on its own.</string>
+    <string name="file_backup_attached">File connected — the backup will be saved to it.</string>
+    <string name="file_backup_saved">Backup saved to the file</string>
+    <string name="file_backup_no_access">No access to the file — pick it again</string>
+    <string name="file_backup_found_title">The file already has a backup</string>
+    <string name="file_backup_found_text">Backup from %1$s, workouts: %2$d. Restore your data from it (current data will be replaced) or overwrite the file with data from this phone?</string>
+    <string name="file_backup_restore">Restore</string>
+    <string name="file_backup_overwrite">Overwrite the file</string>
+    <string name="drive_account_title">Dated backups — with Google sign-in</string>
 </resources>
