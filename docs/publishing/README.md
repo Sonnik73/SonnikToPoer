@@ -20,7 +20,7 @@ Category: Sports & Health
 
 Short description: Offline workout log: progress, personal records and muscle recovery.
 
-No ads, no trackers, no Google Play Services, no network access — all data stays on the device.
+No ads, no trackers. Works offline; the network is optional — update checks on GitHub and backups to Google Drive (Drive sign-in uses Google Play Services, which F-Droid flags as a non-free dependency).
 Interface in Russian and English.
 ```
 

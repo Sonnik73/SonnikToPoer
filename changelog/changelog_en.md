@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.28
+- Update checks, as in Pin: on start (at most every 6 hours) and with a button in Settings; the new version downloads from GitHub
+- Backups on Google Drive: automatically every 12 hours if data changed, and on demand; restore from a list of backups
+
 ## 1.27
 - Background transparency for the Muscle status widget: a slider in Settings from solid to fully transparent, as in Pin
 

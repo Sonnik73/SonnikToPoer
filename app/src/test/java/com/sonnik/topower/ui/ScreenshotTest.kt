@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sonnik.topower.MainActivity
 import com.sonnik.topower.SonnikApp
 import com.sonnik.topower.data.AppSettings
+import com.sonnik.topower.domain.ReleaseInfo
 import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.Repository
@@ -67,6 +68,8 @@ class ScreenshotTest {
         // Скриншоты нужны только при ручном запуске сборки (SCREENSHOTS=1), релизную сборку не задерживают.
         assumeTrue(System.getenv("SCREENSHOTS") == "1")
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
+        // Без запросов к GitHub: окна обновлений тесты показывают сами.
+        app.updates.setEnabled(false)
         // Приложение при старте само заполняет упражнения в главном потоке. Блокировать его
         // ожиданием нельзя (взаимная блокировка), поэтому готовим данные в фоне, прокручивая очередь.
         inBackground { seedDemoData(app.repository, app.settings) }
@@ -169,7 +172,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.27")
+        waitText("Версия 1.28")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -226,6 +229,26 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Прозрачность фона"))
         waitText("фон виден на 40%")
+    }
+
+    @Test fun driveBackup() = shoot("27-drive-backup") {
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Таймер отдыха")
+        listWith("Таймер отдыха").performScrollToNode(hasText("Подключить Google Диск"))
+        waitText("Подключить Google Диск")
+    }
+
+    @Test fun updateOffer() = shoot("28-update-offer") {
+        val updates = ApplicationProvider.getApplicationContext<SonnikApp>().updates
+        updates.offer.value = ReleaseInfo(
+            version = "v1.29",
+            pageUrl = "",
+            apkUrl = "",
+            notes = "- Новые темы оформления\n- Резервные копии на Google Диске",
+            publishedAt = System.currentTimeMillis(),
+            apkBytes = 7_586_445,
+        )
+        waitText("Новая версия SonnikToPower")
     }
 
     @Test fun settings() = shoot("08-settings") {

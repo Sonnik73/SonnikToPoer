@@ -55,6 +55,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sonnik.topower.R
+import com.sonnik.topower.SonnikApp
+import com.sonnik.topower.ui.updates.UpdateDialogs
+import androidx.compose.runtime.LaunchedEffect
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
 import com.sonnik.topower.timer.RestTimer
@@ -124,6 +127,10 @@ fun AppRoot() {
 
     val openSettings: () -> Unit = { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } }
     WhatsNewOnUpdate(openChangelog = { nav.navigate(Routes.CHANGELOG) })
+    // Новая версия на GitHub: проверка при входе (не чаще раза в 6 часов) и окна ручной проверки.
+    val updates = (LocalContext.current.applicationContext as SonnikApp).updates
+    LaunchedEffect(Unit) { updates.checkIfDue() }
+    UpdateDialogs(updates, openChangelog = { nav.navigate(Routes.CHANGELOG) })
 
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
         Scaffold(

@@ -1,4 +1,4 @@
-A strength training log with no internet, ads or sign-up. All data stays on your phone.
+A strength training log that works offline, with no ads or sign-up. Data stays on your phone; the network is used only if you want it — for update checks on GitHub and backups to your Google Drive.
 
 <b>Workouts</b>
 <ul>

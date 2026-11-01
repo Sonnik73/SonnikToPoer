@@ -91,6 +91,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
+    // Автокопии на Google Диск в фоне и вход в Google (только область drive.file).
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.auth)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

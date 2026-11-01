@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
+import com.sonnik.topower.SonnikApp
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ConfirmDialog
 import com.sonnik.topower.ui.common.ScreenScaffold
@@ -139,6 +140,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            DriveBackupSettings()
             SectionCard {
                 Text(stringResource(R.string.about_title), style = MaterialTheme.typography.titleMedium)
                 val version = remember {
@@ -148,6 +150,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                 OutlinedButton(onClick = openChangelog, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.whats_new))
                 }
+                UpdateSettings()
                 Text(
                     stringResource(R.string.language_hint),
                     style = MaterialTheme.typography.bodySmall,
@@ -245,5 +248,20 @@ internal fun Stepper(
         FilledTonalIconButton(onClick = onPlus, enabled = plusEnabled) {
             Text("+", style = MaterialTheme.typography.titleLarge)
         }
+    }
+}
+
+/** Обновления: автопроверка при входе и кнопка «Проверить обновления» (окна — в AppRoot). */
+@Composable
+private fun UpdateSettings() {
+    val updates = (LocalContext.current.applicationContext as SonnikApp).updates
+    val enabled by updates.enabled.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    OutlinedButton(onClick = { scope.launch { updates.checkNow() } }, modifier = Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.update_check_now))
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.update_auto), modifier = Modifier.weight(1f))
+        Switch(checked = enabled, onCheckedChange = { updates.setEnabled(it) })
     }
 }

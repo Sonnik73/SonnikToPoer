@@ -1,6 +1,8 @@
 package com.sonnik.topower
 
 import android.app.Application
+import com.sonnik.topower.backup.BackupWorker
+import com.sonnik.topower.backup.DriveBackup
 import com.sonnik.topower.data.AppDatabase
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.data.Repository
@@ -8,6 +10,7 @@ import com.sonnik.topower.ecosystem.EcosystemChanges
 import com.sonnik.topower.reminders.Reminders
 import com.sonnik.topower.reminders.muscleStatuses
 import com.sonnik.topower.timer.RestTimer
+import com.sonnik.topower.updates.UpdateChecker
 import com.sonnik.topower.widget.MuscleWidget
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -24,12 +27,16 @@ class SonnikApp : Application() {
     val settings: AppSettings by lazy { AppSettings(this) }
     val restTimer: RestTimer by lazy { RestTimer(this) }
     val reminders: Reminders by lazy { Reminders(this, settings) }
+    val updates: UpdateChecker by lazy { UpdateChecker(this) }
+    val driveBackup: DriveBackup by lazy { DriveBackup(this, repository) }
 
     override fun onCreate() {
         super.onCreate()
         appScope.launch {
             repository.seedDefaultsIfNeeded(settings, russian = Locale.getDefault().language == "ru")
         }
+        // Автокопии на Диск: расписание восстанавливается, если пользователь их включил.
+        if (driveBackup.state.value.connected) BackupWorker.schedule(this)
         // Приложения экосистемы обновляются сами после любого изменения тренировок.
         repository.observeTrainingChanges { EcosystemChanges.onDataChanged(this) }
         // Уведомления перепланируются при любом изменении тренировок или их настроек.
