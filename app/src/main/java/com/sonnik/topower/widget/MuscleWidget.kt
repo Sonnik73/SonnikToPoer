@@ -30,8 +30,7 @@ class MuscleWidget : AppWidgetProvider() {
         val result = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val app = context.applicationContext as SonnikApp
-                update(context, muscleStatuses(app.repository.dao.muscleWork()))
+                refresh(context)
             } finally {
                 result.finish()
             }
@@ -40,6 +39,12 @@ class MuscleWidget : AppWidgetProvider() {
 
     companion object {
         private const val IMAGE_HEIGHT_PX = 360
+
+        /** Перерисовывает виджеты по текущим данным (например, после смены прозрачности). */
+        suspend fun refresh(context: Context) {
+            val app = context.applicationContext as SonnikApp
+            update(context, muscleStatuses(app.repository.dao.muscleWork()))
+        }
 
         /** Перерисовывает все виджеты, если они есть на рабочем столе. */
         fun update(context: Context, statuses: Map<Muscle, MuscleStatus>, now: Long = System.currentTimeMillis()) {
@@ -51,7 +56,9 @@ class MuscleWidget : AppWidgetProvider() {
                 Configuration.UI_MODE_NIGHT_YES
             val idle = if (night) 0xFF4A515B.toInt() else 0xFFC3C9D1.toInt()
             val bodyColor = if (night) 0xFF2E333A.toInt() else 0xFFE4E7EB.toInt()
-            val gapColor = context.getColor(R.color.widget_bg) or 0xFF000000.toInt()
+            val opacity = WidgetLook.opacity(context)
+            // Промежутки между мышцами — цветом фона; если фон прозрачный, цветом силуэта, иначе они светились бы на обоях.
+            val gapColor = if (opacity >= 100) context.getColor(R.color.widget_bg) else bodyColor
             val bitmap = renderBodyBitmap(
                 colorOf = { m -> statuses[m]?.let { muscleColor(it, now, androidx.compose.ui.graphics.Color(idle)).toArgb() } ?: idle },
                 bodyColor = bodyColor,
@@ -60,6 +67,7 @@ class MuscleWidget : AppWidgetProvider() {
             )
 
             val views = RemoteViews(context.packageName, R.layout.widget_muscles).apply {
+                setInt(R.id.widget_bg, "setImageAlpha", WidgetLook.alpha(context))
                 setImageViewBitmap(R.id.widget_body, bitmap)
                 setTextViewText(R.id.widget_status, statusText(context, statuses, now))
                 setOnClickPendingIntent(R.id.widget_root, RestTimer.openAppIntent(context))

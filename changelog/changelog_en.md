@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.27
+- Background transparency for the Muscle status widget: a slider in Settings from solid to fully transparent, as in Pin
+
 ## 1.26
 - Appearance settings: light, dark or system theme and seven color palettes — Steel, Forest, Sunset, Amethyst, Graphite and the themed Forge and Garrison; Wallpaper on Android 12+
 - Black background in the dark theme for AMOLED screens

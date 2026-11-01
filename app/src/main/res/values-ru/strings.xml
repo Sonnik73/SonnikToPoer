@@ -409,4 +409,9 @@
     <string name="palette_forge">Кузница</string>
     <string name="palette_garrison">Гарнизон</string>
     <string name="palette_dynamic">Обои</string>
+    <string name="widget_section">Виджет</string>
+    <string name="widget_opacity">Прозрачность фона</string>
+    <string name="widget_opacity_solid">сплошной фон</string>
+    <string name="widget_opacity_none">без фона — только схема и текст</string>
+    <string name="widget_opacity_value">фон виден на %d%%</string>
 </resources>

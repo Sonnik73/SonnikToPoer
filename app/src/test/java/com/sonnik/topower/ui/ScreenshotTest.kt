@@ -31,6 +31,7 @@ import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseEntity
 import com.sonnik.topower.ui.theme.ThemeMode
+import com.sonnik.topower.widget.WidgetLook
 import com.sonnik.topower.ui.theme.ThemePalette
 import android.os.Looper
 import kotlinx.coroutines.CoroutineScope
@@ -168,7 +169,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.26")
+        waitText("Версия 1.27")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -217,6 +218,14 @@ class ScreenshotTest {
         theme(ThemePalette.FOREST, ThemeMode.SYSTEM)
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
         waitText("Оформление")
+    }
+
+    @Test fun widgetOpacity() = shoot("26-widget-opacity") {
+        WidgetLook.setOpacity(ApplicationProvider.getApplicationContext(), 40)
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Таймер отдыха")
+        listWith("Таймер отдыха").performScrollToNode(hasText("Прозрачность фона"))
+        waitText("фон виден на 40%")
     }
 
     @Test fun settings() = shoot("08-settings") {

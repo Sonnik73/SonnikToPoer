@@ -420,4 +420,9 @@
     <string name="palette_forge">Forge</string>
     <string name="palette_garrison">Garrison</string>
     <string name="palette_dynamic">Wallpaper</string>
+    <string name="widget_section">Widget</string>
+    <string name="widget_opacity">Background transparency</string>
+    <string name="widget_opacity_solid">solid background</string>
+    <string name="widget_opacity_none">no background — just the map and text</string>
+    <string name="widget_opacity_value">background at %d%%</string>
 </resources>

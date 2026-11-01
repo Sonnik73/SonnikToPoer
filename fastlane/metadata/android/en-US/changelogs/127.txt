@@ -1,0 +1,1 @@
+• Background transparency for the Muscle status widget: a slider in Settings from solid to fully transparent, as in Pin
