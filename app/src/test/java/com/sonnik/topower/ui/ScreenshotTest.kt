@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
@@ -105,15 +106,15 @@ class ScreenshotTest {
         compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
         waitText("Нажмите на мышцу", substring = true)
         // Название может быть и на карточке под диалогом — нажимаем последнее, в диалоге.
-        compose.onAllNodesWithText("Широчайшие").onLast().performClick()
+        compose.onAllNodesWithText("Широчайшие").onLast().performScrollTo().performClick()
     }
 
     @Test fun muscleInfo() = shoot("30-muscle-info") {
         waitText("Можно тренировать", substring = true)
         compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
         waitText("Нажмите на мышцу", substring = true)
-        compose.onAllNodesWithText("Широчайшие").onLast().performClick()
-        compose.onAllNodesWithText("Что делает эта мышца").onLast().performClick()
+        compose.onAllNodesWithText("Широчайшие").onLast().performScrollTo().performClick()
+        compose.onAllNodesWithText("Что делает эта мышца").onLast().performScrollTo().performClick()
         waitText("Самая большая мышца спины", substring = true)
         compose.onAllNodesWithText("Упражнения (2)").onLast().performClick()
         waitText("Тяга резины к поясу")
