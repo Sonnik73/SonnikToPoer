@@ -1,0 +1,1 @@
+• Reproducible build for F-Droid: the F-Droid version will carry the same signature as GitHub, so you can switch between them without reinstalling

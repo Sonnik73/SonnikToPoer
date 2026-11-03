@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.34
+- Reproducible build for F-Droid: the F-Droid version will carry the same signature as GitHub, so you can switch between them without reinstalling
+
 ## 1.33
 - F-Droid preparation: a separate build without Google services and without network access; refreshed store description and screenshots
 

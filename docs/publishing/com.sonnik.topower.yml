@@ -1,4 +1,5 @@
 # Файл для репозитория https://gitlab.com/fdroid/fdroiddata → metadata/com.sonnik.topower.yml
+# commit — полный хеш коммита, на который указывает тег версии (см. Releases → тег → коммит).
 Categories:
   - Sports & Health
 License: GPL-3.0-only
@@ -11,17 +12,21 @@ AutoName: SonnikToPower
 
 RepoType: git
 Repo: https://github.com/Sonnik73/SonnikToPoer.git
+# Воспроизводимая сборка: F-Droid сверяет свою сборку с нашим подписанным APK и публикует его с нашей подписью.
+Binaries: https://github.com/Sonnik73/SonnikToPoer/releases/download/v%v/SonnikToPower-fdroid-%v.apk
 
 Builds:
-  - versionName: '1.33'
-    versionCode: 133
-    commit: v1.33
+  - versionName: '1.34'
+    versionCode: 134
+    commit: <полный хеш коммита тега v1.34>
     subdir: app
     gradle:
       - fdroid
 
+AllowedAPKSigningKeys: 0f057701a7946499a2b97891744a4ced2ad8f6adaea70494cd5a809e5e6ef650
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: gradle.properties|appVersionCode=(\d+)|.|appVersion=(.+)
-CurrentVersion: '1.33'
-CurrentVersionCode: 133
+CurrentVersion: '1.34'
+CurrentVersionCode: 134

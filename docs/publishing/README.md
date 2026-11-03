@@ -14,7 +14,7 @@ Application name: SonnikToPower
 Package name: com.sonnik.topower
 Source code: https://github.com/Sonnik73/SonnikToPoer
 License: GPL-3.0-only
-APK: attached to GitHub Releases (https://github.com/Sonnik73/SonnikToPoer/releases), one universal APK per release
+APK: attached to GitHub Releases (https://github.com/Sonnik73/SonnikToPoer/releases): SonnikToPower-X.Y.apk (please use this one; the -fdroid- APK is for F-Droid reproducible builds)
 Metadata: Fastlane structure in the repo (fastlane/metadata/android, en-US and ru-RU)
 Category: Sports & Health
 
@@ -24,7 +24,7 @@ No ads, no trackers. Works offline; the network is optional — update checks on
 Interface in Russian and English.
 ```
 
-## F-Droid (основной каталог, F-Droid собирает сам и подписывает своим ключом)
+## F-Droid (основной каталог, F-Droid собирает сам; воспроизводимая сборка — с нашей подписью)
 
 **Две сборки из одного кода** (`productFlavors` в `app/build.gradle.kts`):
 
@@ -40,12 +40,13 @@ CI собирает обе и проверяет, что в `fdroid` нет кл
 
 **Перед подачей:** репозиторий на GitHub должен быть **публичным** — F-Droid собирает из исходников.
 
-**Экосистема.** Обмен данными с «Крепостью» идёт по разрешению с уровнем `signature`: оба приложения
-должны быть подписаны одним ключом. Версия из F-Droid подписана ключом F-Droid, поэтому с «Крепостью»
-она обменяется данными, только если и «Крепость» установлена из F-Droid.
+**Воспроизводимая сборка.** В каждом релизе лежит и `SonnikToPower-fdroid-X.Y.apk` — сборка `fdroid`,
+подписанная нашим ключом. F-Droid собирает её сам из того же коммита, сверяет побайтно и публикует
+**с нашей подписью** (`Binaries` и `AllowedAPKSigningKeys` в метаданных). Поэтому версии из F-Droid и с GitHub
+ставятся друг поверх друга, а обмен данными с «Крепостью» (разрешение уровня `signature`) работает с любой.
+CI проверяет воспроизводимость на каждой сборке (шаг «Check reproducible F-Droid build»): сборка в другой
+папке и без ключа должна совпасть по содержимому. Для этого в `fdroid` отключены профиль ART и сведения о git.
 
-Установленные из GitHub/IzzyOnDroid копии **не обновятся** версией из F-Droid (другая подпись):
-перед переходом сделайте резервную копию (Настройки → Резервная копия), удалите приложение и поставьте из F-Droid.
 
 1. Войти на https://gitlab.com, сделать форк https://gitlab.com/fdroid/fdroiddata.
 2. В форке создать ветку `com.sonnik.topower` и файл `metadata/com.sonnik.topower.yml`

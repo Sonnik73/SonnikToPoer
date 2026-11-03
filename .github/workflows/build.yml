@@ -54,6 +54,17 @@ jobs:
             echo "::error::The fdroid build contains Google Play services"; exit 1
           fi
 
+      # Воспроизводимость: сборка fdroid в другой папке и без ключа должна совпасть с основной по содержимому
+      # (подпись v2/v3 хранится вне файлов архива) — так же её проверяет F-Droid перед публикацией с нашей подписью.
+      - name: Check reproducible F-Droid build
+        run: |
+          rm -rf /tmp/rb /tmp/rb-a /tmp/rb-b
+          rsync -a --exclude build --exclude .gradle ./ /tmp/rb/
+          (cd /tmp/rb && env -u SIGNING_STORE_FILE ./gradlew --no-daemon -q assembleFdroidRelease)
+          unzip -q "$(ls app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk)" -d /tmp/rb-a
+          unzip -q "$(ls /tmp/rb/app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk)" -d /tmp/rb-b
+          diff -r /tmp/rb-a /tmp/rb-b && echo "fdroid build is reproducible"
+
       - name: Commit UI screenshots
         if: always() && github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
         run: |
@@ -71,9 +82,10 @@ jobs:
           VERSION=$(grep '^appVersion=' gradle.properties | cut -d= -f2)
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p dist
-          # В релиз идёт сборка full (её подписью обновляются установленные копии); fdroid F-Droid собирает сам.
+          # Основной APK релиза — сборка full (для GitHub и IzzyOnDroid).
           cp app/build/outputs/apk/full/release/app-full-release*.apk "dist/SonnikToPower-$VERSION.apk"
-          ls app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk
+          # Подписанная нашим ключом сборка fdroid — F-Droid сверяет с ней свою и публикует с нашей подписью.
+          cp app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk "dist/SonnikToPower-fdroid-$VERSION.apk"
           awk '/^## /{n++} n==1' changelog/changelog_ru.md > release-notes.md
 
       # APK и так прикладывается к релизу; квота хранилища артефактов не должна ронять сборку.

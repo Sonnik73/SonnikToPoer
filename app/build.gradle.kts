@@ -53,6 +53,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // Воспроизводимая сборка: в APK не попадают сведения о git-коммите сборки.
+            vcsInfo.include = false
             // Без ключа релиз собирается неподписанным — так его подписывает F-Droid.
             signingConfig = if (signingStoreFile != null) signingConfigs.getByName("sonnik") else null
         }
@@ -110,6 +112,12 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
+}
+
+// Воспроизводимая сборка для F-Droid: профиль ART (baseline.prof) может отличаться от сборки к сборке,
+// поэтому в сборке fdroid он не создаётся — F-Droid сравнивает APK побайтно и публикует его с нашей подписью.
+tasks.configureEach {
+    if (name.contains("Fdroid") && name.contains("ArtProfile")) enabled = false
 }
 
 // Зависший тест не должен держать сборку бесконечно.

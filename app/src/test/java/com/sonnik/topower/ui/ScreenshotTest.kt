@@ -197,7 +197,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.33")
+        waitText("Версия 1.34")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
