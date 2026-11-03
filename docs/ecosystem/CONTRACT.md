@@ -35,7 +35,7 @@ SonnikToPower отдаёт сводки своих тренировок друг
 
 ## Общие правила
 
-- Даты и время в epoch millis (`Long`), веса и тоннаж в килограммах (`Double`). Мышцы — имена enum `Muscle`: `CHEST, FRONT_DELTS, SIDE_DELTS, REAR_DELTS, TRAPS, LATS, LOWER_BACK, BICEPS, TRICEPS, FOREARMS, ABS, OBLIQUES, GLUTES, QUADS, HAMSTRINGS, ADDUCTORS, CALVES`. Список может пополняться, неизвестные имена нужно пропускать.
+- Даты и время в epoch millis (`Long`), веса и тоннаж в килограммах (`Double`). Мышцы — имена enum `Muscle`: `CHEST, FRONT_DELTS, SIDE_DELTS, REAR_DELTS, TRAPS, LATS, LOWER_BACK, BICEPS, TRICEPS, FOREARMS, ABS, OBLIQUES, GLUTES, QUADS, HAMSTRINGS, ADDUCTORS, CALVES, BRACHIALIS, BRACHIORADIALIS, SERRATUS, TERES_MAJOR, INFRASPINATUS, TIBIALIS` (последние шесть — с версии 1.31). Список может пополняться, неизвестные имена нужно пропускать.
 - Период задаётся query-параметрами `from` и `to` в epoch millis, обе границы включительно. Если параметр не задан, берутся последние 7 дней: `from = now − 7 суток`, `to = now`. Нечисловое значение даёт `IllegalArgumentException`. Если `from > to`, курсор будет пустым.
 - Тренировка попадает в период по времени начала (`started_at`).
 - Разминочные подходы не учитываются нигде.
@@ -145,3 +145,4 @@ resolver.registerContentObserver(Uri.parse(EcosystemContract.BASE_URI), true, ob
 | schema_version | SonnikToPower | Изменения |
 |---|---|---|
 | 1 | 1.25 | первая версия: `info`, `workouts`, `muscle_volume`, `recovery`, `body_weight`, `records` |
+| 1 | 1.31 | новые значения `Muscle`: `BRACHIALIS`, `BRACHIORADIALIS`, `SERRATUS`, `TERES_MAJOR`, `INFRASPINATUS`, `TIBIALIS` — `recovery` теперь отдаёт 23 строки; колонки не менялись |

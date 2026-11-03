@@ -84,6 +84,23 @@ class Repository(
             updated.forEach { dao.upsertExercise(it) }
             settings.exercisePack = 3
         }
+        // Набор 4 (1.31): новые мышцы у упражнений по умолчанию — если пользователь мышцы не менял, —
+        // и упражнения на турнике и на мелкие мышцы, кроме совпадающих по названию.
+        if (settings.exercisePack < 4) {
+            val all = dao.allExercises()
+            all.forEach { e ->
+                val upgrade = MUSCLE_UPGRADES_1_31.firstOrNull { (names, _, _) -> names.any { it.equals(e.name.trim(), ignoreCase = true) } }
+                if (upgrade != null && Muscle.parse(e.muscles) == upgrade.second) {
+                    dao.upsertExercise(e.copy(muscles = Muscle.format(upgrade.third), updatedAt = now()))
+                }
+            }
+            val existing = all.map { it.name.trim().lowercase() }.toSet()
+            val added = EXERCISE_PACK_4
+                .filter { it.nameRu.lowercase() !in existing && it.nameEn.lowercase() !in existing }
+                .map { it.toEntity(russian) }
+            if (added.isNotEmpty()) dao.insertExercises(added)
+            settings.exercisePack = 4
+        }
     }
 
     // ---- Инвентарь ----

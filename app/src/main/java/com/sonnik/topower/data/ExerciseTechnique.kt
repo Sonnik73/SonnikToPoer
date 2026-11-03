@@ -257,6 +257,86 @@ val TECHNIQUE: Map<String, Pair<String, String>> = mapOf(
         "• Сидя с прямыми ногами, резина зацеплена за переднюю часть стопы, концы в руках.\n• Тяните носок от себя, преодолевая сопротивление резины.\n• Медленно возвращайте стопу к себе до растяжения икры.",
         "• Sit with straight legs, band around the ball of the foot, ends in hands.\n• Point the toes away against the band.\n• Slowly pull the foot back to a calf stretch.",
     ),
+    "Подтягивания нейтральным хватом" to Pair(
+        "• Возьмитесь за параллельные ручки или узкие рукоятки ладонями друг к другу, повисните на прямых руках.\n• Тяните себя вверх, ведя локти вниз и к корпусу, пока подбородок не окажется над руками.\n• Опускайтесь медленно до прямых рук, не раскачиваясь и не бросая тело вниз.",
+        "• Grip parallel handles palms facing each other and hang on straight arms.\n• Pull up driving the elbows down and toward the body until the chin clears the hands.\n• Lower slowly to straight arms without swinging or dropping.",
+    ),
+    "Австралийские подтягивания" to Pair(
+        "• Низкая перекладина на уровне пояса, лягте под неё, хват на ширине плеч, тело прямое от пяток до головы.\n• Тяните грудь к перекладине, сводя лопатки, таз не опускайте.\n• Опускайтесь медленно до прямых рук; чем ниже перекладина и прямее ноги, тем тяжелее.",
+        "• Set a bar at waist height, hang under it with a shoulder-width grip, body straight from heels to head.\n• Pull the chest to the bar squeezing the shoulder blades, hips stay up.\n• Lower slowly to straight arms; a lower bar and straighter legs make it harder.",
+    ),
+    "Негативные подтягивания" to Pair(
+        "• Запрыгните или встаньте на опору так, чтобы подбородок оказался над перекладиной.\n• Опускайтесь как можно медленнее — 3–5 секунд — до полностью прямых рук.\n• Внизу встаньте на опору и повторите; не падайте в нижнюю точку, держите плечи собранными.",
+        "• Jump or step up so the chin is above the bar.\n• Lower as slowly as you can — 3–5 seconds — to fully straight arms.\n• Step back up at the bottom and repeat; don't drop into the hang, keep the shoulders packed.",
+    ),
+    "Лопаточные подтягивания" to Pair(
+        "• Повисните на прямых руках хватом на ширине плеч, плечи расслаблены у ушей.\n• Не сгибая локти, опустите и сведите лопатки — тело поднимется на несколько сантиметров.\n• Медленно вернитесь в вис; движение только в плечах, без рывков ногами.",
+        "• Hang on straight arms with a shoulder-width grip, shoulders relaxed toward the ears.\n• Without bending the elbows, pull the shoulder blades down and together — the body rises a few centimetres.\n• Return slowly to the hang; the movement is only in the shoulders, no leg kicks.",
+    ),
+    "Подъём коленей в висе" to Pair(
+        "• Повисните на перекладине на прямых руках, ноги вместе, корпус неподвижен.\n• Поднимайте колени к груди, подкручивая таз вперёд, — работает пресс, а не только бёдра.\n• Опускайте ноги медленно и не раскачивайтесь между повторениями.",
+        "• Hang from the bar on straight arms, legs together, torso still.\n• Raise the knees to the chest, curling the pelvis up — the abs work, not just the hips.\n• Lower the legs slowly and don't swing between reps.",
+    ),
+    "Подъём ног к перекладине" to Pair(
+        "• Повисните на прямых руках, плечи напряжены, ноги вместе.\n• Поднимайте прямые или слегка согнутые ноги, пока носки не коснутся перекладины, скругляя поясницу.\n• Опускайте под контролем; если не получается до перекладины — поднимайте как можно выше.",
+        "• Hang on straight arms, shoulders engaged, legs together.\n• Raise straight or slightly bent legs until the toes touch the bar, rounding the lower back.\n• Lower under control; if you can't reach the bar yet, raise them as high as you can.",
+    ),
+    "Косые подъёмы коленей в висе" to Pair(
+        "• Повисните на перекладине на прямых руках, корпус неподвижен.\n• Поднимайте колени по диагонали к одному плечу, скручивая таз, затем к другому.\n• Опускайте медленно в центр, не раскачиваясь; выдох — на подъёме.",
+        "• Hang from the bar on straight arms, torso still.\n• Raise the knees diagonally toward one shoulder, twisting the pelvis, then to the other side.\n• Lower slowly to the centre without swinging; breathe out on the way up.",
+    ),
+    "Молотки поперёк корпуса" to Pair(
+        "• Стоя, гантели в опущенных руках, ладони смотрят к бёдрам.\n• Сгибайте руку по диагонали к противоположному плечу, сохраняя хват молотком, локоть у корпуса.\n• Опускайте медленно до прямой руки и чередуйте руки, корпус не раскачивайте.",
+        "• Stand with dumbbells at your sides, palms facing the thighs.\n• Curl one arm diagonally toward the opposite shoulder with a hammer grip, elbow by the body.\n• Lower slowly to a straight arm and alternate, without swinging.",
+    ),
+    "Молотки с резиной" to Pair(
+        "• Наступите на резину, концы в руках, ладони смотрят друг на друга.\n• Сгибайте руки, локти прижаты к бокам и не уходят вперёд.\n• Опускайте медленно против натяжения резины до прямых рук.",
+        "• Stand on the band, ends in your hands, palms facing each other.\n• Curl the arms with the elbows pinned to your sides.\n• Lower slowly against the band to straight arms.",
+    ),
+    "Пуловер с гантелью лёжа" to Pair(
+        "• Лягте поперёк или вдоль скамьи, гантель двумя руками над грудью, локти слегка согнуты.\n• Опускайте гантель за голову по дуге до растяжения в боках и груди, таз не поднимайте.\n• Возвращайте по той же дуге над грудь, угол в локтях не меняйте.",
+        "• Lie across or along the bench, one dumbbell in both hands over the chest, elbows slightly bent.\n• Lower it behind the head in an arc until you feel a stretch in the sides and chest, hips stay down.\n• Bring it back along the same arc over the chest without changing the elbow angle.",
+    ),
+    "Отжимания с протракцией лопаток" to Pair(
+        "• Упор лёжа на прямых руках, тело — прямая линия.\n• Не сгибая локти, сведите лопатки и опуститесь грудью на несколько сантиметров.\n• Оттолкнитесь от пола, разводя лопатки и скругляя верх спины; локти всё время прямые.",
+        "• Plank on straight arms, body in a straight line.\n• Without bending the elbows, squeeze the shoulder blades together and let the chest sink a few centimetres.\n• Push the floor away, spreading the shoulder blades and rounding the upper back; elbows stay straight.",
+    ),
+    "Удары с резиной вперёд" to Pair(
+        "• Закрепите резину за спиной на уровне груди, конец в руке, локоть согнут у корпуса.\n• Выпрямляйте руку вперёд и в конце дотягивайтесь плечом, выводя лопатку вперёд.\n• Возвращайте медленно, корпус не разворачивайте; выполните все повторения одной рукой, затем другой.",
+        "• Anchor the band behind you at chest height, end in one hand, elbow bent by the body.\n• Punch forward and at the end reach with the shoulder, moving the shoulder blade forward.\n• Return slowly without twisting; do all reps on one side, then the other.",
+    ),
+    "Наружная ротация плеча с резиной" to Pair(
+        "• Закрепите резину на уровне пояса сбоку, локоть согнут под 90° и прижат к боку (можно подложить свёрнутое полотенце).\n• Разворачивайте предплечье наружу, вращая плечо, локоть остаётся у корпуса.\n• Возвращайте медленно; вес небольшой, без рывков — это мелкие мышцы-стабилизаторы.",
+        "• Anchor the band at waist height to the side, elbow bent 90° and pinned to your side (a rolled towel helps).\n• Rotate the forearm outward, turning the shoulder, elbow stays by the body.\n• Return slowly; keep the load light and smooth — these are small stabilising muscles.",
+    ),
+    "Наружная ротация с гантелью лёжа на боку" to Pair(
+        "• Лягте на бок, верхняя рука с лёгкой гантелью согнута под 90°, локоть прижат к боку.\n• Поднимайте предплечье вверх, вращая плечо, — локоть не отрывайте от корпуса.\n• Медленно опускайте к животу; берите лёгкий вес и делайте много повторений.",
+        "• Lie on your side, top arm with a light dumbbell bent 90°, elbow against your side.\n• Raise the forearm by rotating the shoulder — keep the elbow on the body.\n• Lower slowly toward the stomach; use a light weight and high reps.",
+    ),
+    "Подъёмы носков стоя у стены" to Pair(
+        "• Встаньте спиной к стене, пятки в 20–30 см от неё, спина и таз прижаты.\n• Поднимайте носки как можно выше, опираясь на пятки, колени прямые.\n• Опускайте медленно, не касаясь пола полностью; темп ровный, без рывков.",
+        "• Stand with your back to a wall, heels 20–30 cm from it, back and hips against the wall.\n• Raise the toes as high as you can, resting on the heels, knees straight.\n• Lower slowly without fully touching down; keep a steady tempo.",
+    ),
+    "Тяга носка на себя с резиной" to Pair(
+        "• Сядьте, ноги вытянуты; резину закрепите впереди и наденьте петлёй на верх стопы.\n• Тяните носок на себя против резины, пятка остаётся на месте.\n• Медленно отпускайте до вытянутого носка; выполните все повторения одной ногой, затем другой.",
+        "• Sit with legs straight; anchor the band in front and loop it over the top of the foot.\n• Pull the toes toward you against the band, heel stays put.\n• Release slowly to a pointed foot; do all reps on one leg, then the other.",
+    ),
+    "Ходьба на пятках" to Pair(
+        "• Встаньте прямо и поднимите носки, опираясь только на пятки.\n• Идите мелкими шагами, держа носки поднятыми, корпус ровный.\n• Если в голени жжёт — это нормально; остановитесь, когда носки начинают опускаться.",
+        "• Stand tall and lift the toes, balancing on the heels only.\n• Walk with small steps keeping the toes up, torso upright.\n• A burn in the shin is normal; stop when the toes start to drop.",
+    ),
+    "Пресс на перекладине с подъемом ног" to Pair(
+        "• Повисните на перекладине на прямых руках, плечи напряжены.\n• Поднимите прямые ноги до параллели с полом (уголок) или колени к груди и удерживайте.\n• Держите корпус неподвижно, не раскачивайтесь; закончите подход, когда ноги начинают опускаться.",
+        "• Hang from the bar on straight arms, shoulders engaged.\n• Raise straight legs parallel to the floor (L-sit), or knees to the chest, and hold.\n• Keep the torso still without swinging; end the set when the legs start to drop.",
+    ),
+    "Кубинское вращение" to Pair(
+        "• Стоя, лёгкие гантели, локти разведены в стороны на уровне плеч, предплечья смотрят вниз.\n• Медленно поворачивайте предплечья вверх, вращая плечи, пока гантели не окажутся над локтями; локти параллельно полу.\n• Опускайте в 2 раза медленнее, чем поднимали; вес небольшой — это мышцы-ротаторы.",
+        "• Stand with light dumbbells, elbows out to the sides at shoulder height, forearms pointing down.\n• Slowly rotate the forearms up by turning the shoulders until the dumbbells are above the elbows; elbows stay parallel to the floor.\n• Lower twice as slowly as you raised; keep it light — these are the rotator muscles.",
+    ),
+    "Бицепс на скамье Скотта" to Pair(
+        "• Сядьте у наклонной спинки или скамьи Скотта, задняя сторона плеча плотно прижата к опоре, гантель в руке.\n• Сгибайте руку, не отрывая плечо и локоть от опоры, до полного сокращения бицепса.\n• Опускайте медленно почти до прямой руки, не бросая вес вниз и не разгибая локоть рывком.",
+        "• Sit at a preacher bench or an inclined backrest, back of the upper arm pressed into the pad, dumbbell in hand.\n• Curl without lifting the upper arm or elbow off the pad until the biceps is fully contracted.\n• Lower slowly to an almost straight arm without dropping the weight or snapping the elbow.",
+    ),
 )
 
 /** Старые варианты названий упражнений → русское название в [TECHNIQUE]. */
@@ -275,4 +355,4 @@ fun techniqueFor(name: String, russian: Boolean): String? {
     return if (russian) entry.first else entry.second
 }
 
-private val DEFAULT_ALL by lazy { DEFAULT_EXERCISES + EXERCISE_PACK_2 }
+private val DEFAULT_ALL by lazy { DEFAULT_EXERCISES + EXERCISE_PACK_2 + EXERCISE_PACK_4 }

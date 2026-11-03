@@ -103,7 +103,7 @@ class MigrationTest {
         try {
             runBlocking {
                 val byId = db.dao().allExercises().associateBy { it.id }
-                assertEquals("LATS,BICEPS", byId.getValue("e1").muscles)
+                assertEquals("LATS,BICEPS,BRACHIALIS", byId.getValue("e1").muscles)
                 assertEquals("TRICEPS", byId.getValue("e2").muscles)
                 assertEquals("", byId.getValue("e3").muscles)
             }

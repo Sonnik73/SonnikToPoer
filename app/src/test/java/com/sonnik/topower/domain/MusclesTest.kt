@@ -51,9 +51,12 @@ class MusclesTest {
 
     @Test
     fun suggestions() {
-        assertEquals(setOf(Muscle.LATS, Muscle.BICEPS), suggestMuscles("Подтягивания узким обратным хватом"))
+        assertEquals(setOf(Muscle.LATS, Muscle.BICEPS, Muscle.BRACHIALIS), suggestMuscles("Подтягивания узким обратным хватом"))
         assertEquals(setOf(Muscle.LATS), suggestMuscles("Подтягивания прямым широким хватом"))
-        assertEquals(setOf(Muscle.BICEPS, Muscle.FOREARMS), suggestMuscles("Молотки с гантелями"))
+        assertEquals(setOf(Muscle.BICEPS, Muscle.BRACHIALIS, Muscle.BRACHIORADIALIS), suggestMuscles("Молотки с гантелями"))
+        assertEquals(setOf(Muscle.BRACHIORADIALIS, Muscle.BRACHIALIS, Muscle.FOREARMS), suggestMuscles("Сгибания рук обратным хватом"))
+        assertEquals(setOf(Muscle.TIBIALIS), suggestMuscles("Подъёмы носков стоя у стены"))
+        assertEquals(setOf(Muscle.CALVES), suggestMuscles("Подъёмы на носки с гантелями"))
         assertEquals(setOf(Muscle.CHEST), suggestMuscles("Разводка гантелей на скамье"))
         assertEquals(setOf(Muscle.CALVES), suggestMuscles("Прыжки на скакалке"))
     }

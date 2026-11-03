@@ -69,7 +69,7 @@ class Reminders(private val context: Context, private val settings: AppSettings)
                 if (recoveryKey(s, statuses) != key || now < key || key <= settings.notifiedRecovery) return
                 settings.notifiedRecovery = key
                 val title = if (s.mode == RecoveryNotifyMode.GROUPS) {
-                    context.getString(R.string.reminder_groups_title, names(s.groups.sortedBy { it.ordinal }))
+                    context.getString(R.string.reminder_groups_title, names(s.groups.sortedBy { Muscle.rank(it) }))
                 } else {
                     context.getString(R.string.reminder_all_title)
                 }

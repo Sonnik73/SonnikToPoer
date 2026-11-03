@@ -1,5 +1,10 @@
 # What's new in SonnikToPower
 
+## 1.31
+- New muscles on the map: brachialis, brachioradialis, serratus anterior, teres major, infraspinatus (rotator cuff) and tibialis anterior; added to default exercises unless you changed their muscles
+- A more detailed, three-dimensional muscle map: light and shade, collarbones, sternum, spine
+- 20 new exercises: on the pull-up bar and for the new muscles
+
 ## 1.30
 - A more compact rest timer: one row with ±15 s, the time and Skip, plus a thin progress line — more room for your sets
 

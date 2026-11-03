@@ -270,6 +270,12 @@
     <string name="m_hamstrings">Бицепс бедра</string>
     <string name="m_adductors">Приводящие</string>
     <string name="m_calves">Икры</string>
+    <string name="m_brachialis">Плечевая (брахиалис)</string>
+    <string name="m_brachioradialis">Плечелучевая</string>
+    <string name="m_serratus">Передняя зубчатая</string>
+    <string name="m_teres_major">Большая круглая</string>
+    <string name="m_infraspinatus">Подостная (ротаторы)</string>
+    <string name="m_tibialis">Передняя большеберцовая</string>
     <string name="muscles_title">Состояние мышц</string>
     <string name="muscles_front">Спереди</string>
     <string name="muscles_back">Сзади</string>

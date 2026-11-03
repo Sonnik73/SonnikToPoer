@@ -19,16 +19,16 @@ import org.robolectric.annotation.Config
 class ExercisePackTest {
     @Test fun everyMuscleHasAtLeastThreeExercises() {
         Muscle.entries.forEach { m ->
-            val count = EXERCISE_PACK_2.count { m in it.muscles }
+            val count = (DEFAULT_EXERCISES + EXERCISE_PACK_2 + EXERCISE_PACK_4).count { m in it.muscles }
             assertTrue("$m: $count", count >= 3)
         }
     }
 
     @Test fun namesAreUniqueAndRangesValid() {
-        val all = DEFAULT_EXERCISES + EXERCISE_PACK_2
+        val all = DEFAULT_EXERCISES + EXERCISE_PACK_2 + EXERCISE_PACK_4
         assertEquals(all.size, all.map { it.nameRu.lowercase() }.toSet().size)
         assertEquals(all.size, all.map { it.nameEn.lowercase() }.toSet().size)
-        EXERCISE_PACK_2.forEach { e ->
+        (EXERCISE_PACK_2 + EXERCISE_PACK_4).forEach { e ->
             e.reps?.let { assertTrue(e.nameRu, it.first in 1..it.last) }
             assertTrue(e.nameRu, e.trackReps == (e.reps != null))
         }
@@ -46,7 +46,7 @@ class ExercisePackTest {
             repo.seedDefaultsIfNeeded(settings, russian = true)
             repo.seedDefaultsIfNeeded(settings, russian = true)
             val names = db.dao().allExercises().map { it.name }
-            assertEquals(2 + EXERCISE_PACK_2.size - 1, names.size)
+            assertEquals(2 + EXERCISE_PACK_2.size - 1 + EXERCISE_PACK_4.size, names.size)
             assertEquals(1, names.count { it == "Жим гантелей лёжа" })
             assertEquals(12, db.dao().allExercises().first { it.name == "Махи гантелями в стороны" }.repMin)
         } finally {
@@ -83,13 +83,13 @@ class ExercisePackTest {
     }
 
     @Test fun everyDefaultExerciseHasTechnique() {
-        (DEFAULT_EXERCISES + EXERCISE_PACK_2).forEach { e ->
+        (DEFAULT_EXERCISES + EXERCISE_PACK_2 + EXERCISE_PACK_4).forEach { e ->
             val (ru, en) = TECHNIQUE[e.nameRu] ?: error("нет техники: ${e.nameRu}")
             assertTrue(e.nameRu, ru.lines().size == 3 && en.lines().size == 3)
             assertEquals(ru, e.toEntity(russian = true).technique)
             assertEquals(en, e.toEntity(russian = false).technique)
         }
-        assertEquals(TECHNIQUE.keys, (DEFAULT_EXERCISES + EXERCISE_PACK_2).map { it.nameRu }.toSet())
+        assertEquals(TECHNIQUE.keys, (DEFAULT_EXERCISES + EXERCISE_PACK_2 + EXERCISE_PACK_4).map { it.nameRu }.toSet())
     }
 
     @Test fun techniqueFoundByAnyName() {
@@ -120,7 +120,36 @@ class ExercisePackTest {
             assertEquals(TECHNIQUE.getValue("Планка").first, byName.getValue("Планка").technique)
             assertEquals("Моя техника", byName.getValue("Пресс с роликом").technique)
             assertEquals("", byName.getValue("Моё").technique)
-            assertEquals(3, settings.exercisePack)
+            assertEquals(4, settings.exercisePack)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test fun pack4UpgradesUntouchedMusclesOnly() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).allowMainThreadQueries().build()
+        try {
+            val repo = Repository(db, CoroutineScope(Dispatchers.Unconfined))
+            val settings = AppSettings(context)
+            settings.defaultsSeeded = true
+            settings.exercisePack = 3
+            db.dao().insertExercises(
+                listOf(
+                    ExerciseEntity(name = "Молотки с гантелями", muscles = "BICEPS,FOREARMS"),
+                    ExerciseEntity(name = "Подтягивания прямым широким хватом", muscles = "LATS,BICEPS"),
+                    ExerciseEntity(name = "Австралийские подтягивания", muscles = "LATS"),
+                )
+            )
+            repo.seedDefaultsIfNeeded(settings, russian = true)
+            val byName = db.dao().allExercises().groupBy { it.name }
+            assertEquals("BICEPS,BRACHIALIS,BRACHIORADIALIS", byName.getValue("Молотки с гантелями").single().muscles)
+            // Мышцы изменены пользователем — не трогаем.
+            assertEquals("LATS,BICEPS", byName.getValue("Подтягивания прямым широким хватом").single().muscles)
+            // Уже есть с таким названием — не дублируем.
+            assertEquals(1, byName.getValue("Австралийские подтягивания").size)
+            assertEquals("TIBIALIS", byName.getValue("Подъёмы носков стоя у стены").single().muscles)
+            assertEquals(4, settings.exercisePack)
         } finally {
             db.close()
         }

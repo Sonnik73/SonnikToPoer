@@ -89,7 +89,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     decimalComma = Locale.getDefault().language == "ru",
                     warmupMark = warmupMark,
                     yesMark = yesMark,
-                    muscleNames = { text -> Muscle.parse(text).sortedBy { it.ordinal }.joinToString(", ") { context.getString(muscleNameRes(it)) } },
+                    muscleNames = { text -> Muscle.parse(text).sortedBy { Muscle.rank(it) }.joinToString(", ") { context.getString(muscleNameRes(it)) } },
                 )
                 withContext(Dispatchers.IO) {
                     context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(csv.toByteArray()) }

@@ -18,6 +18,12 @@ import com.sonnik.topower.domain.Muscle.REAR_DELTS
 import com.sonnik.topower.domain.Muscle.SIDE_DELTS
 import com.sonnik.topower.domain.Muscle.TRAPS
 import com.sonnik.topower.domain.Muscle.TRICEPS
+import com.sonnik.topower.domain.Muscle.BRACHIALIS
+import com.sonnik.topower.domain.Muscle.BRACHIORADIALIS
+import com.sonnik.topower.domain.Muscle.INFRASPINATUS
+import com.sonnik.topower.domain.Muscle.SERRATUS
+import com.sonnik.topower.domain.Muscle.TERES_MAJOR
+import com.sonnik.topower.domain.Muscle.TIBIALIS
 
 /**
  * Упражнения, которые появляются при первой установке. Основные мышцы сверены с описаниями техники:
@@ -56,10 +62,10 @@ val DEFAULT_EXERCISES = listOf(
     DefaultExercise("Резинка на перекладине, на трицепс", "Band triceps pushdown from bar", setOf(TRICEPS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Резинка на трицепс из-за спины", "Overhead band triceps extension", setOf(TRICEPS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Тяга Ли Хейни", "Lee Haney row", setOf(REAR_DELTS, TRAPS, LATS)),
-    DefaultExercise("Молотки с гантелями", "Dumbbell hammer curls", setOf(BICEPS, FOREARMS), equipmentType = EquipmentType.DUMBBELL),
-    DefaultExercise("Молоточек с упором в бедро", "Concentration hammer curl", setOf(BICEPS, FOREARMS), equipmentType = EquipmentType.DUMBBELL),
-    DefaultExercise("Подтягивания узким обратным хватом", "Close-grip chin-ups", setOf(LATS, BICEPS), useBodyWeight = true),
-    DefaultExercise("Подтягивания прямым широким хватом", "Wide-grip pull-ups", setOf(LATS), useBodyWeight = true),
+    DefaultExercise("Молотки с гантелями", "Dumbbell hammer curls", setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS), equipmentType = EquipmentType.DUMBBELL),
+    DefaultExercise("Молоточек с упором в бедро", "Concentration hammer curl", setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS), equipmentType = EquipmentType.DUMBBELL),
+    DefaultExercise("Подтягивания узким обратным хватом", "Close-grip chin-ups", setOf(LATS, BICEPS, BRACHIALIS), useBodyWeight = true),
+    DefaultExercise("Подтягивания прямым широким хватом", "Wide-grip pull-ups", setOf(LATS, TERES_MAJOR), useBodyWeight = true),
     DefaultExercise("Средняя дельта с эспандером", "Band lateral raise", setOf(SIDE_DELTS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Пресс с роликом", "Ab wheel rollout", setOf(ABS), useBodyWeight = true),
     DefaultExercise("Планка", "Plank", setOf(ABS), trackReps = false, trackWeight = false, trackTime = true, useBodyWeight = true),
@@ -88,15 +94,15 @@ val EXERCISE_PACK_2 = listOf(
     DefaultExercise("Тяга гантелей к подбородку", "Dumbbell upright row", setOf(SIDE_DELTS, TRAPS), equipmentType = DB, reps = 10..15),
     DefaultExercise("Жим Арнольда", "Arnold press", setOf(SIDE_DELTS, FRONT_DELTS), equipmentType = DB, reps = 8..12),
     DefaultExercise("Разводка гантелей в наклоне", "Bent-over dumbbell reverse fly", setOf(REAR_DELTS), equipmentType = DB, reps = 12..20),
-    DefaultExercise("Растяжка резины перед грудью", "Band pull-apart", setOf(REAR_DELTS, TRAPS), equipmentType = BAND, reps = 15..25),
+    DefaultExercise("Растяжка резины перед грудью", "Band pull-apart", setOf(REAR_DELTS, TRAPS, INFRASPINATUS), equipmentType = BAND, reps = 15..25),
     DefaultExercise("Растяжка пружинного эспандера", "Spring chest expander pull", setOf(REAR_DELTS, TRAPS), equipmentType = EquipmentType.EXPANDER, reps = 10..20),
     // Трапеции
     DefaultExercise("Шраги с гантелями", "Dumbbell shrugs", setOf(TRAPS), equipmentType = DB, reps = 12..20),
     DefaultExercise("Шраги с резиной", "Band shrugs", setOf(TRAPS), equipmentType = BAND, reps = 15..25),
-    DefaultExercise("Тяга резины к лицу", "Band face pull", setOf(TRAPS, REAR_DELTS), equipmentType = BAND, reps = 15..20),
+    DefaultExercise("Тяга резины к лицу", "Band face pull", setOf(TRAPS, REAR_DELTS, INFRASPINATUS), equipmentType = BAND, reps = 15..20),
     // Спина
-    DefaultExercise("Тяга гантели одной рукой в наклоне", "One-arm dumbbell row", setOf(LATS), equipmentType = DB, reps = 8..12),
-    DefaultExercise("Подтягивания в жилете", "Weighted vest pull-ups", setOf(LATS, BICEPS), useBodyWeight = true, equipmentType = VEST, reps = 5..10),
+    DefaultExercise("Тяга гантели одной рукой в наклоне", "One-arm dumbbell row", setOf(LATS, TERES_MAJOR), equipmentType = DB, reps = 8..12),
+    DefaultExercise("Подтягивания в жилете", "Weighted vest pull-ups", setOf(LATS, BICEPS, TERES_MAJOR), useBodyWeight = true, equipmentType = VEST, reps = 5..10),
     DefaultExercise("Тяга резины к поясу сидя", "Seated band row", setOf(LATS), equipmentType = BAND, reps = 12..20),
     DefaultExercise("Супермен (лёжа на животе)", "Superman hold", setOf(LOWER_BACK, GLUTES), useBodyWeight = true, trackWeight = false, reps = 12..20),
     DefaultExercise("Наклоны с резиной (гуд-морнинг)", "Band good morning", setOf(LOWER_BACK, HAMSTRINGS), equipmentType = BAND, reps = 12..20),
@@ -109,7 +115,7 @@ val EXERCISE_PACK_2 = listOf(
     DefaultExercise("Разгибание руки с гантелью в наклоне", "Dumbbell triceps kickback", setOf(TRICEPS), equipmentType = DB, reps = 12..15),
     DefaultExercise("Обратные отжимания от скамьи", "Bench dips", setOf(TRICEPS), useBodyWeight = true, equipmentType = VEST, reps = 10..20),
     DefaultExercise("Сгибания запястий с гантелями", "Dumbbell wrist curl", setOf(FOREARMS), equipmentType = DB, reps = 15..25),
-    DefaultExercise("Сгибания рук обратным хватом", "Reverse-grip dumbbell curl", setOf(FOREARMS, BICEPS), equipmentType = DB, reps = 10..15),
+    DefaultExercise("Сгибания рук обратным хватом", "Reverse-grip dumbbell curl", setOf(BRACHIORADIALIS, BRACHIALIS, FOREARMS), equipmentType = DB, reps = 10..15),
     DefaultExercise("Вис на перекладине", "Dead hang", setOf(FOREARMS), trackReps = false, trackWeight = false, trackTime = true, useBodyWeight = true),
     // Пресс
     DefaultExercise("Подъёмы ног в висе", "Hanging leg raise", setOf(ABS), useBodyWeight = true, trackWeight = false, reps = 8..15),
@@ -133,6 +139,53 @@ val EXERCISE_PACK_2 = listOf(
     DefaultExercise("Подъёмы на носки с гантелями", "Dumbbell calf raise", setOf(CALVES), equipmentType = DB, reps = 15..25),
     DefaultExercise("Подъёмы на носок на одной ноге в жилете", "Single-leg vest calf raise", setOf(CALVES), useBodyWeight = true, equipmentType = VEST, reps = 12..20),
     DefaultExercise("Разгибание стопы с резиной сидя", "Seated band calf press", setOf(CALVES), equipmentType = BAND, reps = 15..25),
+)
+
+/**
+ * Набор 4 (1.31): упражнения на турнике и на новые мышцы помельче — брахиалис, плечелучевую,
+ * переднюю зубчатую, большую круглую, подостную и переднюю большеберцовую. Как и набор 2,
+ * добавляется к существующим, совпадающие по названию пропускаются.
+ */
+val EXERCISE_PACK_4 = listOf(
+    // Турник
+    DefaultExercise("Подтягивания нейтральным хватом", "Neutral-grip pull-ups", setOf(LATS, BRACHIALIS, BICEPS), useBodyWeight = true, reps = 5..10),
+    DefaultExercise("Австралийские подтягивания", "Inverted row", setOf(LATS, REAR_DELTS, BICEPS), useBodyWeight = true, reps = 8..15),
+    DefaultExercise("Негативные подтягивания", "Negative pull-ups", setOf(LATS, BICEPS, TERES_MAJOR), useBodyWeight = true, reps = 3..6),
+    DefaultExercise("Лопаточные подтягивания", "Scapular pull-ups", setOf(LATS, TRAPS, TERES_MAJOR), useBodyWeight = true, trackWeight = false, reps = 8..15),
+    DefaultExercise("Подъём коленей в висе", "Hanging knee raise", setOf(ABS), useBodyWeight = true, trackWeight = false, reps = 10..20),
+    DefaultExercise("Подъём ног к перекладине", "Toes to bar", setOf(ABS, SERRATUS), useBodyWeight = true, trackWeight = false, reps = 5..12),
+    DefaultExercise("Косые подъёмы коленей в висе", "Hanging oblique knee raise", setOf(OBLIQUES, ABS), useBodyWeight = true, trackWeight = false, reps = 8..15),
+    DefaultExercise("Пресс на перекладине с подъемом ног", "Hanging L-sit", setOf(ABS, FOREARMS, QUADS), trackReps = false, trackWeight = false, trackTime = true, useBodyWeight = true),
+    // Из упражнений автора
+    DefaultExercise("Кубинское вращение", "Cuban rotation", setOf(INFRASPINATUS, REAR_DELTS), equipmentType = DB, reps = 10..15),
+    DefaultExercise("Бицепс на скамье Скотта", "Dumbbell preacher curl", setOf(BICEPS, BRACHIALIS), equipmentType = DB, reps = 8..12),
+    // Брахиалис и плечелучевая
+    DefaultExercise("Молотки поперёк корпуса", "Cross-body hammer curl", setOf(BRACHIALIS, BRACHIORADIALIS, BICEPS), equipmentType = DB, reps = 8..12),
+    DefaultExercise("Молотки с резиной", "Band hammer curl", setOf(BRACHIALIS, BRACHIORADIALIS, BICEPS), equipmentType = BAND, reps = 12..20),
+    // Передняя зубчатая
+    DefaultExercise("Пуловер с гантелью лёжа", "Dumbbell pullover", setOf(LATS, SERRATUS, CHEST), equipmentType = DB, reps = 10..15),
+    DefaultExercise("Отжимания с протракцией лопаток", "Scapular push-ups", setOf(SERRATUS), useBodyWeight = true, trackWeight = false, reps = 10..20),
+    DefaultExercise("Удары с резиной вперёд", "Band serratus punch", setOf(SERRATUS, FRONT_DELTS), equipmentType = BAND, reps = 12..20),
+    // Подостная (ротаторы)
+    DefaultExercise("Наружная ротация плеча с резиной", "Band external rotation", setOf(INFRASPINATUS, REAR_DELTS), equipmentType = BAND, reps = 12..20),
+    DefaultExercise("Наружная ротация с гантелью лёжа на боку", "Side-lying dumbbell external rotation", setOf(INFRASPINATUS), equipmentType = DB, reps = 12..20),
+    // Передняя большеберцовая
+    DefaultExercise("Подъёмы носков стоя у стены", "Wall tibialis raise", setOf(TIBIALIS), useBodyWeight = true, trackWeight = false, reps = 15..30),
+    DefaultExercise("Тяга носка на себя с резиной", "Band dorsiflexion", setOf(TIBIALIS), equipmentType = BAND, reps = 15..25),
+    DefaultExercise("Ходьба на пятках", "Heel walk", setOf(TIBIALIS, CALVES), trackReps = false, trackWeight = false, trackTime = true),
+)
+
+/** Прежние мышцы упражнений по умолчанию → новые: обновляются, только если пользователь их не менял. */
+val MUSCLE_UPGRADES_1_31: List<Triple<List<String>, Set<Muscle>, Set<Muscle>>> = listOf(
+    Triple(listOf("Молотки с гантелями", "Dumbbell hammer curls"), setOf(BICEPS, FOREARMS), setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS)),
+    Triple(listOf("Молоточек с упором в бедро", "Concentration hammer curl"), setOf(BICEPS, FOREARMS), setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS)),
+    Triple(listOf("Подтягивания узким обратным хватом", "Close-grip chin-ups"), setOf(LATS, BICEPS), setOf(LATS, BICEPS, BRACHIALIS)),
+    Triple(listOf("Подтягивания прямым широким хватом", "Wide-grip pull-ups"), setOf(LATS), setOf(LATS, TERES_MAJOR)),
+    Triple(listOf("Тяга гантели одной рукой в наклоне", "One-arm dumbbell row"), setOf(LATS), setOf(LATS, TERES_MAJOR)),
+    Triple(listOf("Подтягивания в жилете", "Weighted vest pull-ups"), setOf(LATS, BICEPS), setOf(LATS, BICEPS, TERES_MAJOR)),
+    Triple(listOf("Растяжка резины перед грудью", "Band pull-apart"), setOf(REAR_DELTS, TRAPS), setOf(REAR_DELTS, TRAPS, INFRASPINATUS)),
+    Triple(listOf("Тяга резины к лицу", "Band face pull"), setOf(TRAPS, REAR_DELTS), setOf(TRAPS, REAR_DELTS, INFRASPINATUS)),
+    Triple(listOf("Сгибания рук обратным хватом", "Reverse-grip dumbbell curl"), setOf(FOREARMS, BICEPS), setOf(BRACHIORADIALIS, BRACHIALIS, FOREARMS)),
 )
 
 /**

@@ -285,6 +285,12 @@
     <string name="m_hamstrings">Hamstrings</string>
     <string name="m_adductors">Adductors</string>
     <string name="m_calves">Calves</string>
+    <string name="m_brachialis">Brachialis</string>
+    <string name="m_brachioradialis">Brachioradialis</string>
+    <string name="m_serratus">Serratus anterior</string>
+    <string name="m_teres_major">Teres major</string>
+    <string name="m_infraspinatus">Infraspinatus (rotator cuff)</string>
+    <string name="m_tibialis">Tibialis anterior</string>
     <string name="muscles_title">Muscle status</string>
     <string name="muscles_front">Front</string>
     <string name="muscles_back">Back</string>

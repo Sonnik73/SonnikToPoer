@@ -1,9 +1,15 @@
 package com.sonnik.topower.domain
 
-/** Мышечные группы на схеме тела. */
+/**
+ * Мышечные группы на схеме тела. Новые мышцы добавляются только в конец: порядковые номера
+ * и имена хранятся в базе, копиях и отдаются приложениям экосистемы.
+ */
 enum class Muscle {
     CHEST, FRONT_DELTS, SIDE_DELTS, REAR_DELTS, TRAPS, LATS, LOWER_BACK,
-    BICEPS, TRICEPS, FOREARMS, ABS, OBLIQUES, GLUTES, QUADS, HAMSTRINGS, ADDUCTORS, CALVES;
+    BICEPS, TRICEPS, FOREARMS, ABS, OBLIQUES, GLUTES, QUADS, HAMSTRINGS, ADDUCTORS, CALVES,
+
+    // 1.31: мышцы помельче.
+    BRACHIALIS, BRACHIORADIALIS, SERRATUS, TERES_MAJOR, INFRASPINATUS, TIBIALIS;
 
     companion object {
         /** «CHEST,TRICEPS» → набор мышц; неизвестные значения пропускаются. */
@@ -11,6 +17,16 @@ enum class Muscle {
             text.split(',').mapNotNull { part -> entries.firstOrNull { it.name == part.trim() } }.toSet()
 
         fun format(muscles: Collection<Muscle>): String = muscles.sortedBy { it.ordinal }.joinToString(",") { it.name }
+
+        /** Порядок в списках: сверху вниз по телу, мелкие мышцы рядом со своей группой. */
+        val displayOrder: List<Muscle> = listOf(
+            CHEST, SERRATUS, FRONT_DELTS, SIDE_DELTS, REAR_DELTS, INFRASPINATUS, TERES_MAJOR, TRAPS, LATS, LOWER_BACK,
+            BICEPS, BRACHIALIS, TRICEPS, BRACHIORADIALIS, FOREARMS, ABS, OBLIQUES,
+            GLUTES, QUADS, HAMSTRINGS, ADDUCTORS, CALVES, TIBIALIS,
+        )
+
+        /** Позиция в [displayOrder] — для сортировки списков мышц. */
+        fun rank(muscle: Muscle): Int = displayOrder.indexOf(muscle)
     }
 }
 
@@ -89,9 +105,14 @@ private val keywordMuscles: List<Pair<List<String>, Set<Muscle>>> = listOf(
     listOf("жим леж", "жим лёж", "bench") to setOf(Muscle.CHEST, Muscle.TRICEPS, Muscle.FRONT_DELTS),
     listOf("брусь", "dip") to setOf(Muscle.CHEST, Muscle.TRICEPS),
     listOf("трицепс", "tricep", "французск") to setOf(Muscle.TRICEPS),
-    listOf("молот", "hammer") to setOf(Muscle.BICEPS, Muscle.FOREARMS),
+    listOf("молот", "hammer") to setOf(Muscle.BICEPS, Muscle.BRACHIALIS, Muscle.BRACHIORADIALIS),
+    listOf("сгибания рук обратным", "reverse curl", "reverse-grip curl") to setOf(Muscle.BRACHIORADIALIS, Muscle.BRACHIALIS, Muscle.FOREARMS),
+    listOf("ротаци", "rotation") to setOf(Muscle.INFRASPINATUS, Muscle.REAR_DELTS),
+    listOf("пуловер", "pullover") to setOf(Muscle.LATS, Muscle.SERRATUS, Muscle.CHEST),
+    listOf("протракц", "protraction", "serratus", "зубчат") to setOf(Muscle.SERRATUS),
+    listOf("тибиал", "tibialis", "подъёмы носков", "носка на себя", "toe raise", "на пятках", "heel walk") to setOf(Muscle.TIBIALIS),
     listOf("бицепс", "bicep", "сгибани", "curl") to setOf(Muscle.BICEPS),
-    listOf("обратным хват", "chin") to setOf(Muscle.LATS, Muscle.BICEPS),
+    listOf("обратным хват", "chin") to setOf(Muscle.LATS, Muscle.BICEPS, Muscle.BRACHIALIS),
     listOf("подтягиван", "pull-up", "pullup", "тяга верхнего", "pulldown") to setOf(Muscle.LATS),
     listOf("ли хейни", "шраг", "shrug") to setOf(Muscle.TRAPS, Muscle.LATS, Muscle.REAR_DELTS),
     listOf("тяга", "row") to setOf(Muscle.LATS),

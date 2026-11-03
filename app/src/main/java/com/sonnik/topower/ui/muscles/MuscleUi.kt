@@ -87,6 +87,12 @@ fun muscleNameRes(muscle: Muscle): Int =
         Muscle.HAMSTRINGS -> R.string.m_hamstrings
         Muscle.ADDUCTORS -> R.string.m_adductors
         Muscle.CALVES -> R.string.m_calves
+        Muscle.BRACHIALIS -> R.string.m_brachialis
+        Muscle.BRACHIORADIALIS -> R.string.m_brachioradialis
+        Muscle.SERRATUS -> R.string.m_serratus
+        Muscle.TERES_MAJOR -> R.string.m_teres_major
+        Muscle.INFRASPINATUS -> R.string.m_infraspinatus
+        Muscle.TIBIALIS -> R.string.m_tibialis
     }
 
 @Composable
@@ -94,7 +100,7 @@ fun muscleName(muscle: Muscle): String = stringResource(muscleNameRes(muscle))
 
 @Composable
 fun muscleNames(muscles: Collection<Muscle>): String =
-    muscles.sortedBy { it.ordinal }.map { muscleName(it) }.joinToString(", ")
+    muscles.sortedBy { Muscle.rank(it) }.map { muscleName(it) }.joinToString(", ")
 
 private val Red = Color(0xFFE53935)
 private val Orange = Color(0xFFFB8C00)
@@ -382,7 +388,7 @@ private fun VolumeDetails(volume: Map<Muscle, Int>) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    val none = volume.filterValues { it == 0 }.keys.sortedBy { it.ordinal }
+    val none = volume.filterValues { it == 0 }.keys.sortedBy { Muscle.rank(it) }
     val low = volume.filterValues { it in 1..9 }.keys.sortedBy { volume[it] }
     if (low.isNotEmpty()) {
         Text(stringResource(R.string.volume_low, muscleNames(low)), style = MaterialTheme.typography.bodyMedium)
@@ -483,7 +489,7 @@ fun MuscleGuideDialog(onDismiss: () -> Unit, selected: Set<Muscle> = emptySet())
                     modifier = Modifier.fillMaxWidth(),
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Muscle.entries.forEach { m ->
+                    Muscle.displayOrder.forEach { m ->
                         FilterChip(
                             selected = m == current,
                             onClick = { current = if (m == current) null else m },
@@ -501,7 +507,7 @@ fun MuscleGuideDialog(onDismiss: () -> Unit, selected: Set<Muscle> = emptySet())
 @Composable
 fun MusclePicker(selected: Set<Muscle>, onChange: (Set<Muscle>) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Muscle.entries.forEach { m ->
+        Muscle.displayOrder.forEach { m ->
             FilterChip(
                 selected = m in selected,
                 onClick = { onChange(if (m in selected) selected - m else selected + m) },

@@ -5,6 +5,7 @@ import android.graphics.LinearGradient
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PointF
+import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Region
 import android.graphics.Shader
@@ -163,12 +164,22 @@ private fun fanFibers(outline: List<Pt>, focus: Pt): APath {
     }
 }
 
-/** Часть мышцы: контур, волокна и градиент объёма. */
+/**
+ * Часть мышцы: контур, волокна и объём. Свет падает сверху слева: блик смещён к нему,
+ * к дальнему краю мышца темнеет, а по краю внутри идёт мягкая тень — мышца выглядит выпуклой.
+ */
 private class MuscleShape(val path: APath, val fibers: APath, val bounds: RectF) {
-    val shade: Shader = LinearGradient(
-        0f, bounds.top, 0f, bounds.bottom,
-        intArrayOf(Color.White.copy(alpha = 0.16f).toArgb(), 0, Color.Black.copy(alpha = 0.12f).toArgb()),
-        null, Shader.TileMode.CLAMP,
+    val shade: Shader = RadialGradient(
+        bounds.left + bounds.width() * 0.38f,
+        bounds.top + bounds.height() * 0.3f,
+        max(bounds.width(), bounds.height()) * 0.85f,
+        intArrayOf(
+            Color.White.copy(alpha = 0.26f).toArgb(),
+            Color.White.copy(alpha = 0.04f).toArgb(),
+            Color.Black.copy(alpha = 0.18f).toArgb(),
+        ),
+        floatArrayOf(0f, 0.45f, 1f),
+        Shader.TileMode.CLAMP,
     )
 }
 
@@ -185,6 +196,8 @@ private class Figure(
     val tendons: List<APath>,
     val tendonLines: List<APath>,
     val veins: List<APath>,
+    /** Тонкие тёмные линии поверх мышц: белая линия живота, ключицы, складки. */
+    val creases: List<APath>,
 )
 
 private class FigureBuilder {
@@ -192,6 +205,7 @@ private class FigureBuilder {
     val tendons = mutableListOf<APath>()
     val tendonLines = mutableListOf<APath>()
     val veins = mutableListOf<APath>()
+    val creases = mutableListOf<APath>()
 
     /** Левая часть и её зеркальное отражение (волокна и точка прикрепления тоже отражаются). */
     fun sym(muscle: Muscle, fiberDeg: Float, points: List<Pt>, fan: Pt? = null) {
@@ -219,10 +233,15 @@ private class FigureBuilder {
         veins += APath().apply { openSpline(points) }
         veins += APath().apply { openSpline(mirror(points)) }
     }
+
+    fun crease(points: List<Pt>, symmetric: Boolean = true) {
+        creases += APath().apply { openSpline(points) }
+        if (symmetric) creases += APath().apply { openSpline(mirror(points)) }
+    }
 }
 
 private fun figure(block: FigureBuilder.() -> Unit): Figure =
-    FigureBuilder().apply(block).let { Figure(it.muscles, it.tendons, it.tendonLines, it.veins) }
+    FigureBuilder().apply(block).let { Figure(it.muscles, it.tendons, it.tendonLines, it.veins, it.creases) }
 
 /**
  * Части силуэта по отдельности: зеркальные части обходятся в обратную сторону, и в одном пути
@@ -251,9 +270,14 @@ private fun frontFigure() = figure {
     sym(Muscle.SIDE_DELTS, 100f, listOf(pt(30, 30.5), pt(25.8, 32.2), pt(23.4, 37.5), pt(23.8, 44), pt(26.5, 43), pt(27.3, 36.5)), fan = pt(24.6, 43.6))
     sym(Muscle.FRONT_DELTS, 105f, listOf(pt(34, 30), pt(29.5, 31), pt(27.6, 35.5), pt(27.8, 41.5), pt(30, 45), pt(33, 41), pt(34.5, 35.5)), fan = pt(29.6, 44.5))
     sym(Muscle.CHEST, 20f, listOf(pt(49.2, 32), pt(44, 30.8), pt(38.5, 31.2), pt(34.8, 34.5), pt(33.6, 40), pt(35.5, 45.5), pt(40, 49), pt(45, 50), pt(49.2, 49)), fan = pt(33.8, 38.5))
-    sym(Muscle.BICEPS, 95f, listOf(pt(30, 45.5), pt(26, 46.5), pt(23.2, 51), pt(22.8, 57), pt(24.5, 62), pt(27.8, 61), pt(29.6, 55), pt(30.6, 49)))
+    sym(Muscle.BICEPS, 95f, listOf(pt(30, 45.5), pt(26.6, 46.4), pt(24.8, 50.5), pt(24.8, 56), pt(25.9, 60.8), pt(28.2, 60.4), pt(29.8, 55), pt(30.6, 49)))
+    sym(Muscle.BRACHIALIS, 98f, listOf(pt(24.2, 49), pt(22.8, 52.5), pt(22.5, 57.5), pt(23.5, 62.2), pt(25.2, 61.8), pt(24.2, 57), pt(24.1, 52.5)))
     sym(Muscle.FOREARMS, 100f, listOf(pt(26.5, 63.5), pt(22, 64.8), pt(19.3, 72), pt(17.6, 82), pt(17.2, 90), pt(20, 90.8), pt(22.4, 82), pt(25, 73), pt(27, 67.5)))
+    sym(Muscle.BRACHIORADIALIS, 105f, listOf(pt(24.2, 62.8), pt(21.4, 64.4), pt(19.4, 69.5), pt(18.6, 76.5), pt(19.8, 78.6), pt(21.8, 72.8), pt(24, 67.2), pt(25.4, 64.6)))
     sym(Muscle.OBLIQUES, 55f, listOf(pt(42.8, 52.5), pt(38.5, 51), pt(35.5, 54.5), pt(35.2, 64), pt(36, 76), pt(36.5, 86), pt(39, 92), pt(42.8, 93.5), pt(43.3, 80), pt(43.2, 64)))
+    sym(Muscle.SERRATUS, 160f, listOf(pt(37.4, 45.2), pt(34.8, 45.8), pt(33.5, 47.6), pt(34.6, 48.6), pt(37.6, 47.8)))
+    sym(Muscle.SERRATUS, 160f, listOf(pt(37.8, 48.8), pt(34.8, 49.4), pt(33.7, 51.4), pt(35, 52.2), pt(38.1, 51.3)))
+    sym(Muscle.SERRATUS, 160f, listOf(pt(38.2, 52.4), pt(35.2, 53), pt(34.4, 55), pt(35.8, 55.7), pt(38.5, 54.7)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 51.5), pt(45.2, 51.6), pt(44, 54), pt(44, 58), pt(45, 59.6), pt(49.3, 59.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 61.2), pt(45, 61.2), pt(43.9, 63.5), pt(43.9, 68), pt(45, 69.6), pt(49.3, 69.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 71.2), pt(45, 71.2), pt(43.9, 73.5), pt(43.9, 78), pt(45, 79.6), pt(49.3, 79.6)))
@@ -262,7 +286,8 @@ private fun frontFigure() = figure {
     sym(Muscle.QUADS, 90f, listOf(pt(42.5, 104), pt(40.6, 113), pt(40.8, 127), pt(42, 139), pt(44.5, 143), pt(46.4, 130), pt(46.6, 115), pt(45.5, 107)))
     sym(Muscle.QUADS, 70f, listOf(pt(46.8, 128), pt(44.8, 135), pt(43.8, 142), pt(45, 148.5), pt(48, 146.5), pt(48.8, 137)))
     sym(Muscle.ADDUCTORS, 70f, listOf(pt(49.4, 104.5), pt(47.2, 108), pt(46.8, 116), pt(47, 125), pt(48.6, 123), pt(49.7, 113)))
-    sym(Muscle.CALVES, 95f, listOf(pt(37.5, 152), pt(35.6, 160), pt(36.2, 170), pt(38.6, 177), pt(40.6, 168), pt(40.2, 157)))
+    sym(Muscle.CALVES, 95f, listOf(pt(37.4, 152.5), pt(35.8, 160), pt(36.3, 169.5), pt(38, 175), pt(39.3, 167), pt(39, 157)))
+    sym(Muscle.TIBIALIS, 92f, listOf(pt(41, 151.8), pt(39.6, 156.5), pt(39.7, 166), pt(40.7, 177), pt(42, 181), pt(42.6, 169), pt(42.5, 158), pt(42.2, 153)))
     sym(Muscle.CALVES, 85f, listOf(pt(45.3, 152), pt(44, 159), pt(44.2, 169), pt(45.4, 174), pt(46.6, 164), pt(46.5, 156)))
     tendon(listOf(pt(42, 148.6), pt(45.2, 148.6), pt(45.6, 151.6), pt(43.6, 153.6), pt(41.6, 151.6)))
     tendon(listOf(pt(25, 61.2), pt(26.6, 61.6), pt(25.6, 64.4), pt(24.4, 63.8)))
@@ -271,6 +296,11 @@ private fun frontFigure() = figure {
     vein(listOf(pt(23.6, 65), pt(21.8, 71), pt(20.2, 78), pt(19, 85), pt(18.4, 89.5)))
     vein(listOf(pt(21.8, 71), pt(23.6, 76), pt(23, 82), pt(21.6, 88)))
     vein(listOf(pt(43.2, 84), pt(43.6, 89), pt(44.8, 94), pt(46.6, 100)))
+    // Ключицы, грудина, пупок и складка над коленом — мелкие детали поверх.
+    crease(listOf(pt(46.6, 27.6), pt(42, 28.4), pt(37.6, 29.8)))
+    crease(listOf(pt(50, 33), pt(50, 47.5)), symmetric = false)
+    crease(listOf(pt(49.6, 87.2), pt(50, 88.2), pt(50.4, 87.2)), symmetric = false)
+    crease(listOf(pt(41.5, 145.6), pt(43.8, 146.6), pt(46, 145.8)))
 }
 
 private fun backFigure() = figure {
@@ -279,7 +309,9 @@ private fun backFigure() = figure {
     sym(Muscle.REAR_DELTS, 70f, listOf(pt(34.5, 31), pt(29.8, 32), pt(27.8, 36.5), pt(28.4, 41.8), pt(31.5, 41), pt(34.6, 36.5)), fan = pt(28.8, 41.5))
     sym(Muscle.TRICEPS, 92f, listOf(pt(30.6, 43), pt(26, 44), pt(23, 49.5), pt(22.6, 56), pt(24.4, 62), pt(28, 61), pt(29.6, 55), pt(30.8, 48)))
     sym(Muscle.FOREARMS, 100f, listOf(pt(26.5, 63.5), pt(22, 64.8), pt(19.3, 72), pt(17.6, 82), pt(17.2, 90), pt(20, 90.8), pt(22.4, 82), pt(25, 73), pt(27, 67.5)))
-    sym(Muscle.LATS, 60f, listOf(pt(46.6, 41), pt(41, 36.5), pt(35, 35.2), pt(32, 40.5), pt(32.5, 50), pt(34.5, 60), pt(37.5, 70), pt(41.2, 79), pt(44.8, 85), pt(45, 72), pt(45.6, 58), pt(46.4, 48)), fan = pt(33.6, 37.5))
+    sym(Muscle.INFRASPINATUS, 20f, listOf(pt(39.4, 33.8), pt(36, 33.6), pt(34, 35.6), pt(34.6, 38.8), pt(37.6, 40.6), pt(41.8, 41.4), pt(45.2, 41.8), pt(43.2, 38.2)), fan = pt(34.6, 35.4))
+    sym(Muscle.TERES_MAJOR, 160f, listOf(pt(34.4, 39.8), pt(31.8, 41.2), pt(31.2, 44), pt(32.8, 45.4), pt(35.8, 43.8), pt(37, 41.6)))
+    sym(Muscle.LATS, 60f, listOf(pt(46.6, 43), pt(43.6, 42.2), pt(39.4, 42.6), pt(36.8, 44.2), pt(33.6, 46.6), pt(32.8, 51), pt(34.5, 60), pt(37.5, 70), pt(41.2, 79), pt(44.8, 85), pt(45, 72), pt(45.6, 58), pt(46.4, 49)), fan = pt(33.8, 46))
     sym(Muscle.LOWER_BACK, 90f, listOf(pt(49.3, 58), pt(47, 60), pt(46.3, 70), pt(46.1, 82), pt(46.6, 92), pt(49.3, 96)))
     sym(Muscle.GLUTES, 30f, listOf(pt(49.2, 97.5), pt(43.5, 96.5), pt(38, 98.5), pt(34.8, 104), pt(35, 112), pt(38.5, 118), pt(44, 120.5), pt(49.2, 118.5)), fan = pt(35.4, 110))
     sym(Muscle.HAMSTRINGS, 95f, listOf(pt(37, 121.5), pt(34.5, 129), pt(34.8, 139), pt(37.5, 147), pt(41, 148.5), pt(42, 136), pt(41.5, 126), pt(40, 121)))
@@ -293,6 +325,9 @@ private fun backFigure() = figure {
     vein(listOf(pt(39, 156), pt(38.3, 162), pt(38.6, 168), pt(39.6, 173)))
     vein(listOf(pt(44.6, 157), pt(45, 163), pt(44.6, 169)))
     vein(listOf(pt(20.4, 74), pt(19.4, 81), pt(18.6, 88)))
+    // Позвоночник и подколенная складка.
+    crease(listOf(pt(50, 58), pt(50, 95)), symmetric = false)
+    crease(listOf(pt(38.4, 149), pt(42, 149.8), pt(45.6, 149)))
 }
 
 private val SILHOUETTE by lazy { silhouette() }
@@ -325,7 +360,11 @@ private const val SELECTED_WIDTH = 1.2f
 private const val TENDON_LINE_WIDTH = 0.9f
 private const val VEIN_WIDTH = 0.55f
 private const val VEIN_HIGHLIGHT_WIDTH = 0.2f
+private const val RIM_WIDTH = 1.5f
+private const val CREASE_WIDTH = 0.35f
 private val FiberColor = Color.Black.copy(alpha = 0.1f).toArgb()
+private val RimColor = Color.Black.copy(alpha = 0.13f).toArgb()
+private val CreaseColor = Color.Black.copy(alpha = 0.16f).toArgb()
 private val VeinColor = Color(0xFF3C2F5A).copy(alpha = 0.42f).toArgb()
 private val VeinHighlight = Color.White.copy(alpha = 0.35f).toArgb()
 
@@ -351,8 +390,15 @@ private fun Canvas.drawFigure(
     // Контур: обводка под заливкой видна только снаружи силуэта.
     val outline = strokePaint(lerp(Color(bodyColor), Color.Black, 0.1f).toArgb(), OUTLINE_WIDTH)
     SILHOUETTE.forEach { drawPath(it, outline) }
-    fill.color = bodyColor
+    // Тело чуть светлее сверху, будто освещено сверху.
+    fill.shader = LinearGradient(
+        0f, 0f, 0f, 200f,
+        lerp(Color(bodyColor), Color.White, 0.12f).toArgb(),
+        lerp(Color(bodyColor), Color.Black, 0.06f).toArgb(),
+        Shader.TileMode.CLAMP,
+    )
     SILHOUETTE.forEach { drawPath(it, fill) }
+    fill.shader = null
 
     // Сухожилия — светлее тела; мышцы ложатся поверх.
     val tendonColor = lerp(Color(bodyColor), Color.White, 0.6f).toArgb()
@@ -363,6 +409,7 @@ private fun Canvas.drawFigure(
 
     val fiber = strokePaint(FiberColor, FIBER_WIDTH)
     val gap = strokePaint(gapColor, GAP_WIDTH)
+    val rim = strokePaint(RimColor, RIM_WIDTH)
     figure.muscles.forEach { (muscle, shapes) ->
         val color = colorOf(muscle)
         shapes.forEach { s ->
@@ -374,6 +421,8 @@ private fun Canvas.drawFigure(
             fill.shader = s.shade
             drawRect(s.bounds, fill)
             drawPath(s.fibers, fiber)
+            // Тень по краю внутри мышцы: обводка, обрезанная контуром, видна только изнутри.
+            drawPath(s.path, rim)
             restore()
             drawPath(s.path, gap)
         }
@@ -389,6 +438,9 @@ private fun Canvas.drawFigure(
         drawPath(v, veinLight)
         restore()
     }
+
+    val crease = strokePaint(CreaseColor, CREASE_WIDTH)
+    figure.creases.forEach { drawPath(it, crease) }
 
     selected?.let { m ->
         val stroke = strokePaint(selectedColor, SELECTED_WIDTH)
