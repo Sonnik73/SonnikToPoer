@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -146,6 +147,11 @@ private fun StepButton(text: String, enabled: Boolean = true, onClick: () -> Uni
     FilledTonalButton(
         onClick = onClick,
         enabled = enabled,
+        // Светлая «таблетка» на фоне панели, иначе кнопка с ней сливается.
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            contentColor = MaterialTheme.colorScheme.primary,
+        ),
         contentPadding = PaddingValues(horizontal = 10.dp),
         modifier = Modifier.height(36.dp),
     ) { Text(text, style = MaterialTheme.typography.labelMedium) }
