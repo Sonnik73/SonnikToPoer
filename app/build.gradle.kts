@@ -42,6 +42,14 @@ android {
         }
     }
 
+    // full — GitHub и IzzyOnDroid: вход в Google Диск (сервисы Google Play) и проверка обновлений.
+    // fdroid — для F-Droid: только свободные библиотеки, без сети; копия на Диск — файлом через «Сохранить в…».
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("full") { dimension = "distribution" }
+        create("fdroid") { dimension = "distribution" }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -91,9 +99,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
-    // Автокопии на Google Диск в фоне и вход в Google (только область drive.file).
+    // Автокопии в фоне; вход в Google (только область drive.file) — лишь в сборке full.
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.play.services.auth)
+    "fullImplementation"(libs.play.services.auth)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

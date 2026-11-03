@@ -57,6 +57,3 @@ object DriveAuth {
         else -> e.message ?: e.javaClass.simpleName
     }
 }
-
-/** Нужен повторный вход в Google (доступ отозван или истёк). */
-class NeedsSignInException(message: String) : Exception(message)

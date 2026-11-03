@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.33
+- F-Droid preparation: a separate build without Google services and without network access; refreshed store description and screenshots
+
 ## 1.32
 - What each muscle does: on the map, “What this muscle does” for the selected one (with an Exercises button listing all exercises for it) and “How the muscles work” — all muscles in one list with descriptions
 
