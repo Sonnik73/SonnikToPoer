@@ -42,9 +42,11 @@ class BodyMapTest {
         fun isRed(color: Int) = (color shr 16 and 0xFF) > 170 && (color shr 8 and 0xFF) < 110
         assertTrue(isRed(bitmap.getPixel((43 * s).toInt(), (42 * s).toInt())))
         assertTrue(isRed(bitmap.getPixel(((112 + 40) * s).toInt(), (55 * s).toInt())))
-        // Силуэт залит и сзади: голень без мышц — цвет тела, а не пустота.
-        assertEquals(0xFFE4E7EB.toInt(), bitmap.getPixel(((112 + 40) * s).toInt(), (185 * s).toInt()))
-        assertEquals(0xFFE4E7EB.toInt(), bitmap.getPixel((40 * s).toInt(), (185 * s).toInt()))
+        // Силуэт залит и сзади: голень без мышц — цвет тела (с лёгким градиентом света), а не пустота.
+        fun isBody(color: Int) = color ushr 24 == 0xFF &&
+            listOf(16, 8, 0).all { shift -> kotlin.math.abs((color shr shift and 0xFF) - (0xFFE4E7EB.toInt() shr shift and 0xFF)) <= 24 }
+        assertTrue(isBody(bitmap.getPixel(((112 + 40) * s).toInt(), (185 * s).toInt())))
+        assertTrue(isBody(bitmap.getPixel((40 * s).toInt(), (185 * s).toInt())))
         File("build/screenshots").apply { mkdirs() }.resolve("14-widget-body.png").outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }

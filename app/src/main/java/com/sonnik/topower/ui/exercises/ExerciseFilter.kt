@@ -7,7 +7,7 @@ import com.sonnik.topower.domain.Muscle
 /** Крупные части тела для фильтра списка упражнений. */
 enum class BodyArea(val muscles: Set<Muscle>) {
     CHEST(setOf(Muscle.CHEST, Muscle.SERRATUS)),
-    BACK(setOf(Muscle.LATS, Muscle.TRAPS, Muscle.LOWER_BACK, Muscle.TERES_MAJOR, Muscle.INFRASPINATUS)),
+    BACK(setOf(Muscle.LATS, Muscle.TRAPS, Muscle.LOWER_BACK, Muscle.TERES_MAJOR)),
     SHOULDERS(setOf(Muscle.FRONT_DELTS, Muscle.SIDE_DELTS, Muscle.REAR_DELTS, Muscle.INFRASPINATUS)),
     ARMS(setOf(Muscle.BICEPS, Muscle.TRICEPS, Muscle.FOREARMS, Muscle.BRACHIALIS, Muscle.BRACHIORADIALIS)),
     CORE(setOf(Muscle.ABS, Muscle.OBLIQUES)),
