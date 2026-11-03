@@ -532,4 +532,7 @@
     <string name="muscle_all_title">How the muscles work</string>
     <string name="muscle_exercises_button">Exercises (%d)</string>
     <string name="muscle_exercises_also">Also: %s</string>
+    <string name="github_hint">Like the app? Star it on GitHub — it helps others find it. You can also leave feedback, an idea or a bug report there.</string>
+    <string name="github_star">★ Project on GitHub</string>
+    <string name="github_feedback">Feedback, idea or bug</string>
 </resources>

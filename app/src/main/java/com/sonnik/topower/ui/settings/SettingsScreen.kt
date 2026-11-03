@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
@@ -47,6 +48,9 @@ import com.sonnik.topower.ui.share.fileTimestamp
 import java.util.Locale
 import com.sonnik.topower.domain.Muscle
 import com.sonnik.topower.ui.muscles.muscleNameRes
+
+/** Исходный код, звёзды и отзывы. */
+private const val GITHUB_URL = "https://github.com/Sonnik73/SonnikToPoer"
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
@@ -152,6 +156,19 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     Text(stringResource(R.string.whats_new))
                 }
                 if (Flavor.UPDATE_CHECKS) UpdateSettings()
+                // Ссылки открываются в браузере — самому приложению сеть не нужна.
+                val uriHandler = LocalUriHandler.current
+                Text(
+                    stringResource(R.string.github_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(onClick = { uriHandler.openUri(GITHUB_URL) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.github_star))
+                }
+                OutlinedButton(onClick = { uriHandler.openUri("$GITHUB_URL/issues/new") }, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.github_feedback))
+                }
                 Text(
                     stringResource(R.string.language_hint),
                     style = MaterialTheme.typography.bodySmall,

@@ -521,4 +521,7 @@
     <string name="muscle_all_title">Как работают мышцы</string>
     <string name="muscle_exercises_button">Упражнения (%d)</string>
     <string name="muscle_exercises_also">Ещё: %s</string>
+    <string name="github_hint">Нравится приложение? Поставьте звезду на GitHub — так его проще найти другим. Там же можно оставить отзыв, идею или сообщить об ошибке.</string>
+    <string name="github_star">★ Проект на GitHub</string>
+    <string name="github_feedback">Отзыв, идея или ошибка</string>
 </resources>

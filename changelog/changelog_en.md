@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.35
+- Links to GitHub in About: star the project and leave feedback, an idea or a bug report
+
 ## 1.34
 - Reproducible build for F-Droid: the F-Droid version will carry the same signature as GitHub, so you can switch between them without reinstalling
 

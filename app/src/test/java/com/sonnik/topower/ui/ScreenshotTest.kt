@@ -197,7 +197,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.34")
+        waitText("Версия 1.35")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -274,6 +274,13 @@ class ScreenshotTest {
             apkBytes = 7_586_445,
         )
         waitText("Новая версия SonnikToPower")
+    }
+
+    @Test fun aboutGithub() = shoot("32-about-github") {
+        compose.onAllNodesWithContentDescription("Настройки")[0].performClick()
+        waitText("Таймер отдыха")
+        listWith("Таймер отдыха").performScrollToNode(hasText("Отзыв, идея или ошибка"))
+        waitText("★ Проект на GitHub")
     }
 
     @Test fun settings() = shoot("08-settings") {
