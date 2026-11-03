@@ -8,6 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -97,6 +102,84 @@ fun muscleNameRes(muscle: Muscle): Int =
 
 @Composable
 fun muscleName(muscle: Muscle): String = stringResource(muscleNameRes(muscle))
+
+/** Что делает мышца — описание принципа действия. */
+fun muscleInfoRes(muscle: Muscle): Int =
+    when (muscle) {
+        Muscle.CHEST -> R.string.m_info_chest
+        Muscle.FRONT_DELTS -> R.string.m_info_front_delts
+        Muscle.SIDE_DELTS -> R.string.m_info_side_delts
+        Muscle.REAR_DELTS -> R.string.m_info_rear_delts
+        Muscle.TRAPS -> R.string.m_info_traps
+        Muscle.LATS -> R.string.m_info_lats
+        Muscle.LOWER_BACK -> R.string.m_info_lower_back
+        Muscle.BICEPS -> R.string.m_info_biceps
+        Muscle.TRICEPS -> R.string.m_info_triceps
+        Muscle.FOREARMS -> R.string.m_info_forearms
+        Muscle.ABS -> R.string.m_info_abs
+        Muscle.OBLIQUES -> R.string.m_info_obliques
+        Muscle.GLUTES -> R.string.m_info_glutes
+        Muscle.QUADS -> R.string.m_info_quads
+        Muscle.HAMSTRINGS -> R.string.m_info_hamstrings
+        Muscle.ADDUCTORS -> R.string.m_info_adductors
+        Muscle.CALVES -> R.string.m_info_calves
+        Muscle.BRACHIALIS -> R.string.m_info_brachialis
+        Muscle.BRACHIORADIALIS -> R.string.m_info_brachioradialis
+        Muscle.SERRATUS -> R.string.m_info_serratus
+        Muscle.TERES_MAJOR -> R.string.m_info_teres_major
+        Muscle.INFRASPINATUS -> R.string.m_info_infraspinatus
+        Muscle.TIBIALIS -> R.string.m_info_tibialis
+    }
+
+/**
+ * Кнопка под схемой: при выбранной мышце — «Что делает эта мышца» (описание одной),
+ * без выбора — «Как работают мышцы» (все мышцы одним списком).
+ */
+@Composable
+fun MuscleInfoButton(selected: Muscle?) {
+    var showOne by rememberSaveable { mutableStateOf<Muscle?>(null) }
+    var showAll by rememberSaveable { mutableStateOf(false) }
+    TextButton(
+        onClick = { if (selected != null) showOne = selected else showAll = true },
+        contentPadding = PaddingValues(horizontal = 4.dp),
+    ) {
+        Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(stringResource(if (selected != null) R.string.muscle_info_button else R.string.muscle_all_button))
+    }
+    showOne?.let { m ->
+        AlertDialog(
+            onDismissRequest = { showOne = null },
+            title = { Text(muscleName(m)) },
+            text = { Text(stringResource(muscleInfoRes(m)), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = { TextButton(onClick = { showOne = null }) { Text(stringResource(R.string.ok)) } },
+            dismissButton = {
+                TextButton(onClick = { showOne = null; showAll = true }) { Text(stringResource(R.string.muscle_all_button)) }
+            },
+        )
+    }
+    if (showAll) AllMusclesDialog(onDismiss = { showAll = false })
+}
+
+/** Все мышцы одним списком — сверху вниз по телу, с описанием, что каждая делает. */
+@Composable
+fun AllMusclesDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.muscle_all_title)) },
+        text = {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(Muscle.displayOrder) { m ->
+                    Column {
+                        Text(muscleName(m), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(muscleInfoRes(m)), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) } },
+    )
+}
 
 @Composable
 fun muscleNames(muscles: Collection<Muscle>): String =
@@ -275,6 +358,7 @@ fun MuscleStatusCard(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        MuscleInfoButton(selected)
         if (volumeMode) {
             VolumeLegend(idle)
             VolumeDetails(volume)
@@ -488,6 +572,7 @@ fun MuscleGuideDialog(onDismiss: () -> Unit, selected: Set<Muscle> = emptySet())
                     color = if (name != null) accent else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                MuscleInfoButton(current)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Muscle.displayOrder.forEach { m ->
                         FilterChip(

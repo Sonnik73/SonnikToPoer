@@ -108,6 +108,21 @@ class ScreenshotTest {
         compose.onAllNodesWithText("Широчайшие").onLast().performClick()
     }
 
+    @Test fun muscleInfo() = shoot("30-muscle-info") {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
+        waitText("Нажмите на мышцу", substring = true)
+        compose.onAllNodesWithText("Плечевая (брахиалис)").onLast().performClick()
+        compose.onAllNodesWithText("Что делает эта мышца").onLast().performClick()
+        waitText("главный сгибатель", substring = true)
+    }
+
+    @Test fun allMuscles() = shoot("31-all-muscles") {
+        waitText("Можно тренировать", substring = true)
+        compose.onAllNodesWithText("Как работают мышцы")[0].performClick()
+        waitText("Сводит руки перед собой", substring = true)
+    }
+
     @Test fun muscleVolume() = shoot("12-muscle-volume") {
         waitText("Можно тренировать", substring = true)
         click("Объём за 7 дней")
@@ -179,7 +194,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.31")
+        waitText("Версия 1.32")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
