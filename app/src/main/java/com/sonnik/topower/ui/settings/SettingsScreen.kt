@@ -163,10 +163,10 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                OutlinedButton(onClick = { uriHandler.openUri(GITHUB_URL) }, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = { runCatching { uriHandler.openUri(GITHUB_URL) } }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.github_star))
                 }
-                OutlinedButton(onClick = { uriHandler.openUri("$GITHUB_URL/issues/new") }, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = { runCatching { uriHandler.openUri("$GITHUB_URL/issues/new") } }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.github_feedback))
                 }
                 Text(
