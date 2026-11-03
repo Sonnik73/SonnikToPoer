@@ -57,15 +57,15 @@ data class DefaultExercise(
 }
 
 val DEFAULT_EXERCISES = listOf(
-    DefaultExercise("Отжимания на упорах", "Push-ups on handles", setOf(CHEST, TRICEPS, FRONT_DELTS), useBodyWeight = true),
+    DefaultExercise("Отжимания на упорах", "Push-ups on handles", setOf(CHEST, TRICEPS, FRONT_DELTS, SERRATUS), useBodyWeight = true),
     DefaultExercise("Разводка гантелей на скамье", "Dumbbell bench fly", setOf(CHEST), equipmentType = EquipmentType.DUMBBELL),
     DefaultExercise("Резинка на перекладине, на трицепс", "Band triceps pushdown from bar", setOf(TRICEPS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Резинка на трицепс из-за спины", "Overhead band triceps extension", setOf(TRICEPS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Тяга Ли Хейни", "Lee Haney row", setOf(REAR_DELTS, TRAPS, LATS)),
     DefaultExercise("Молотки с гантелями", "Dumbbell hammer curls", setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS), equipmentType = EquipmentType.DUMBBELL),
     DefaultExercise("Молоточек с упором в бедро", "Concentration hammer curl", setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS), equipmentType = EquipmentType.DUMBBELL),
-    DefaultExercise("Подтягивания узким обратным хватом", "Close-grip chin-ups", setOf(LATS, BICEPS, BRACHIALIS), useBodyWeight = true),
-    DefaultExercise("Подтягивания прямым широким хватом", "Wide-grip pull-ups", setOf(LATS, TERES_MAJOR), useBodyWeight = true),
+    DefaultExercise("Подтягивания узким обратным хватом", "Close-grip chin-ups", setOf(LATS, BICEPS, BRACHIALIS, TERES_MAJOR), useBodyWeight = true),
+    DefaultExercise("Подтягивания прямым широким хватом", "Wide-grip pull-ups", setOf(LATS, TERES_MAJOR, BRACHIALIS), useBodyWeight = true),
     DefaultExercise("Средняя дельта с эспандером", "Band lateral raise", setOf(SIDE_DELTS), equipmentType = EquipmentType.BAND),
     DefaultExercise("Пресс с роликом", "Ab wheel rollout", setOf(ABS), useBodyWeight = true),
     DefaultExercise("Планка", "Plank", setOf(ABS), trackReps = false, trackWeight = false, trackTime = true, useBodyWeight = true),
@@ -84,7 +84,7 @@ private val VEST = EquipmentType.WEIGHT_VEST
 val EXERCISE_PACK_2 = listOf(
     // Грудь
     DefaultExercise("Жим гантелей лёжа", "Dumbbell bench press", setOf(CHEST, TRICEPS, FRONT_DELTS), equipmentType = DB, reps = 8..12),
-    DefaultExercise("Отжимания в жилете", "Weighted vest push-ups", setOf(CHEST, TRICEPS, FRONT_DELTS), useBodyWeight = true, equipmentType = VEST, reps = 10..25),
+    DefaultExercise("Отжимания в жилете", "Weighted vest push-ups", setOf(CHEST, TRICEPS, FRONT_DELTS, SERRATUS), useBodyWeight = true, equipmentType = VEST, reps = 10..25),
     DefaultExercise("Сведение рук с резиной перед грудью", "Band chest fly", setOf(CHEST), equipmentType = BAND, reps = 12..20),
     // Плечи
     DefaultExercise("Подъём гантелей перед собой", "Dumbbell front raise", setOf(FRONT_DELTS), equipmentType = DB, reps = 10..15),
@@ -93,24 +93,24 @@ val EXERCISE_PACK_2 = listOf(
     DefaultExercise("Махи гантелями в стороны", "Dumbbell lateral raise", setOf(SIDE_DELTS), equipmentType = DB, reps = 12..20),
     DefaultExercise("Тяга гантелей к подбородку", "Dumbbell upright row", setOf(SIDE_DELTS, TRAPS), equipmentType = DB, reps = 10..15),
     DefaultExercise("Жим Арнольда", "Arnold press", setOf(SIDE_DELTS, FRONT_DELTS), equipmentType = DB, reps = 8..12),
-    DefaultExercise("Разводка гантелей в наклоне", "Bent-over dumbbell reverse fly", setOf(REAR_DELTS), equipmentType = DB, reps = 12..20),
+    DefaultExercise("Разводка гантелей в наклоне", "Bent-over dumbbell reverse fly", setOf(REAR_DELTS, INFRASPINATUS), equipmentType = DB, reps = 12..20),
     DefaultExercise("Растяжка резины перед грудью", "Band pull-apart", setOf(REAR_DELTS, TRAPS, INFRASPINATUS), equipmentType = BAND, reps = 15..25),
-    DefaultExercise("Растяжка пружинного эспандера", "Spring chest expander pull", setOf(REAR_DELTS, TRAPS), equipmentType = EquipmentType.EXPANDER, reps = 10..20),
+    DefaultExercise("Растяжка пружинного эспандера", "Spring chest expander pull", setOf(REAR_DELTS, TRAPS, INFRASPINATUS), equipmentType = EquipmentType.EXPANDER, reps = 10..20),
     // Трапеции
     DefaultExercise("Шраги с гантелями", "Dumbbell shrugs", setOf(TRAPS), equipmentType = DB, reps = 12..20),
     DefaultExercise("Шраги с резиной", "Band shrugs", setOf(TRAPS), equipmentType = BAND, reps = 15..25),
     DefaultExercise("Тяга резины к лицу", "Band face pull", setOf(TRAPS, REAR_DELTS, INFRASPINATUS), equipmentType = BAND, reps = 15..20),
     // Спина
     DefaultExercise("Тяга гантели одной рукой в наклоне", "One-arm dumbbell row", setOf(LATS, TERES_MAJOR), equipmentType = DB, reps = 8..12),
-    DefaultExercise("Подтягивания в жилете", "Weighted vest pull-ups", setOf(LATS, BICEPS, TERES_MAJOR), useBodyWeight = true, equipmentType = VEST, reps = 5..10),
-    DefaultExercise("Тяга резины к поясу сидя", "Seated band row", setOf(LATS), equipmentType = BAND, reps = 12..20),
+    DefaultExercise("Подтягивания в жилете", "Weighted vest pull-ups", setOf(LATS, BICEPS, TERES_MAJOR, BRACHIALIS), useBodyWeight = true, equipmentType = VEST, reps = 5..10),
+    DefaultExercise("Тяга резины к поясу сидя", "Seated band row", setOf(LATS, TERES_MAJOR), equipmentType = BAND, reps = 12..20),
     DefaultExercise("Супермен (лёжа на животе)", "Superman hold", setOf(LOWER_BACK, GLUTES), useBodyWeight = true, trackWeight = false, reps = 12..20),
     DefaultExercise("Наклоны с резиной (гуд-морнинг)", "Band good morning", setOf(LOWER_BACK, HAMSTRINGS), equipmentType = BAND, reps = 12..20),
     DefaultExercise("Румынская тяга с гантелями", "Dumbbell Romanian deadlift", setOf(HAMSTRINGS, GLUTES, LOWER_BACK), equipmentType = DB, reps = 8..12),
     // Руки
-    DefaultExercise("Сгибания рук с гантелями", "Dumbbell biceps curl", setOf(BICEPS), equipmentType = DB, reps = 8..12),
-    DefaultExercise("Концентрированные сгибания", "Concentration curl", setOf(BICEPS), equipmentType = DB, reps = 10..15),
-    DefaultExercise("Сгибания рук с резиной", "Band biceps curl", setOf(BICEPS), equipmentType = BAND, reps = 12..20),
+    DefaultExercise("Сгибания рук с гантелями", "Dumbbell biceps curl", setOf(BICEPS, BRACHIALIS), equipmentType = DB, reps = 8..12),
+    DefaultExercise("Концентрированные сгибания", "Concentration curl", setOf(BICEPS, BRACHIALIS), equipmentType = DB, reps = 10..15),
+    DefaultExercise("Сгибания рук с резиной", "Band biceps curl", setOf(BICEPS, BRACHIALIS), equipmentType = BAND, reps = 12..20),
     DefaultExercise("Французский жим с гантелью лёжа", "Lying dumbbell triceps extension", setOf(TRICEPS), equipmentType = DB, reps = 10..15),
     DefaultExercise("Разгибание руки с гантелью в наклоне", "Dumbbell triceps kickback", setOf(TRICEPS), equipmentType = DB, reps = 12..15),
     DefaultExercise("Обратные отжимания от скамьи", "Bench dips", setOf(TRICEPS), useBodyWeight = true, equipmentType = VEST, reps = 10..20),
@@ -175,18 +175,83 @@ val EXERCISE_PACK_4 = listOf(
     DefaultExercise("Ходьба на пятках", "Heel walk", setOf(TIBIALIS, CALVES), trackReps = false, trackWeight = false, trackTime = true),
 )
 
-/** Прежние мышцы упражнений по умолчанию → новые: обновляются, только если пользователь их не менял. */
-val MUSCLE_UPGRADES_1_31: List<Triple<List<String>, Set<Muscle>, Set<Muscle>>> = listOf(
-    Triple(listOf("Молотки с гантелями", "Dumbbell hammer curls"), setOf(BICEPS, FOREARMS), setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS)),
-    Triple(listOf("Молоточек с упором в бедро", "Concentration hammer curl"), setOf(BICEPS, FOREARMS), setOf(BICEPS, BRACHIALIS, BRACHIORADIALIS)),
-    Triple(listOf("Подтягивания узким обратным хватом", "Close-grip chin-ups"), setOf(LATS, BICEPS), setOf(LATS, BICEPS, BRACHIALIS)),
-    Triple(listOf("Подтягивания прямым широким хватом", "Wide-grip pull-ups"), setOf(LATS), setOf(LATS, TERES_MAJOR)),
-    Triple(listOf("Тяга гантели одной рукой в наклоне", "One-arm dumbbell row"), setOf(LATS), setOf(LATS, TERES_MAJOR)),
-    Triple(listOf("Подтягивания в жилете", "Weighted vest pull-ups"), setOf(LATS, BICEPS), setOf(LATS, BICEPS, TERES_MAJOR)),
-    Triple(listOf("Растяжка резины перед грудью", "Band pull-apart"), setOf(REAR_DELTS, TRAPS), setOf(REAR_DELTS, TRAPS, INFRASPINATUS)),
-    Triple(listOf("Тяга резины к лицу", "Band face pull"), setOf(TRAPS, REAR_DELTS), setOf(TRAPS, REAR_DELTS, INFRASPINATUS)),
-    Triple(listOf("Сгибания рук обратным хватом", "Reverse-grip dumbbell curl"), setOf(FOREARMS, BICEPS), setOf(BRACHIORADIALIS, BRACHIALIS, FOREARMS)),
+/**
+ * Мышцы упражнений по умолчанию до 1.31 (русское название → мышцы). Нужны, чтобы при обновлении
+ * поменять мышцы только тем упражнениям, которые пользователь не редактировал.
+ */
+private val MUSCLES_BEFORE_1_31: Map<String, Set<Muscle>> = mapOf(
+    "Отжимания на упорах" to setOf(CHEST, TRICEPS, FRONT_DELTS),
+    "Разводка гантелей на скамье" to setOf(CHEST),
+    "Резинка на перекладине, на трицепс" to setOf(TRICEPS),
+    "Резинка на трицепс из-за спины" to setOf(TRICEPS),
+    "Тяга Ли Хейни" to setOf(REAR_DELTS, TRAPS, LATS),
+    "Молотки с гантелями" to setOf(BICEPS, FOREARMS),
+    "Молоточек с упором в бедро" to setOf(BICEPS, FOREARMS),
+    "Подтягивания узким обратным хватом" to setOf(LATS, BICEPS),
+    "Подтягивания прямым широким хватом" to setOf(LATS),
+    "Средняя дельта с эспандером" to setOf(SIDE_DELTS),
+    "Пресс с роликом" to setOf(ABS),
+    "Планка" to setOf(ABS),
+    "Прыжки на скакалке" to setOf(CALVES),
+    "Жим гантелей лёжа" to setOf(CHEST, TRICEPS, FRONT_DELTS),
+    "Отжимания в жилете" to setOf(CHEST, TRICEPS, FRONT_DELTS),
+    "Сведение рук с резиной перед грудью" to setOf(CHEST),
+    "Подъём гантелей перед собой" to setOf(FRONT_DELTS),
+    "Жим гантелей сидя" to setOf(FRONT_DELTS, SIDE_DELTS, TRICEPS),
+    "Жим резины вверх стоя" to setOf(FRONT_DELTS, TRICEPS),
+    "Махи гантелями в стороны" to setOf(SIDE_DELTS),
+    "Тяга гантелей к подбородку" to setOf(SIDE_DELTS, TRAPS),
+    "Жим Арнольда" to setOf(SIDE_DELTS, FRONT_DELTS),
+    "Разводка гантелей в наклоне" to setOf(REAR_DELTS),
+    "Растяжка резины перед грудью" to setOf(REAR_DELTS, TRAPS),
+    "Растяжка пружинного эспандера" to setOf(REAR_DELTS, TRAPS),
+    "Шраги с гантелями" to setOf(TRAPS),
+    "Шраги с резиной" to setOf(TRAPS),
+    "Тяга резины к лицу" to setOf(TRAPS, REAR_DELTS),
+    "Тяга гантели одной рукой в наклоне" to setOf(LATS),
+    "Подтягивания в жилете" to setOf(LATS, BICEPS),
+    "Тяга резины к поясу сидя" to setOf(LATS),
+    "Супермен (лёжа на животе)" to setOf(LOWER_BACK, GLUTES),
+    "Наклоны с резиной (гуд-морнинг)" to setOf(LOWER_BACK, HAMSTRINGS),
+    "Румынская тяга с гантелями" to setOf(HAMSTRINGS, GLUTES, LOWER_BACK),
+    "Сгибания рук с гантелями" to setOf(BICEPS),
+    "Концентрированные сгибания" to setOf(BICEPS),
+    "Сгибания рук с резиной" to setOf(BICEPS),
+    "Французский жим с гантелью лёжа" to setOf(TRICEPS),
+    "Разгибание руки с гантелью в наклоне" to setOf(TRICEPS),
+    "Обратные отжимания от скамьи" to setOf(TRICEPS),
+    "Сгибания запястий с гантелями" to setOf(FOREARMS),
+    "Сгибания рук обратным хватом" to setOf(FOREARMS, BICEPS),
+    "Вис на перекладине" to setOf(FOREARMS),
+    "Подъёмы ног в висе" to setOf(ABS),
+    "Скручивания с гантелью" to setOf(ABS),
+    "Скручивания с резиной на коленях" to setOf(ABS),
+    "Боковая планка" to setOf(OBLIQUES),
+    "Наклоны в сторону с гантелью" to setOf(OBLIQUES),
+    "Дровосек с резиной" to setOf(OBLIQUES),
+    "Гоблет-присед с гантелью" to setOf(QUADS, GLUTES),
+    "Выпады с гантелями" to setOf(QUADS, GLUTES),
+    "Приседания в жилете" to setOf(QUADS, GLUTES),
+    "Болгарские выпады с гантелями" to setOf(GLUTES, QUADS),
+    "Ягодичный мост с упором в скамью" to setOf(GLUTES, HAMSTRINGS),
+    "Отведение ноги назад с резиной" to setOf(GLUTES),
+    "Становая тяга на одной ноге с гантелью" to setOf(HAMSTRINGS, GLUTES),
+    "Сгибание ног с резиной лёжа" to setOf(HAMSTRINGS),
+    "Приседания сумо с гантелью" to setOf(ADDUCTORS, QUADS, GLUTES),
+    "Боковые выпады с гантелью" to setOf(ADDUCTORS, QUADS, GLUTES),
+    "Сведение ноги с резиной стоя" to setOf(ADDUCTORS),
+    "Подъёмы на носки с гантелями" to setOf(CALVES),
+    "Подъёмы на носок на одной ноге в жилете" to setOf(CALVES),
+    "Разгибание стопы с резиной сидя" to setOf(CALVES),
 )
+
+/** Упражнения по умолчанию, у которых в 1.31 поменялись мышцы: (названия ru/en, было, стало). */
+val MUSCLE_UPGRADES_1_31: List<Triple<List<String>, Set<Muscle>, Set<Muscle>>> by lazy {
+    (DEFAULT_EXERCISES + EXERCISE_PACK_2).mapNotNull { e ->
+        val before = MUSCLES_BEFORE_1_31[e.nameRu] ?: return@mapNotNull null
+        if (before == e.muscles) null else Triple(listOf(e.nameRu, e.nameEn), before, e.muscles)
+    }
+}
 
 /**
  * Мышцы для упражнений, созданных до появления схемы мышц: по точному названию.

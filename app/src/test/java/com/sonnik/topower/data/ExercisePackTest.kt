@@ -144,6 +144,7 @@ class ExercisePackTest {
             repo.seedDefaultsIfNeeded(settings, russian = true)
             val byName = db.dao().allExercises().groupBy { it.name }
             assertEquals("BICEPS,BRACHIALIS,BRACHIORADIALIS", byName.getValue("Молотки с гантелями").single().muscles)
+            assertEquals(MUSCLE_UPGRADES_1_31.size, 17)
             // Мышцы изменены пользователем — не трогаем.
             assertEquals("LATS,BICEPS", byName.getValue("Подтягивания прямым широким хватом").single().muscles)
             // Уже есть с таким названием — не дублируем.

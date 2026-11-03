@@ -1,3 +1,3 @@
-• New muscles on the map: brachialis, brachioradialis, serratus anterior, teres major, infraspinatus (rotator cuff) and tibialis anterior; added to default exercises unless you changed their muscles
+• New muscles on the map: brachialis, brachioradialis, serratus anterior, teres major, infraspinatus (rotator cuff) and tibialis anterior; muscles of all default exercises reviewed (updated where you have not changed them)
 • A more detailed, three-dimensional muscle map: light and shade, collarbones, sternum, spine
 • 20 new exercises: on the pull-up bar and for the new muscles
