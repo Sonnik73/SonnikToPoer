@@ -93,6 +93,13 @@ class ScreenshotTest {
         waitText("Рекорд", substring = true)
     }
 
+    @Test fun restTimer() = shoot("29-rest-timer") {
+        openActiveWorkout()
+        waitText("Рекорд", substring = true)
+        ApplicationProvider.getApplicationContext<SonnikApp>().restTimer.start("press", "Жим гантелей лёжа", 90)
+        waitText("Отдых · Жим гантелей лёжа")
+    }
+
     @Test fun muscleGuide() = shoot("11-muscle-guide") {
         waitText("Можно тренировать", substring = true)
         compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
@@ -172,7 +179,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.29")
+        waitText("Версия 1.30")
     }
 
     @Test fun exercises() = shoot("06-exercises") {

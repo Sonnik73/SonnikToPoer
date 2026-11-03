@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.30
+- A more compact rest timer: one row with ±15 s, the time and Skip, plus a thin progress line — more room for your sets
+
 ## 1.29
 - A backup file on Google Drive without Google sign-in, as in Pin: create it via the Save to… dialog and the app keeps it updated after workouts; on a new phone your data is restored from that file
 
