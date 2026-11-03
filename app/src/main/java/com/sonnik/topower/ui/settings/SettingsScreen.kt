@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
+import com.sonnik.topower.Flavor
 import com.sonnik.topower.SonnikApp
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ConfirmDialog
@@ -150,7 +151,7 @@ fun SettingsScreen(onBack: () -> Unit, openChangelog: () -> Unit) {
                 OutlinedButton(onClick = openChangelog, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.whats_new))
                 }
-                UpdateSettings()
+                if (Flavor.UPDATE_CHECKS) UpdateSettings()
                 Text(
                     stringResource(R.string.language_hint),
                     style = MaterialTheme.typography.bodySmall,

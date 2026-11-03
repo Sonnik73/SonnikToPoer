@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Сборка full: сеть — только для проверки обновлений на GitHub и резервных копий на Google Диске
+         (включаются в настройках). Аналитики и рекламы нет. В сборке для F-Droid сети нет. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

@@ -7,9 +7,6 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- Уведомления о восстановлении: заново запланировать после перезагрузки -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Сеть — только для проверки обновлений на GitHub и резервных копий на Google Диске
-         (включаются в настройках). Аналитики и рекламы нет. -->
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />

@@ -1,4 +1,4 @@
-A strength training log that works offline, with no ads or sign-up. Data stays on your phone; the network is used only if you want it — for update checks on GitHub and backups to your Google Drive.
+A strength training log with no internet, ads, trackers or sign-up. All data stays on your phone.
 
 <b>Workouts</b>
 <ul>
@@ -7,12 +7,13 @@ A strength training log that works offline, with no ads or sign-up. Data stays o
 <li>Today's target: +1 rep over the last workout, and the next weight from your inventory at the top of the rep range</li>
 <li>Rest timer that works with the screen locked</li>
 <li>Inventory: dumbbells, kettlebells, resistance bands with a from–to range, weight vests</li>
-<li>How-to for 63 default exercises</li>
+<li>83 default exercises with how-to, including pull-up bar work</li>
 </ul>
 
 <b>Muscles</b>
 <ul>
-<li>Anatomical body map colored from red to green by each muscle's recovery</li>
+<li>Anatomical body map of 23 muscles colored from red to green by recovery</li>
+<li>What each muscle does and every exercise for it</li>
 <li>Live countdown to full recovery and a 7-day volume mode</li>
 <li>Template readiness based on their muscles' recovery</li>
 <li>Configurable notifications and a home screen widget</li>
@@ -23,7 +24,10 @@ A strength training log that works offline, with no ads or sign-up. Data stays o
 <li>Records, estimated 1RM, progress charts, volume, plateau hints</li>
 <li>Smartwatch data entered manually: heart rate, duration, calories</li>
 <li>A "Share results" card with your week</li>
-<li>JSON backup and CSV export</li>
+<li>JSON backup, CSV export and a backup file on Google Drive via the Save to… dialog — no Google sign-in</li>
+<li>Themes: light, dark, black background and seven palettes</li>
 </ul>
 
 Russian and English interface.
+
+The GitHub version can also check for updates and keep dated backups with Google sign-in; the F-Droid version has neither and never uses the network.

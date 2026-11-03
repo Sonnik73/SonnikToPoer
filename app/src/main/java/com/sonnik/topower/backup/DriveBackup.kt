@@ -2,6 +2,7 @@ package com.sonnik.topower.backup
 
 import android.content.Context
 import com.sonnik.topower.R
+import com.sonnik.topower.Flavor
 import com.sonnik.topower.data.Repository
 import com.sonnik.topower.ecosystem.EcosystemChanges
 import kotlinx.coroutines.Dispatchers
@@ -26,15 +27,13 @@ data class DriveBackupState(
  * Резервные копии в Google Диске: та же JSON-копия, что «Экспорт» в настройках, файлом в папку
  * «SonnikToPower». Автоматически — раз в [BackupPolicy.AUTO_INTERVAL_HOURS] ч, если данные менялись,
  * вручную — кнопкой. Хранятся последние [BackupPolicy.KEEP] копий.
- * [storeFactory] даёт хранилище (по умолчанию Google Диск с токеном входа) — в тестах подменяется.
+ * [storeFactory] даёт хранилище (в сборке full — Google Диск с токеном входа; в сборке для F-Droid
+ * входа в Google нет) — в тестах подменяется.
  */
 class DriveBackup(
     private val context: Context,
     private val repository: Repository,
-    private val storeFactory: suspend () -> BackupStore = {
-        val token = withContext(Dispatchers.IO) { DriveAuth.tokenBlocking(context) }
-        DriveRest(token, context.getString(R.string.drive_sign_in_again))
-    },
+    private val storeFactory: suspend () -> BackupStore = Flavor.driveStore(context),
 ) {
     private val prefs = context.getSharedPreferences("drive_backup", Context.MODE_PRIVATE)
     private val lock = Mutex()

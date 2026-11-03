@@ -20,11 +20,29 @@ Category: Sports & Health
 
 Short description: Offline workout log: progress, personal records and muscle recovery.
 
-No ads, no trackers. Works offline; the network is optional — update checks on GitHub and backups to Google Drive (Drive sign-in uses Google Play Services, which F-Droid flags as a non-free dependency).
+No ads, no trackers. Works offline; the network is optional — update checks on GitHub and dated backups to Google Drive (sign-in uses Google Play Services: NonFreeDep). A separate "fdroid" flavor without Google libraries and without network access is built for F-Droid.
 Interface in Russian and English.
 ```
 
 ## F-Droid (основной каталог, F-Droid собирает сам и подписывает своим ключом)
+
+**Две сборки из одного кода** (`productFlavors` в `app/build.gradle.kts`):
+
+| | `full` — GitHub, IzzyOnDroid | `fdroid` — F-Droid |
+|---|---|---|
+| Сервисы Google Play (`play-services-auth`) | есть — копии по датам со входом в Google | нет |
+| Проверка обновлений на GitHub | есть | нет, обновляет клиент F-Droid |
+| Разрешение `INTERNET` | есть | нет |
+| Копия файлом на Google Диске через «Сохранить в…» | есть | есть (без входа, через приложение Диска) |
+
+CI собирает обе и проверяет, что в `fdroid` нет классов `com.google.android.gms` и разрешения на сеть
+(шаг «Check F-Droid build»). В релизы GitHub идёт `full`.
+
+**Перед подачей:** репозиторий на GitHub должен быть **публичным** — F-Droid собирает из исходников.
+
+**Экосистема.** Обмен данными с «Крепостью» идёт по разрешению с уровнем `signature`: оба приложения
+должны быть подписаны одним ключом. Версия из F-Droid подписана ключом F-Droid, поэтому с «Крепостью»
+она обменяется данными, только если и «Крепость» установлена из F-Droid.
 
 Установленные из GitHub/IzzyOnDroid копии **не обновятся** версией из F-Droid (другая подпись):
 перед переходом сделайте резервную копию (Настройки → Резервная копия), удалите приложение и поставьте из F-Droid.
@@ -33,8 +51,8 @@ Interface in Russian and English.
 2. В форке создать ветку `com.sonnik.topower` и файл `metadata/com.sonnik.topower.yml`
    с содержимым [com.sonnik.topower.yml](com.sonnik.topower.yml).
 3. Открыть merge request в `fdroid/fdroiddata` (шаблон «App inclusion») и отметить пункты чек-листа:
-   приложение открытое (GPL-3.0), без проприетарных библиотек, без трекеров и рекламы.
-4. Ответить на вопросы рецензентов. После принятия F-Droid соберёт версию с тега `v1.20`,
+   приложение открытое (GPL-3.0); сборка `fdroid` — без проприетарных библиотек, без сети, трекеров и рекламы.
+4. Ответить на вопросы рецензентов. После принятия F-Droid соберёт сборку `fdroid` с тега `v1.33`,
    а новые теги `vX.Y` будет находить сам.
 
 ## При каждом выпуске

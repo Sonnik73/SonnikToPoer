@@ -1,0 +1,1 @@
+• F-Droid preparation: a separate build without Google services and without network access; refreshed store description and screenshots

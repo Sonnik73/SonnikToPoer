@@ -46,7 +46,8 @@ Offline Android workout tracker with progress statistics (Russian and English UI
 ## Сборка
 
 - Kotlin, Jetpack Compose, Material 3, Room; minSdk 26 (Android 8.0).
-- Локально: `./gradlew assembleRelease` (нужен Android SDK).
+- Две сборки: `full` (GitHub, IzzyOnDroid — вход в Google Диск и проверка обновлений) и `fdroid` (для F-Droid — без сервисов Google и без сети).
+- Локально: `./gradlew assembleFullRelease` или `./gradlew assembleFdroidRelease` (нужен Android SDK).
 - CI: `.github/workflows/build.yml` — тесты, сборка, публикация релиза.
 
 ### Ключ подписи

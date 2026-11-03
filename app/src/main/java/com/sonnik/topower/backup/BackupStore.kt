@@ -35,3 +35,6 @@ object BackupPolicy {
     /** Нужна ли автокопия: данные менялись после последней успешной копии. */
     fun autoDue(lastBackupAt: Long, lastChangedAt: Long): Boolean = lastChangedAt > lastBackupAt
 }
+
+/** Нужен повторный вход в Google (доступ отозван или истёк). */
+class NeedsSignInException(message: String) : Exception(message)

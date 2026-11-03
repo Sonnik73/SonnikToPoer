@@ -39,7 +39,20 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SCREENSHOTS: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
-        run: ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+        run: ./gradlew --no-daemon testFullReleaseUnitTest assembleFullRelease assembleFdroidRelease
+
+      # Сборка для F-Droid не должна содержать несвободных библиотек и просить доступ в сеть.
+      - name: Check F-Droid build
+        run: |
+          APK=$(ls app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk)
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          "$AAPT2" dump permissions "$APK"
+          if "$AAPT2" dump permissions "$APK" | grep -q "android.permission.INTERNET"; then
+            echo "::error::The fdroid build must not request INTERNET"; exit 1
+          fi
+          if unzip -p "$APK" 'classes*.dex' | grep -aq "Lcom/google/android/gms"; then
+            echo "::error::The fdroid build contains Google Play services"; exit 1
+          fi
 
       - name: Commit UI screenshots
         if: always() && github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
@@ -58,7 +71,9 @@ jobs:
           VERSION=$(grep '^appVersion=' gradle.properties | cut -d= -f2)
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release*.apk "dist/SonnikToPower-$VERSION.apk"
+          # В релиз идёт сборка full (её подписью обновляются установленные копии); fdroid F-Droid собирает сам.
+          cp app/build/outputs/apk/full/release/app-full-release*.apk "dist/SonnikToPower-$VERSION.apk"
+          ls app/build/outputs/apk/fdroid/release/app-fdroid-release*.apk
           awk '/^## /{n++} n==1' changelog/changelog_ru.md > release-notes.md
 
       # APK и так прикладывается к релизу; квота хранилища артефактов не должна ронять сборку.
