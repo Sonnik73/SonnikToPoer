@@ -112,9 +112,11 @@ class ScreenshotTest {
         waitText("Можно тренировать", substring = true)
         compose.onAllNodesWithContentDescription("Названия мышц")[0].performClick()
         waitText("Нажмите на мышцу", substring = true)
-        compose.onAllNodesWithText("Плечевая (брахиалис)").onLast().performClick()
+        compose.onAllNodesWithText("Широчайшие").onLast().performClick()
         compose.onAllNodesWithText("Что делает эта мышца").onLast().performClick()
-        waitText("главный сгибатель", substring = true)
+        waitText("Самая большая мышца спины", substring = true)
+        compose.onAllNodesWithText("Упражнения (2)").onLast().performClick()
+        waitText("Тяга резины к поясу")
     }
 
     @Test fun allMuscles() = shoot("31-all-muscles") {

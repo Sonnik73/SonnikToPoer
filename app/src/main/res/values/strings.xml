@@ -530,4 +530,6 @@
     <string name="muscle_info_button">What this muscle does</string>
     <string name="muscle_all_button">How the muscles work</string>
     <string name="muscle_all_title">How the muscles work</string>
+    <string name="muscle_exercises_button">Exercises (%d)</string>
+    <string name="muscle_exercises_also">Also: %s</string>
 </resources>

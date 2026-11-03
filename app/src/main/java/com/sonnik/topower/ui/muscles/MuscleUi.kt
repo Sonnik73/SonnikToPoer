@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -151,7 +152,7 @@ fun MuscleInfoButton(selected: Muscle?) {
         AlertDialog(
             onDismissRequest = { showOne = null },
             title = { Text(muscleName(m)) },
-            text = { Text(stringResource(muscleInfoRes(m)), style = MaterialTheme.typography.bodyMedium) },
+            text = { MuscleInfoContent(m) },
             confirmButton = { TextButton(onClick = { showOne = null }) { Text(stringResource(R.string.ok)) } },
             dismissButton = {
                 TextButton(onClick = { showOne = null; showAll = true }) { Text(stringResource(R.string.muscle_all_button)) }
@@ -159,6 +160,40 @@ fun MuscleInfoButton(selected: Muscle?) {
         )
     }
     if (showAll) AllMusclesDialog(onDismiss = { showAll = false })
+}
+
+/** Описание мышцы и кнопка «Упражнения» — список упражнений приложения, где она указана. */
+@Composable
+private fun MuscleInfoContent(muscle: Muscle) {
+    val repo = LocalRepository.current
+    val exercises by remember { repo.dao.observeExercises(includeArchived = false) }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val forMuscle = exercises.filter { muscle in Muscle.parse(it.muscles) }
+    var showList by rememberSaveable(muscle) { mutableStateOf(false) }
+    Column(
+        Modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(stringResource(muscleInfoRes(muscle)), style = MaterialTheme.typography.bodyMedium)
+        FilledTonalButton(onClick = { showList = !showList }, enabled = forMuscle.isNotEmpty()) {
+            Text(stringResource(R.string.muscle_exercises_button, forMuscle.size))
+        }
+        if (showList) {
+            forMuscle.forEach { e ->
+                Column {
+                    Text(e.name, style = MaterialTheme.typography.bodyLarge)
+                    val others = Muscle.parse(e.muscles) - muscle
+                    if (others.isNotEmpty()) {
+                        Text(
+                            stringResource(R.string.muscle_exercises_also, muscleNames(others)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 /** Все мышцы одним списком — сверху вниз по телу, с описанием, что каждая делает. */

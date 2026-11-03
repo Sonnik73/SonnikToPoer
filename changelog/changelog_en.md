@@ -1,7 +1,7 @@
 # What's new in SonnikToPower
 
 ## 1.32
-- What each muscle does: on the map, “What this muscle does” for the selected one and “How the muscles work” — all muscles in one list with descriptions
+- What each muscle does: on the map, “What this muscle does” for the selected one (with an Exercises button listing all exercises for it) and “How the muscles work” — all muscles in one list with descriptions
 
 ## 1.31
 - New muscles on the map: brachialis, brachioradialis, serratus anterior, teres major, infraspinatus (rotator cuff) and tibialis anterior; muscles of all default exercises reviewed (updated where you have not changed them)

@@ -519,4 +519,6 @@
     <string name="muscle_info_button">Что делает эта мышца</string>
     <string name="muscle_all_button">Как работают мышцы</string>
     <string name="muscle_all_title">Как работают мышцы</string>
+    <string name="muscle_exercises_button">Упражнения (%d)</string>
+    <string name="muscle_exercises_also">Ещё: %s</string>
 </resources>
