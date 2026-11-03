@@ -312,10 +312,11 @@ private fun backFigure() = figure {
     sym(Muscle.INFRASPINATUS, 20f, listOf(pt(39.4, 33.8), pt(36, 33.6), pt(34, 35.6), pt(34.6, 38.8), pt(37.6, 40.6), pt(41.8, 41.4), pt(45.2, 41.8), pt(43.2, 38.2)), fan = pt(34.6, 35.4))
     sym(Muscle.TERES_MAJOR, 160f, listOf(pt(34.4, 39.8), pt(31.8, 41.2), pt(31.2, 44), pt(32.8, 45.4), pt(35.8, 43.8), pt(37, 41.6)))
     sym(Muscle.LATS, 60f, listOf(pt(46.6, 43), pt(43.6, 42.2), pt(39.4, 42.6), pt(36.8, 44.2), pt(33.6, 46.6), pt(32.8, 51), pt(34.5, 60), pt(37.5, 70), pt(41.2, 79), pt(44.8, 85), pt(45, 72), pt(45.6, 58), pt(46.4, 49)), fan = pt(33.8, 46))
-    sym(Muscle.LOWER_BACK, 90f, listOf(pt(49.3, 58), pt(47, 60), pt(46.3, 70), pt(46.1, 82), pt(46.6, 92), pt(49.3, 96)))
-    sym(Muscle.GLUTES, 30f, listOf(pt(49.2, 97.5), pt(43.5, 96.5), pt(38, 98.5), pt(34.8, 104), pt(35, 112), pt(38.5, 118), pt(44, 120.5), pt(49.2, 118.5)), fan = pt(35.4, 110))
-    sym(Muscle.HAMSTRINGS, 95f, listOf(pt(37, 121.5), pt(34.5, 129), pt(34.8, 139), pt(37.5, 147), pt(41, 148.5), pt(42, 136), pt(41.5, 126), pt(40, 121)))
-    sym(Muscle.HAMSTRINGS, 85f, listOf(pt(43.4, 121.5), pt(42.6, 129), pt(42.8, 141), pt(44.3, 148.5), pt(47, 146.5), pt(48.3, 134), pt(48.2, 124.5), pt(46.2, 121)))
+    // Ягодицы начинаются от гребня таза (чуть ниже поясницы), под ними — ягодичная складка.
+    sym(Muscle.LOWER_BACK, 90f, listOf(pt(49.3, 58), pt(47, 60), pt(46.3, 70), pt(46.1, 79), pt(46.8, 86), pt(49.3, 89.5)))
+    sym(Muscle.GLUTES, 30f, listOf(pt(49.2, 91), pt(43.8, 89.6), pt(38.2, 91.4), pt(34.6, 97), pt(34.6, 105), pt(37.8, 111.6), pt(43.6, 114.4), pt(49.2, 112.6)), fan = pt(35, 102))
+    sym(Muscle.HAMSTRINGS, 95f, listOf(pt(37, 115.4), pt(34.4, 124), pt(34.6, 137), pt(37.5, 147), pt(41, 148.5), pt(42, 135), pt(41.6, 123), pt(40.2, 116.2)))
+    sym(Muscle.HAMSTRINGS, 85f, listOf(pt(43.4, 116.4), pt(42.6, 125), pt(42.8, 140), pt(44.3, 148.5), pt(47, 146.5), pt(48.3, 133), pt(48.2, 121), pt(46.4, 115.6)))
     sym(Muscle.CALVES, 95f, listOf(pt(39.5, 150.5), pt(36.2, 155), pt(35.6, 164), pt(37.6, 173), pt(40.6, 176), pt(41.6, 164), pt(41.2, 154)))
     sym(Muscle.CALVES, 85f, listOf(pt(43.4, 150.5), pt(42.2, 155), pt(42.4, 166), pt(43.8, 176.5), pt(46.6, 172), pt(47, 161), pt(46.2, 153)))
     tendon(listOf(pt(40.4, 175), pt(42.6, 175), pt(42.4, 186), pt(41.6, 189), pt(40.6, 186)))
@@ -326,7 +327,8 @@ private fun backFigure() = figure {
     vein(listOf(pt(44.6, 157), pt(45, 163), pt(44.6, 169)))
     vein(listOf(pt(20.4, 74), pt(19.4, 81), pt(18.6, 88)))
     // Позвоночник и подколенная складка.
-    crease(listOf(pt(50, 58), pt(50, 95)), symmetric = false)
+    crease(listOf(pt(50, 58), pt(50, 89)), symmetric = false)
+    crease(listOf(pt(37.4, 113.4), pt(42.6, 115.6), pt(47.6, 114.6)))
     crease(listOf(pt(38.4, 149), pt(42, 149.8), pt(45.6, 149)))
 }
 
