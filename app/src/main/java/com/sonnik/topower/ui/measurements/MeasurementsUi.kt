@@ -134,11 +134,14 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
     val names = MeasurementPart.entries.associateWith { stringResource(partNameRes(it)) }
     val noValue = stringResource(R.string.measure_no_value)
     val cmFormat = stringResource(R.string.measure_cm, "%s")
-    fun valueText(part: MeasurementPart): String {
-        val m = latest[part] ?: return noValue
-        val delta = m.deltaCm?.takeIf { kotlin.math.abs(it) >= 0.05 }
-            ?.let { " (" + (if (it > 0) "+" else "−") + formatNumber(kotlin.math.abs(it), 1) + ")" }.orEmpty()
-        return cmFormat.format(formatNumber(m.valueCm, 1)) + delta
+    val goodColor = Color(0xFF2E7D32)
+    fun valueText(part: MeasurementPart): String = latest[part]?.let { cmFormat.format(formatNumber(it.valueCm, 1)) } ?: noValue
+    fun deltaText(part: MeasurementPart): String? = latest[part]?.deltaCm?.takeIf { kotlin.math.abs(it) >= 0.05 }
+        ?.let { (if (it > 0) "+" else "−") + formatNumber(kotlin.math.abs(it), 1) }
+    /** Рост обхватов рук и груди — хорошо, талии — наоборот. */
+    fun deltaGood(part: MeasurementPart): Boolean {
+        val d = latest[part]?.deltaCm ?: return false
+        return if (part == MeasurementPart.WAIST) d < 0 else d > 0
     }
 
     Canvas(Modifier.fillMaxWidth().height(260.dp)) {
@@ -167,21 +170,51 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
                 textSize = 13.sp.toPx(); color = textColor.toArgb(); typeface = Typeface.DEFAULT_BOLD
             }
             val pad = 6.dp.toPx()
+            val side = left - pad * 2.5f // место под подписи с каждой стороны
+            val deltaPaint = Paint(nameText)
+            // Подписи разносим по высоте, чтобы не наезжали: не ближе [gap] друг к другу.
+            val gap = 50.dp.toPx()
+            fun place(parts: List<MeasurementPart>): Map<MeasurementPart, Float> {
+                val ys = mutableMapOf<MeasurementPart, Float>()
+                var prev = Float.NEGATIVE_INFINITY
+                parts.sortedBy { measurementLine(it, female).first.y }.forEach { p ->
+                    val lineY = measurementLine(p, female).first.y * scale
+                    val y = maxOf(lineY - 8.dp.toPx(), prev + gap).coerceIn(14.dp.toPx(), size.height - 30.dp.toPx())
+                    ys[p] = y
+                    prev = y
+                }
+                return ys
+            }
+            val labelY = place(LEFT_PARTS) + place(MeasurementPart.entries - LEFT_PARTS.toSet())
+            fun Paint.fit(text: String, base: Float) {
+                textSize = base
+                val w = measureText(text)
+                if (w > side) textSize = base * side / w
+            }
             MeasurementPart.entries.forEach { part ->
                 val (a, b) = measurementLine(part, female)
                 val y = a.y * scale
                 canvas.drawLine(left + a.x * scale, y, left + b.x * scale, y, dash)
                 val onLeft = part in LEFT_PARTS
+                val ly = labelY.getValue(part)
                 // Выносная линия от края пунктира к подписи у края карточки.
                 val from = if (onLeft) left + a.x * scale else left + b.x * scale
                 val to = if (onLeft) left - pad else left + figW + pad
-                canvas.drawLine(from, y, to, y, leader)
+                canvas.drawLine(from, y, to, ly, leader)
                 val align = if (onLeft) Paint.Align.RIGHT else Paint.Align.LEFT
+                val textX = if (onLeft) to - pad / 2 else to + pad / 2
                 nameText.textAlign = align
                 valueTextPaint.textAlign = align
-                val textX = if (onLeft) to - pad / 2 else to + pad / 2
-                canvas.drawText(names.getValue(part), textX, y - 4.dp.toPx(), nameText)
-                canvas.drawText(valueText(part), textX, y + 14.dp.toPx(), valueTextPaint)
+                deltaPaint.textAlign = align
+                nameText.fit(names.getValue(part), 12.sp.toPx())
+                canvas.drawText(names.getValue(part), textX, ly - 2.dp.toPx(), nameText)
+                valueTextPaint.fit(valueText(part), 14.sp.toPx())
+                canvas.drawText(valueText(part), textX, ly + 15.dp.toPx(), valueTextPaint)
+                deltaText(part)?.let { d ->
+                    deltaPaint.color = (if (deltaGood(part)) goodColor else mutedColor).toArgb()
+                    deltaPaint.fit(d, 12.sp.toPx())
+                    canvas.drawText(d, textX, ly + 30.dp.toPx(), deltaPaint)
+                }
             }
         }
     }
