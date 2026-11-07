@@ -117,7 +117,7 @@ class EcosystemProviderTest {
         assertNull(active["finished_at"])
         assertNull(active["duration_sec"])
         assertNull(active["calories"])
-        assertEquals(2L, active["working_sets"]) // разминка не считается
+        assertEquals(5L, active["working_sets"]) // жим 1 + подтягивания 1 + планка 3; разминка не считается
         assertEquals(78.8, active["body_weight_kg"])
         assertEquals(2 * 14.0 * 12 + 78.8 * 8, active["tonnage_kg"] as Double, 1e-6) // жим парой + подтягивания с весом тела
         workouts.forEach { assertEquals(36, (it["id"] as String).length) }
@@ -248,8 +248,11 @@ class EcosystemProviderTest {
         }
         assertTrue("observer was not called", calls.get() > 0)
 
+        // Своя база приложения тоже может отметить изменение в этот момент — тогда отметка будет текущим временем.
+        val started = System.currentTimeMillis()
         EcosystemChanges.onDataChanged(context, now = 1234L)
-        assertEquals(1234L, EcosystemChanges.lastChangedAt(context))
+        val stamp = EcosystemChanges.lastChangedAt(context)
+        assertTrue("last_changed_at = $stamp", stamp == 1234L || stamp >= started)
         assertTrue(rows(EcosystemContract.Info.URI).single()["last_changed_at"] as Long >= 1234L)
         val notified = shadowOf(context.contentResolver).notifiedUris.map { it.uri.toString() }
         assertTrue(notified.toString(), EcosystemContract.BASE_URI in notified)
