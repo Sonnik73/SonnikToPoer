@@ -553,7 +553,10 @@
     <string name="measure_forearm">Forearm</string>
     <string name="measure_chest">Chest</string>
     <string name="measure_waist">Waist</string>
+    <string name="measure_hips">Hips</string>
+    <string name="measure_thigh">Thigh</string>
+    <string name="measure_calf">Calf</string>
     <string name="measure_field">%s, cm</string>
     <string name="measure_previous">Last time: %s cm</string>
-    <string name="measure_hint">Use a tape measure at the same time of day, ideally in the morning. Biceps and forearm at the widest point of the flexed arm, chest on an exhale at the fullest line, waist at the narrowest point. Empty fields are not saved.</string>
+    <string name="measure_hint">Use a tape measure at the same time of day, ideally in the morning. Biceps and forearm at the widest point of the flexed arm, chest on an exhale at the fullest line, waist at the narrowest point, hips at the fullest point of the glutes, thigh just below the glute fold, calf at the widest point. Empty fields are not saved.</string>
 </resources>

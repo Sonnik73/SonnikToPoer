@@ -542,7 +542,10 @@
     <string name="measure_forearm">Предплечье</string>
     <string name="measure_chest">Грудь</string>
     <string name="measure_waist">Талия</string>
+    <string name="measure_hips">Ягодицы</string>
+    <string name="measure_thigh">Бедро</string>
+    <string name="measure_calf">Икра</string>
     <string name="measure_field">%s, см</string>
     <string name="measure_previous">Прошлый раз: %s см</string>
-    <string name="measure_hint">Мерьте сантиметровой лентой в одно и то же время, лучше утром. Бицепс и предплечье — в самом широком месте напряжённой руки, грудь — на выдохе по самой выступающей линии, талия — в самом узком месте. Пустые поля не сохранятся.</string>
+    <string name="measure_hint">Мерьте сантиметровой лентой в одно и то же время, лучше утром. Бицепс и предплечье — в самом широком месте напряжённой руки, грудь — на выдохе по самой выступающей линии, талия — в самом узком месте, ягодицы — по самой выступающей точке, бедро — под ягодичной складкой, икра — в самом широком месте. Пустые поля не сохранятся.</string>
 </resources>

@@ -535,8 +535,8 @@ private fun Canvas.drawFigure(
 }
 
 /**
- * Линия замера на фигуре спереди в координатах схемы 100×200: плечо и предплечье — на левой
- * (по экрану) руке, грудь и талия — поперёк корпуса. Для женской фигуры — в её пропорциях.
+ * Линия замера на фигуре спереди в координатах схемы 100×200: плечо, предплечье, бедро и икра —
+ * на левой (по экрану) руке и ноге, грудь, талия и ягодицы — поперёк корпуса. Для женской фигуры — в её пропорциях.
  */
 fun measurementLine(part: MeasurementPart, female: Boolean): Pair<PointF, PointF> = synchronized(FIGURE_LOCK) {
     fun line() = when (part) {
@@ -544,6 +544,9 @@ fun measurementLine(part: MeasurementPart, female: Boolean): Pair<PointF, PointF
         MeasurementPart.FOREARM -> pt(18.8, 70) to pt(26.8, 70)
         MeasurementPart.CHEST -> pt(31.2, 41) to pt(68.8, 41)
         MeasurementPart.WAIST -> pt(35, 74) to pt(65, 74)
+        MeasurementPart.HIPS -> pt(33.6, 97) to pt(66.4, 97)
+        MeasurementPart.THIGH -> pt(33.3, 117) to pt(49.4, 117)
+        MeasurementPart.CALF -> pt(35.1, 161) to pt(46.4, 161)
     }
     if (female) female { line() } else line()
 }

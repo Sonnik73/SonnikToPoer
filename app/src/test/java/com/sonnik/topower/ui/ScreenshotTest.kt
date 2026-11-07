@@ -200,7 +200,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.38")
+        waitText("Версия 1.39")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -461,11 +461,13 @@ suspend fun seedDemoData(repo: Repository, settings: AppSettings) {
     }
     // Замеры тела: месяц назад и два дня назад.
     repo.saveMeasurements(
-        mapOf(MeasurementPart.BICEPS to 36.0, MeasurementPart.FOREARM to 29.5, MeasurementPart.CHEST to 101.0, MeasurementPart.WAIST to 84.0),
+        mapOf(MeasurementPart.BICEPS to 36.0, MeasurementPart.FOREARM to 29.5, MeasurementPart.CHEST to 101.0, MeasurementPart.WAIST to 84.0,
+            MeasurementPart.HIPS to 98.0, MeasurementPart.THIGH to 58.0, MeasurementPart.CALF to 38.0),
         takenAt = now - 30 * day,
     )
     repo.saveMeasurements(
-        mapOf(MeasurementPart.BICEPS to 37.2, MeasurementPart.FOREARM to 30.0, MeasurementPart.CHEST to 103.5, MeasurementPart.WAIST to 82.5),
+        mapOf(MeasurementPart.BICEPS to 37.2, MeasurementPart.FOREARM to 30.0, MeasurementPart.CHEST to 103.5, MeasurementPart.WAIST to 82.5,
+            MeasurementPart.HIPS to 99.5, MeasurementPart.THIGH to 59.5, MeasurementPart.CALF to 38.5),
         takenAt = now - 2 * day,
     )
     // Ноги — полтора дня назад: на схеме промежуточный цвет между красным и зелёным.

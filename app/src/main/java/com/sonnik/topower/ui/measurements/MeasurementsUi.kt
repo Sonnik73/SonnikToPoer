@@ -73,10 +73,13 @@ fun partNameRes(part: MeasurementPart): Int = when (part) {
     MeasurementPart.FOREARM -> R.string.measure_forearm
     MeasurementPart.CHEST -> R.string.measure_chest
     MeasurementPart.WAIST -> R.string.measure_waist
+    MeasurementPart.HIPS -> R.string.measure_hips
+    MeasurementPart.THIGH -> R.string.measure_thigh
+    MeasurementPart.CALF -> R.string.measure_calf
 }
 
 /** Подписи слева — руки, справа — корпус. */
-private val LEFT_PARTS = listOf(MeasurementPart.BICEPS, MeasurementPart.FOREARM)
+private val LEFT_PARTS = listOf(MeasurementPart.BICEPS, MeasurementPart.FOREARM, MeasurementPart.THIGH, MeasurementPart.CALF)
 
 /**
  * Карточка «Замеры тела»: фигура спереди с пунктирами мест замеров и подписями сбоку
@@ -121,7 +124,7 @@ fun MeasurementsCard(modifier: Modifier = Modifier) {
     }
 }
 
-/** Фигура с пунктирами замеров и выносными подписями: руки — слева, грудь и талия — справа. */
+/** Фигура с пунктирами замеров и выносными подписями: рука и нога — слева, грудь, талия и ягодицы — справа. */
 @Composable
 private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
     val female = LocalFemaleBody.current
@@ -138,13 +141,13 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
     fun valueText(part: MeasurementPart): String = latest[part]?.let { cmFormat.format(formatNumber(it.valueCm, 1)) } ?: noValue
     fun deltaText(part: MeasurementPart): String? = latest[part]?.deltaCm?.takeIf { kotlin.math.abs(it) >= 0.05 }
         ?.let { (if (it > 0) "+" else "−") + formatNumber(kotlin.math.abs(it), 1) }
-    /** Рост обхватов рук и груди — хорошо, талии — наоборот. */
+    /** Рост обхватов — хорошо, кроме талии: там наоборот. */
     fun deltaGood(part: MeasurementPart): Boolean {
         val d = latest[part]?.deltaCm ?: return false
         return if (part == MeasurementPart.WAIST) d < 0 else d > 0
     }
 
-    Canvas(Modifier.fillMaxWidth().height(260.dp)) {
+    Canvas(Modifier.fillMaxWidth().height(300.dp)) {
         val figH = size.height
         val figW = figH / 2f
         val left = (size.width - figW) / 2f

@@ -204,7 +204,7 @@ data class EquipmentEntity(
 }
 
 /** Место замера тела. Хранится по имени, поэтому новые места добавляются только в конец. */
-enum class MeasurementPart { BICEPS, FOREARM, CHEST, WAIST }
+enum class MeasurementPart { BICEPS, FOREARM, CHEST, WAIST, HIPS, THIGH, CALF }
 
 /** Замер тела в сантиметрах: [part] — имя [MeasurementPart], [takenAt] — когда измерено. */
 @Serializable

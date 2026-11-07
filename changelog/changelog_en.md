@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.39
+- Body measurements: added hips, thigh and calf — dashed lines on the figure, fields in Measure now and charts in the history
+
 ## 1.38
 - Body measurements: a figure on the home screen with dashed lines — biceps, forearm, chest, waist — showing the latest values and change; Measure now saves girths in cm with the date, plus a history with a chart
 
