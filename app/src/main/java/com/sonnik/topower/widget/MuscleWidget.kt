@@ -64,6 +64,7 @@ class MuscleWidget : AppWidgetProvider() {
                 bodyColor = bodyColor,
                 gapColor = gapColor,
                 height = IMAGE_HEIGHT_PX,
+                female = (context.applicationContext as SonnikApp).settings.femaleBody.value,
             )
 
             val views = RemoteViews(context.packageName, R.layout.widget_muscles).apply {

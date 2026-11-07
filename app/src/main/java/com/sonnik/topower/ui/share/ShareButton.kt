@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
+import com.sonnik.topower.ui.muscles.LocalFemaleBody
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetWithContext
 import com.sonnik.topower.data.WorkoutEntity
@@ -98,6 +99,7 @@ fun ShareResultsButton(
             else ShareTile(week.sets.toString(), stringResource(R.string.share_sets)),
         ),
         musclesTitle = stringResource(R.string.share_muscles),
+        femaleBody = LocalFemaleBody.current,
         volume = volume,
         muscleNames = Muscle.entries.associateWith { muscleName(it) },
         setsFormat = stringResource(R.string.volume_sets),

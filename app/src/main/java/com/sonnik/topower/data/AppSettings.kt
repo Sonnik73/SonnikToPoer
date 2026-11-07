@@ -33,6 +33,14 @@ class AppSettings(context: Context) {
     )
     val themePalette: StateFlow<ThemePalette> = _themePalette.asStateFlow()
 
+    /** Женский силуэт на схемах мышц. */
+    private val _femaleBody = MutableStateFlow(prefs.getBoolean(KEY_FEMALE_BODY, false))
+    val femaleBody: StateFlow<Boolean> = _femaleBody.asStateFlow()
+
+    /** Вопрос «пол для схемы мышц» уже задан (один раз — при первом запуске или после обновления). */
+    private val _bodyTypeAsked = MutableStateFlow(prefs.getBoolean(KEY_BODY_ASKED, false))
+    val bodyTypeAsked: StateFlow<Boolean> = _bodyTypeAsked.asStateFlow()
+
     /** Чёрный фон в тёмной теме (AMOLED). */
     private val _pureBlack = MutableStateFlow(prefs.getBoolean(KEY_PURE_BLACK, false))
     val pureBlack: StateFlow<Boolean> = _pureBlack.asStateFlow()
@@ -111,6 +119,17 @@ class AppSettings(context: Context) {
         _themePalette.value = value
     }
 
+    fun setFemaleBody(value: Boolean) {
+        prefs.edit().putBoolean(KEY_FEMALE_BODY, value).putBoolean(KEY_BODY_ASKED, true).apply()
+        _femaleBody.value = value
+        _bodyTypeAsked.value = true
+    }
+
+    fun setBodyTypeAsked(value: Boolean) {
+        prefs.edit().putBoolean(KEY_BODY_ASKED, value).apply()
+        _bodyTypeAsked.value = value
+    }
+
     fun setPureBlack(value: Boolean) {
         prefs.edit().putBoolean(KEY_PURE_BLACK, value).apply()
         _pureBlack.value = value
@@ -142,6 +161,8 @@ class AppSettings(context: Context) {
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_THEME_PALETTE = "theme_palette"
         private const val KEY_PURE_BLACK = "theme_pure_black"
+        private const val KEY_FEMALE_BODY = "female_body"
+        private const val KEY_BODY_ASKED = "body_type_asked"
         private const val KEY_PLATEAU_ON = "plateau_enabled"
         private const val KEY_PLATEAU_N = "plateau_sessions"
         private const val KEY_LAST_SEEN_VERSION = "last_seen_version"

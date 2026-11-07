@@ -27,6 +27,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -128,6 +131,7 @@ fun AppRoot() {
 
     val openSettings: () -> Unit = { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } }
     WhatsNewOnUpdate(openChangelog = { nav.navigate(Routes.CHANGELOG) })
+    BodyTypeQuestion()
     // Новая версия на GitHub: проверка при входе (не чаще раза в 6 часов) и окна ручной проверки.
     val updates = (LocalContext.current.applicationContext as SonnikApp).updates
     LaunchedEffect(Unit) { if (Flavor.UPDATE_CHECKS) updates.checkIfDue() }
@@ -272,4 +276,19 @@ private fun BottomBar(current: Tab?, onSelect: (Tab) -> Unit) {
             }
         }
     }
+}
+
+/** Один раз — при первом запуске или после обновления — спрашивает пол для схемы мышц. */
+@Composable
+private fun BodyTypeQuestion() {
+    val settings = LocalAppSettings.current
+    val asked by settings.bodyTypeAsked.collectAsStateWithLifecycle()
+    if (asked) return
+    AlertDialog(
+        onDismissRequest = { settings.setBodyTypeAsked(true) },
+        title = { Text(stringResource(R.string.body_question_title)) },
+        text = { Text(stringResource(R.string.body_question_text)) },
+        confirmButton = { TextButton(onClick = { settings.setFemaleBody(true) }) { Text(stringResource(R.string.body_female_answer)) } },
+        dismissButton = { TextButton(onClick = { settings.setFemaleBody(false) }) { Text(stringResource(R.string.body_male_answer)) } },
+    )
 }

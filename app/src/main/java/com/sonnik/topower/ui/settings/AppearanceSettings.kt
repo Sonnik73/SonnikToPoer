@@ -49,6 +49,7 @@ fun AppearanceSettings() {
     val mode by settings.themeMode.collectAsStateWithLifecycle()
     val palette by settings.themePalette.collectAsStateWithLifecycle()
     val pureBlack by settings.pureBlack.collectAsStateWithLifecycle()
+    val femaleBody by settings.femaleBody.collectAsStateWithLifecycle()
     val dark = isDarkTheme(mode)
 
     SectionCard {
@@ -61,6 +62,11 @@ fun AppearanceSettings() {
                     label = { Text(stringResource(modeLabel(m))) },
                 )
             }
+        }
+        Text(stringResource(R.string.body_type_title), style = MaterialTheme.typography.bodyMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(selected = !femaleBody, onClick = { settings.setFemaleBody(false) }, label = { Text(stringResource(R.string.body_male)) })
+            FilterChip(selected = femaleBody, onClick = { settings.setFemaleBody(true) }, label = { Text(stringResource(R.string.body_female)) })
         }
         Text(stringResource(R.string.theme_palette), style = MaterialTheme.typography.bodyMedium)
         ThemePalette.available.chunked(COLUMNS).forEach { row ->

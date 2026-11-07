@@ -52,6 +52,22 @@ class BodyMapTest {
         }
     }
 
+    @Test fun femaleFigureHasSameMuscles() {
+        assertEquals(Muscle.CHEST, muscleAt(back = false, x = 43f, y = 44f, female = true))
+        assertEquals(Muscle.ABS, muscleAt(back = false, x = 47.5f, y = 65f, female = true))
+        assertEquals(Muscle.GLUTES, muscleAt(back = true, x = 40f, y = 102f, female = true))
+        val bitmap = renderBodyBitmap(
+            colorOf = { if (it == Muscle.GLUTES) 0xFFE53935.toInt() else 0xFFC3C9D1.toInt() },
+            bodyColor = 0xFFE4E7EB.toInt(),
+            gapColor = 0xFFFFFFFF.toInt(),
+            height = 360,
+            female = true,
+        )
+        File("build/screenshots").apply { mkdirs() }.resolve("35-widget-body-female.png").outputStream().use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+    }
+
     @Test fun tapOutsideMuscles() {
         assertNull(muscleAt(back = false, x = 5f, y = 5f))
         assertNull(muscleAt(back = true, x = 50f, y = 13f))

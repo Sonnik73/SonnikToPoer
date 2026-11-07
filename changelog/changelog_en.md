@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.36
+- A female muscle map: the app asks once on first launch, and you can switch in Settings → Appearance — figure, proportions and chest shape change on the maps, the widget and the share card
+
 ## 1.35
 - Links to GitHub in About: star the project and leave feedback, an idea or a bug report
 

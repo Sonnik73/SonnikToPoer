@@ -40,6 +40,8 @@ data class ShareCardData(
     val records: List<ShareRecordLine>,
     val noRecords: String,
     val footer: String,
+    /** Женский силуэт на схеме мышц. */
+    val femaleBody: Boolean = false,
 )
 
 const val SHARE_WIDTH = 1080
@@ -117,6 +119,7 @@ fun renderShareCard(data: ShareCardData): Bitmap {
         bodyColor = BodyColor,
         gapColor = CardColor,
         height = 400,
+        female = data.femaleBody,
     )
     canvas.drawBitmap(body, left - 10f, 688f, null)
 

@@ -13,6 +13,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -37,7 +38,44 @@ import android.graphics.Path as APath
 
 private typealias Pt = PointF
 
-private fun pt(x: Number, y: Number) = PointF(x.toFloat(), y.toFloat())
+/*
+ * Женская фигура строится из тех же точек, пересчитанных по пропорциям: уже плечи и талия, шире бёдра.
+ * Пересчёт зависит только от высоты и расстояния до оси, поэтому зеркальные части остаются зеркальными.
+ */
+private var buildingFemale = false
+
+/** Все фигуры строятся под одной блокировкой: флаг [buildingFemale] общий. */
+private val FIGURE_LOCK = Any()
+
+/** Ширина женской фигуры относительно мужской на высоте y (опорные точки, между ними — линейно). */
+private val FEMALE_WIDTH = listOf(
+    0f to 0.94f, 20f to 0.94f, 26f to 0.9f, 42f to 0.91f, 55f to 0.9f, 66f to 0.86f, 80f to 0.88f,
+    92f to 1.02f, 104f to 1.07f, 118f to 1.04f, 140f to 1f, 160f to 0.97f, 200f to 0.97f,
+)
+
+private fun femaleWidth(x: Float, y: Float): Float {
+    // Руки от плеча до кисти сужаются вместе с плечами и не меняют форму.
+    if (kotlin.math.abs(x - 50f) > 19.5f && y in 28f..102f) return 0.9f
+    val i = FEMALE_WIDTH.indexOfFirst { it.first >= y }.coerceAtLeast(1)
+    val (y0, k0) = FEMALE_WIDTH[i - 1]
+    val (y1, k1) = FEMALE_WIDTH[i]
+    return k0 + (k1 - k0) * ((y - y0) / (y1 - y0)).coerceIn(0f, 1f)
+}
+
+private fun pt(x: Number, y: Number): PointF {
+    val px = x.toFloat()
+    val py = y.toFloat()
+    return if (buildingFemale) PointF(50f + (px - 50f) * femaleWidth(px, py), py) else PointF(px, py)
+}
+
+private fun <T> female(block: () -> T): T {
+    buildingFemale = true
+    try {
+        return block()
+    } finally {
+        buildingFemale = false
+    }
+}
 
 private fun mirror(points: List<Pt>): List<Pt> = points.map { PointF(100f - it.x, it.y) }
 
@@ -95,7 +133,9 @@ private fun splineSamples(points: List<Pt>): List<Pt> {
 }
 
 private fun APath.oval(cx: Float, cy: Float, rx: Float, ry: Float) {
-    addOval(RectF(cx - rx, cy - ry, cx + rx, cy + ry), APath.Direction.CW)
+    val c = pt(cx, cy)
+    val sx = if (buildingFemale) femaleWidth(cx, cy) else 1f
+    addOval(RectF(c.x - rx * sx, c.y - ry, c.x + rx * sx, c.y + ry), APath.Direction.CW)
 }
 
 /** Ломаная из [n] точек, равномерно распределённых по длине [chain]. */
@@ -269,7 +309,12 @@ private fun frontFigure() = figure {
     sym(Muscle.TRAPS, 160f, listOf(pt(45, 25.5), pt(40, 28.2), pt(34.5, 30.2), pt(40, 30.8), pt(44.5, 29.5)))
     sym(Muscle.SIDE_DELTS, 100f, listOf(pt(30, 30.5), pt(25.8, 32.2), pt(23.4, 37.5), pt(23.8, 44), pt(26.5, 43), pt(27.3, 36.5)), fan = pt(24.6, 43.6))
     sym(Muscle.FRONT_DELTS, 105f, listOf(pt(34, 30), pt(29.5, 31), pt(27.6, 35.5), pt(27.8, 41.5), pt(30, 45), pt(33, 41), pt(34.5, 35.5)), fan = pt(29.6, 44.5))
-    sym(Muscle.CHEST, 20f, listOf(pt(49.2, 32), pt(44, 30.8), pt(38.5, 31.2), pt(34.8, 34.5), pt(33.6, 40), pt(35.5, 45.5), pt(40, 49), pt(45, 50), pt(49.2, 49)), fan = pt(33.8, 38.5))
+    if (buildingFemale) {
+        // Женская грудь — круглее и ниже.
+        sym(Muscle.CHEST, 20f, listOf(pt(49.2, 33.5), pt(44, 32), pt(38.6, 33.2), pt(35.2, 37.6), pt(34.6, 43.4), pt(36.8, 49), pt(41.2, 52.2), pt(45.6, 52), pt(49.2, 50)), fan = pt(34.4, 39.5))
+    } else {
+        sym(Muscle.CHEST, 20f, listOf(pt(49.2, 32), pt(44, 30.8), pt(38.5, 31.2), pt(34.8, 34.5), pt(33.6, 40), pt(35.5, 45.5), pt(40, 49), pt(45, 50), pt(49.2, 49)), fan = pt(33.8, 38.5))
+    }
     sym(Muscle.BICEPS, 95f, listOf(pt(30, 45.5), pt(26.6, 46.4), pt(24.8, 50.5), pt(24.8, 56), pt(25.9, 60.8), pt(28.2, 60.4), pt(29.8, 55), pt(30.6, 49)))
     sym(Muscle.BRACHIALIS, 98f, listOf(pt(24.2, 49), pt(22.8, 52.5), pt(22.5, 57.5), pt(23.5, 62.2), pt(25.2, 61.8), pt(24.2, 57), pt(24.1, 52.5)))
     sym(Muscle.FOREARMS, 100f, listOf(pt(26.5, 63.5), pt(22, 64.8), pt(19.3, 72), pt(17.6, 82), pt(17.2, 90), pt(20, 90.8), pt(22.4, 82), pt(25, 73), pt(27, 67.5)))
@@ -332,22 +377,38 @@ private fun backFigure() = figure {
     crease(listOf(pt(38.4, 149), pt(42, 149.8), pt(45.6, 149)))
 }
 
-private val SILHOUETTE by lazy { silhouette() }
-private val FRONT by lazy { frontFigure() }
-private val BACK by lazy { backFigure() }
+private val SILHOUETTE by lazy(FIGURE_LOCK) { silhouette() }
+private val FRONT by lazy(FIGURE_LOCK) { frontFigure() }
+private val BACK by lazy(FIGURE_LOCK) { backFigure() }
+private val SILHOUETTE_F by lazy(FIGURE_LOCK) { female { silhouette() } }
+private val FRONT_F by lazy(FIGURE_LOCK) { female { frontFigure() } }
+private val BACK_F by lazy(FIGURE_LOCK) { female { backFigure() } }
 
-private fun figureOf(back: Boolean) = if (back) BACK else FRONT
+/** Волосы: спереди — за головой (видны по бокам и у шеи), сзади — поверх затылка. */
+private val HAIR_FRONT by lazy(FIGURE_LOCK) {
+    female { APath().apply { spline(listOf(pt(50, 1.5), pt(44, 3.5), pt(41.2, 10), pt(41, 18), pt(42.4, 25), pt(45.5, 27), pt(50, 25.5), pt(54.5, 27), pt(57.6, 25), pt(59, 18), pt(58.8, 10), pt(56, 3.5))) } }
+}
+private val HAIR_BACK by lazy(FIGURE_LOCK) {
+    female { APath().apply { spline(listOf(pt(50, 1.5), pt(44, 3.5), pt(41.2, 10), pt(41.3, 17), pt(43, 22.5), pt(47, 23.8), pt(50, 22.6), pt(53, 23.8), pt(57, 22.5), pt(58.7, 17), pt(58.8, 10), pt(56, 3.5))) } }
+}
+
+private fun figureOf(back: Boolean, female: Boolean = false) = when {
+    female && back -> BACK_F
+    female -> FRONT_F
+    back -> BACK
+    else -> FRONT
+}
 
 /** Мышцы, видимые на схеме спереди и сзади. */
 val FRONT_MUSCLES: Set<Muscle> get() = FRONT.muscles.keys
 val BACK_MUSCLES: Set<Muscle> get() = BACK.muscles.keys
 
 /** Мышца под точкой ([x], [y]) в координатах схемы 100×200 или null. Верхние слои проверяются первыми. */
-fun muscleAt(back: Boolean, x: Float, y: Float): Muscle? {
+fun muscleAt(back: Boolean, x: Float, y: Float, female: Boolean = false): Muscle? {
     // Region работает с целыми координатами — увеличиваем схему в 10 раз для точности.
     val zoom = Matrix().apply { setScale(10f, 10f) }
     val clip = Region(0, 0, 1000, 2000)
-    return figureOf(back).muscles.entries.reversed().firstOrNull { (_, shapes) ->
+    return figureOf(back, female).muscles.entries.reversed().firstOrNull { (_, shapes) ->
         shapes.any { s ->
             val scaled = APath(s.path).apply { transform(zoom) }
             Region().apply { setPath(scaled, clip) }.contains((x * 10).toInt(), (y * 10).toInt())
@@ -386,12 +447,16 @@ private fun Canvas.drawFigure(
     gapColor: Int,
     selected: Muscle?,
     selectedColor: Int,
+    female: Boolean = false,
 ) {
-    val figure = figureOf(back)
+    val figure = figureOf(back, female)
+    val silhouette = if (female) SILHOUETTE_F else SILHOUETTE
     val fill = Paint(Paint.ANTI_ALIAS_FLAG)
+    val hair = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = lerp(Color(bodyColor), Color.Black, 0.2f).toArgb() }
+    if (female && !back) drawPath(HAIR_FRONT, hair)
     // Контур: обводка под заливкой видна только снаружи силуэта.
     val outline = strokePaint(lerp(Color(bodyColor), Color.Black, 0.1f).toArgb(), OUTLINE_WIDTH)
-    SILHOUETTE.forEach { drawPath(it, outline) }
+    silhouette.forEach { drawPath(it, outline) }
     // Тело чуть светлее сверху, будто освещено сверху.
     fill.shader = LinearGradient(
         0f, 0f, 0f, 200f,
@@ -399,8 +464,9 @@ private fun Canvas.drawFigure(
         lerp(Color(bodyColor), Color.Black, 0.06f).toArgb(),
         Shader.TileMode.CLAMP,
     )
-    SILHOUETTE.forEach { drawPath(it, fill) }
+    silhouette.forEach { drawPath(it, fill) }
     fill.shader = null
+    if (female && back) drawPath(HAIR_BACK, hair)
 
     // Сухожилия — светлее тела; мышцы ложатся поверх.
     val tendonColor = lerp(Color(bodyColor), Color.White, 0.6f).toArgb()
@@ -450,6 +516,9 @@ private fun Canvas.drawFigure(
     }
 }
 
+/** Женский силуэт на схемах — по настройке «Схема мышц». */
+val LocalFemaleBody = staticCompositionLocalOf { false }
+
 /**
  * Тело спереди ([back] = false) или сзади с мышцами, окрашенными через [colorOf].
  * [bodyColor] — силуэт, [gapColor] — тонкие промежутки между мышцами (цвет фона карточки).
@@ -465,11 +534,12 @@ fun BodyFigure(
     selected: Muscle? = null,
     selectedColor: Color = Color.Black,
     onTap: ((Muscle) -> Unit)? = null,
+    female: Boolean = LocalFemaleBody.current,
 ) {
-    val tap = if (onTap == null) Modifier else Modifier.pointerInput(back, onTap) {
+    val tap = if (onTap == null) Modifier else Modifier.pointerInput(back, onTap, female) {
         detectTapGestures { offset ->
             val scale = size.width / 100f
-            muscleAt(back, offset.x / scale, offset.y / scale)?.let(onTap)
+            muscleAt(back, offset.x / scale, offset.y / scale, female)?.let(onTap)
         }
     }
     Canvas(modifier.aspectRatio(0.5f).then(tap)) {
@@ -485,6 +555,7 @@ fun BodyFigure(
                 gapColor = gapColor.toArgb(),
                 selected = selected,
                 selectedColor = selectedColor.toArgb(),
+                female = female,
             )
             canvas.restore()
         }
@@ -495,7 +566,13 @@ fun BodyFigure(
  * Тело спереди и сзади рядом одной картинкой — для виджета (там нет Compose).
  * [colorOf] — цвет мышцы (ARGB), [height] — высота картинки в пикселях.
  */
-fun renderBodyBitmap(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, height: Int): android.graphics.Bitmap {
+fun renderBodyBitmap(
+    colorOf: (Muscle) -> Int,
+    bodyColor: Int,
+    gapColor: Int,
+    height: Int,
+    female: Boolean = false,
+): android.graphics.Bitmap {
     val scale = height / 200f
     val gap = 12f
     val bitmap = android.graphics.Bitmap.createBitmap(((200 + gap) * scale).toInt(), height, android.graphics.Bitmap.Config.ARGB_8888)
@@ -504,7 +581,7 @@ fun renderBodyBitmap(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, he
         canvas.save()
         canvas.translate(i * (100 + gap) * scale, 0f)
         canvas.scale(scale, scale)
-        canvas.drawFigure(back, colorOf, bodyColor, gapColor, selected = null, selectedColor = 0)
+        canvas.drawFigure(back, colorOf, bodyColor, gapColor, selected = null, selectedColor = 0, female = female)
         canvas.restore()
     }
     return bitmap

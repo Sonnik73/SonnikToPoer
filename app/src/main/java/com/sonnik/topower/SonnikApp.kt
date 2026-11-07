@@ -53,7 +53,8 @@ class SonnikApp : Application() {
                 settings.reminders,
                 repository.dao.observeMuscleWork(),
                 repository.dao.observeLastWorkoutStart(),
-            ) { _, rows, last -> muscleStatuses(rows) to last }
+                settings.femaleBody, // виджет перерисовывается и при смене схемы мышц
+            ) { _, rows, last, _ -> muscleStatuses(rows) to last }
                 .collectLatest { (statuses, last) ->
                     reminders.reschedule(statuses, last)
                     MuscleWidget.update(this@SonnikApp, statuses)

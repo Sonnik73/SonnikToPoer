@@ -524,4 +524,11 @@
     <string name="github_hint">Нравится приложение? Поставьте звезду на GitHub — так его проще найти другим. Там же можно оставить отзыв, идею или сообщить об ошибке.</string>
     <string name="github_star">★ Проект на GitHub</string>
     <string name="github_feedback">Отзыв, идея или ошибка</string>
+    <string name="body_type_title">Схема мышц</string>
+    <string name="body_male">Мужская</string>
+    <string name="body_female">Женская</string>
+    <string name="body_question_title">Ваш пол</string>
+    <string name="body_question_text">Нужен только для схемы мышц — мужской или женский силуэт. Изменить можно в настройках, в разделе «Оформление».</string>
+    <string name="body_male_answer">Мужской</string>
+    <string name="body_female_answer">Женский</string>
 </resources>

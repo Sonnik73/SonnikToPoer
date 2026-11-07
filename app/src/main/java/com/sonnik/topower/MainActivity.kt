@@ -14,6 +14,7 @@ import com.sonnik.topower.ui.AppRoot
 import com.sonnik.topower.ui.LocalAppSettings
 import com.sonnik.topower.ui.LocalRestTimer
 import com.sonnik.topower.ui.LocalRepository
+import com.sonnik.topower.ui.muscles.LocalFemaleBody
 import com.sonnik.topower.ui.theme.SonnikTheme
 import com.sonnik.topower.ui.theme.isDarkTheme
 
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
             val mode by app.settings.themeMode.collectAsStateWithLifecycle()
             val palette by app.settings.themePalette.collectAsStateWithLifecycle()
             val pureBlack by app.settings.pureBlack.collectAsStateWithLifecycle()
+            val femaleBody by app.settings.femaleBody.collectAsStateWithLifecycle()
             val dark = isDarkTheme(mode)
             // Значки строки состояния — под выбранную тему, а не под системную.
             DisposableEffect(dark) {
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     LocalRepository provides app.repository,
                     LocalAppSettings provides app.settings,
                     LocalRestTimer provides app.restTimer,
+                    LocalFemaleBody provides femaleBody,
                 ) {
                     AppRoot()
                 }

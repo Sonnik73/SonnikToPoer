@@ -71,6 +71,8 @@ class ScreenshotTest {
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
         // Без запросов к GitHub: окна обновлений тесты показывают сами.
         app.updates.setEnabled(false)
+        // Вопрос о схеме мышц тесты показывают сами.
+        app.settings.setBodyTypeAsked(true)
         // Приложение при старте само заполняет упражнения в главном потоке. Блокировать его
         // ожиданием нельзя (взаимная блокировка), поэтому готовим данные в фоне, прокручивая очередь.
         inBackground { seedDemoData(app.repository, app.settings) }
@@ -197,7 +199,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.35")
+        waitText("Версия 1.36")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -281,6 +283,16 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Отзыв, идея или ошибка"))
         waitText("★ Проект на GitHub")
+    }
+
+    @Test fun femaleBody() = shoot("33-female-body") {
+        ApplicationProvider.getApplicationContext<SonnikApp>().settings.setFemaleBody(true)
+        waitText("Можно тренировать", substring = true)
+    }
+
+    @Test fun bodyQuestion() = shoot("34-body-question") {
+        ApplicationProvider.getApplicationContext<SonnikApp>().settings.setBodyTypeAsked(false)
+        waitText("Ваш пол")
     }
 
     @Test fun settings() = shoot("08-settings") {
