@@ -51,6 +51,9 @@
     <string name="remove_exercise_confirm">Упражнение и его подходы будут убраны из этой тренировки.</string>
     <string name="sets_progress">Подходы: %1$d из %2$d</string>
     <string name="sets_count">Подходов: %d</string>
+    <string name="sets_done_short">%1$d из %2$d</string>
+    <string name="collapse">Свернуть</string>
+    <string name="expand">Развернуть</string>
     <string name="previous_time">Прошлый раз: %s</string>
     <string name="workout_empty_hint">Добавьте упражнения в тренировку</string>
     <string name="workout_finished_at">Завершена %s</string>

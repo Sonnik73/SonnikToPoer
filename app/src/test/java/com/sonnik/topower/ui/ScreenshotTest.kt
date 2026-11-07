@@ -97,6 +97,22 @@ class ScreenshotTest {
         waitText("Рекорд", substring = true)
     }
 
+    @Test fun workoutCollapsed() = shoot("37-workout-collapsed") {
+        openActiveWorkout()
+        waitText("Рекорд", substring = true)
+        listWith("Рекорд").performScrollToNode(hasText("3 из 3"))
+        waitText("Планка")
+    }
+
+    @Test fun workoutExpanded() = shoot("38-workout-expanded") {
+        openActiveWorkout()
+        waitText("Рекорд", substring = true)
+        listWith("Рекорд").performScrollToNode(hasText("3 из 3"))
+        click("Планка")
+        listWith("Рекорд").performScrollToNode(hasText("Подходы: 3 из 3"))
+        waitText("Подходы: 3 из 3")
+    }
+
     @Test fun restTimer() = shoot("29-rest-timer") {
         openActiveWorkout()
         waitText("Рекорд", substring = true)
@@ -200,7 +216,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.39")
+        waitText("Версия 1.40")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -487,6 +503,8 @@ suspend fun seedDemoData(repo: Repository, settings: AppSettings) {
             press to listOf(s(reps = 12, weight = 10.0, pair = true, eq = d10.id, warmup = true), s(reps = 12, weight = 14.0, pair = true, eq = d14.id)),
             pull to listOf(s(reps = 8)),
             row to emptyList(),
+            // План выполнен — упражнение свёрнуто в строку «3 из 3».
+            plank to List(3) { s(sec = 90) },
         ),
     )
 }

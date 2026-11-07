@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
@@ -46,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -55,6 +58,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
@@ -255,6 +259,9 @@ private fun WorkoutContent(
     val targets = if (workout.finishedAt != null) emptyMap() else items.map { it.exercise }.distinctBy { it.id }
         .associate { e -> e.id to targetFor(e, previous[e.id].orEmpty(), allEquipment) }
 
+    // Упражнения, которые пользователь развернул после выполнения плана; остальные выполненные — свёрнуты.
+    var expandedDone by rememberSaveable { mutableStateOf(emptyList<String>()) }
+
     LazyColumn(
         modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -313,7 +320,11 @@ private fun WorkoutContent(
         }
 
         items(items, key = { it.item.id }) { entry ->
-            ExerciseCard(
+            val planned = entry.item.plannedSets
+            val done = workout.finishedAt == null && planned != null && entry.sets.count { !it.isWarmup } >= planned
+            if (done && entry.item.id !in expandedDone) {
+                CollapsedExerciseCard(entry) { expandedDone = expandedDone + entry.item.id }
+            } else ExerciseCard(
                 entry = entry,
                 bodyWeight = workout.bodyWeight,
                 equipment = equipmentById,
@@ -323,6 +334,11 @@ private fun WorkoutContent(
                 plateauSessions = if (plateauEnabled) plateauSessions else null,
                 isFirst = entry == items.first(),
                 isLast = entry == items.last(),
+                onCollapse = if (done) {
+                    { expandedDone = expandedDone - entry.item.id }
+                } else {
+                    null
+                },
                 onAddSet = { setDialog = SetDialogState(entry, null) },
                 onEditSet = { setDialog = SetDialogState(entry, it) },
                 onMove = { delta -> repo.launch { moveWorkoutExercise(workout.id, entry.item.id, delta) } },
@@ -426,6 +442,10 @@ private fun WorkoutContent(
                 // После последнего запланированного подхода спрашиваем, насколько было тяжело.
                 val planned = state.item.item.plannedSets
                 val workingBefore = state.item.sets.count { !it.isWarmup }
+                // Последний запланированный подход сворачивает упражнение, даже если его разворачивали.
+                if (state.set == null && !values.isWarmup && planned != null && workingBefore + 1 == planned) {
+                    expandedDone = expandedDone - state.item.item.id
+                }
                 if (state.set == null && !values.isWarmup && planned != null && workingBefore + 1 == planned &&
                     exercise.muscles.isNotBlank() && state.item.item.recoveryHours == null
                 ) {
@@ -492,6 +512,7 @@ private fun ExerciseCard(
     plateauSessions: Int?,
     isFirst: Boolean,
     isLast: Boolean,
+    onCollapse: (() -> Unit)?,
     onAddSet: () -> Unit,
     onEditSet: (SetEntity) -> Unit,
     onMove: (Int) -> Unit,
@@ -519,6 +540,11 @@ private fun ExerciseCard(
                         color = if (planned != null && workingSets >= planned) MaterialTheme.colorScheme.tertiary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                if (onCollapse != null) {
+                    IconButton(onClick = onCollapse) {
+                        Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.collapse))
+                    }
                 }
                 if (exercise.technique.isNotBlank()) {
                     IconButton(onClick = { showTechnique = true }) {
@@ -607,6 +633,43 @@ private fun ExerciseCard(
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Spacer(Modifier.width(4.dp))
                 Text(stringResource(R.string.add_set))
+            }
+        }
+    }
+}
+
+/** Выполненное по плану упражнение одной строкой: название и «3 из 3»; нажатие разворачивает карточку. */
+@Composable
+private fun CollapsedExerciseCard(entry: WorkoutExerciseFull, onExpand: () -> Unit) {
+    val working = entry.sets.count { !it.isWarmup }
+    Card(Modifier.fillMaxWidth().clickable(onClick = onExpand)) {
+        Row(
+            Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                entry.exercise.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                stringResource(R.string.sets_done_short, working, entry.item.plannedSets ?: working),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+            IconButton(onClick = onExpand) {
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.expand))
             }
         }
     }

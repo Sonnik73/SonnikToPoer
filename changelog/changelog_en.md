@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.40
+- During a workout, an exercise with all planned sets done collapses into one line with its name and “3 of 3”; tap to expand, or ↑ to collapse again
+
 ## 1.39
 - Body measurements: added hips, thigh and calf — dashed lines on the figure, fields in Measure now and charts in the history
 

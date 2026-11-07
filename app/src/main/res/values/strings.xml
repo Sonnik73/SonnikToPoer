@@ -55,6 +55,9 @@
     <string name="remove_exercise_confirm">The exercise and its sets will be removed from this workout.</string>
     <string name="sets_progress">Sets: %1$d of %2$d</string>
     <string name="sets_count">Sets: %d</string>
+    <string name="sets_done_short">%1$d of %2$d</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
     <string name="previous_time">Last time: %s</string>
     <string name="workout_empty_hint">Add exercises to the workout</string>
     <string name="workout_finished_at">Finished %s</string>
