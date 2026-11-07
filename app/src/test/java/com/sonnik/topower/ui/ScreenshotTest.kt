@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.sonnik.topower.MainActivity
 import com.sonnik.topower.SonnikApp
 import com.sonnik.topower.data.AppSettings
@@ -305,10 +306,10 @@ class ScreenshotTest {
     @Test fun measureDialog() = shoot("37-measure-dialog") {
         waitText("Можно тренировать", substring = true)
         listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
-        // Мигающий курсор в поле ввода — бесконечная анимация: дальше время двигаем вручную.
-        compose.mainClock.autoAdvance = false
+        // Robolectric по умолчанию не в режиме касаний — окно ставит фокус на первое поле, и мигающий
+        // курсор не даёт дождаться покоя. На телефоне (режим касаний) автофокуса нет — включаем его и здесь.
+        InstrumentationRegistry.getInstrumentation().setInTouchMode(true)
         click("Провести замеры", inList = true)
-        compose.mainClock.advanceTimeBy(1000)
         waitText("Прошлый раз: 37.2 см", substring = true)
     }
 
