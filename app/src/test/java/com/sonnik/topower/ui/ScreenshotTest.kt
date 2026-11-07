@@ -305,7 +305,10 @@ class ScreenshotTest {
     @Test fun measureDialog() = shoot("37-measure-dialog") {
         waitText("Можно тренировать", substring = true)
         listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
+        // Мигающий курсор в поле ввода — бесконечная анимация: дальше время двигаем вручную.
+        compose.mainClock.autoAdvance = false
         click("Провести замеры", inList = true)
+        compose.mainClock.advanceTimeBy(1000)
         waitText("Прошлый раз: 37.2 см", substring = true)
     }
 
