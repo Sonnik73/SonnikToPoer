@@ -257,6 +257,16 @@ interface AppDao {
     @Query("DELETE FROM template_exercises WHERE id = :id")
     suspend fun deleteTemplateExercise(id: String)
 
+    // ---- Замеры тела ----
+
+    @Query("SELECT * FROM measurements ORDER BY takenAt")
+    fun observeMeasurements(): Flow<List<MeasurementEntity>>
+
+    @Insert suspend fun insertMeasurements(items: List<MeasurementEntity>)
+
+    @Query("DELETE FROM measurements WHERE takenAt = :takenAt")
+    suspend fun deleteMeasurementsAt(takenAt: Long)
+
     // ---- Резервная копия ----
 
     @Query("SELECT * FROM exercises") suspend fun allExercises(): List<ExerciseEntity>
@@ -266,6 +276,7 @@ interface AppDao {
     @Query("SELECT * FROM templates") suspend fun allTemplates(): List<TemplateEntity>
     @Query("SELECT * FROM template_exercises") suspend fun allTemplateExercises(): List<TemplateExerciseEntity>
     @Query("SELECT * FROM equipment") suspend fun allEquipment(): List<EquipmentEntity>
+    @Query("SELECT * FROM measurements") suspend fun allMeasurements(): List<MeasurementEntity>
 
     @Insert suspend fun insertExercises(items: List<ExerciseEntity>)
     @Insert suspend fun insertWorkouts(items: List<WorkoutEntity>)
@@ -282,6 +293,7 @@ interface AppDao {
     @Query("DELETE FROM templates") suspend fun clearTemplates()
     @Query("DELETE FROM exercises") suspend fun clearExercises()
     @Query("DELETE FROM equipment") suspend fun clearEquipment()
+    @Query("DELETE FROM measurements") suspend fun clearMeasurements()
 }
 
 private const val MUSCLE_WORK =

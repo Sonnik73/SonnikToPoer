@@ -531,4 +531,18 @@
     <string name="body_question_text">Нужен только для схемы мышц — мужской или женский силуэт. Изменить можно в настройках, в разделе «Оформление».</string>
     <string name="body_male_answer">Мужской</string>
     <string name="body_female_answer">Женский</string>
+    <string name="measure_title">Замеры тела</string>
+    <string name="measure_last">Последний замер: %s</string>
+    <string name="measure_empty">Замеров пока нет — нажмите «Провести замеры»</string>
+    <string name="measure_now">Провести замеры</string>
+    <string name="measure_history">История</string>
+    <string name="measure_no_value">—</string>
+    <string name="measure_cm">%s см</string>
+    <string name="measure_biceps">Бицепс</string>
+    <string name="measure_forearm">Предплечье</string>
+    <string name="measure_chest">Грудь</string>
+    <string name="measure_waist">Талия</string>
+    <string name="measure_field">%s, см</string>
+    <string name="measure_previous">Прошлый раз: %s см</string>
+    <string name="measure_hint">Мерьте сантиметровой лентой в одно и то же время, лучше утром. Бицепс и предплечье — в самом широком месте напряжённой руки, грудь — на выдохе по самой выступающей линии, талия — в самом узком месте. Пустые поля не сохранятся.</string>
 </resources>

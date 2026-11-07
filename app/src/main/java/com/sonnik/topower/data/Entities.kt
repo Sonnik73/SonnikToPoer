@@ -203,6 +203,19 @@ data class EquipmentEntity(
     val load: Double get() = weight ?: maxResistance ?: 0.0
 }
 
+/** Место замера тела. Хранится по имени, поэтому новые места добавляются только в конец. */
+enum class MeasurementPart { BICEPS, FOREARM, CHEST, WAIST }
+
+/** Замер тела в сантиметрах: [part] — имя [MeasurementPart], [takenAt] — когда измерено. */
+@Serializable
+@Entity(tableName = "measurements", indices = [Index("takenAt")])
+data class MeasurementEntity(
+    @PrimaryKey val id: String = newId(),
+    val takenAt: Long,
+    val part: String,
+    val valueCm: Double,
+)
+
 // ---- Результаты запросов ----
 
 data class WorkoutExerciseFull(

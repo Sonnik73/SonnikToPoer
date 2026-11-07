@@ -41,6 +41,28 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate7To8AddsMeasurements() {
+        createDatabase(7).apply {
+            execSQL("INSERT INTO workouts (id, startedAt, finishedAt, bodyWeight, note, updatedAt) VALUES ('w1', 1000, 2000, 80.5, '', 1)")
+            close()
+        }
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(*MIGRATIONS)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            runBlocking {
+                assertEquals(80.5, db.dao().allWorkouts().single().bodyWeight!!, 1e-9)
+                assertEquals(0, db.dao().allMeasurements().size)
+                db.dao().insertMeasurements(listOf(MeasurementEntity(takenAt = 5, part = "WAIST", valueCm = 82.0)))
+                assertEquals(82.0, db.dao().allMeasurements().single().valueCm, 1e-9)
+            }
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
     fun migrate6To7AddsTechnique() {
         createDatabase(6).apply {
             val cols = "id, name, category, note, trackReps, trackWeight, trackTime, trackDistance, useBodyWeight, archived, createdAt, updatedAt, bandAssist, muscles, repMin, repMax"

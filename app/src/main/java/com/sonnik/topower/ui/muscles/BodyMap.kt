@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import com.sonnik.topower.data.MeasurementPart
 import com.sonnik.topower.domain.Muscle
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -532,6 +533,24 @@ private fun Canvas.drawFigure(
         figure.muscles[m]?.forEach { drawPath(it.path, stroke) }
     }
 }
+
+/**
+ * Линия замера на фигуре спереди в координатах схемы 100×200: плечо и предплечье — на левой
+ * (по экрану) руке, грудь и талия — поперёк корпуса. Для женской фигуры — в её пропорциях.
+ */
+fun measurementLine(part: MeasurementPart, female: Boolean): Pair<PointF, PointF> = synchronized(FIGURE_LOCK) {
+    fun line() = when (part) {
+        MeasurementPart.BICEPS -> pt(21.6, 53) to pt(31, 53)
+        MeasurementPart.FOREARM -> pt(18.8, 70) to pt(26.8, 70)
+        MeasurementPart.CHEST -> pt(31.2, 41) to pt(68.8, 41)
+        MeasurementPart.WAIST -> pt(35, 74) to pt(65, 74)
+    }
+    if (female) female { line() } else line()
+}
+
+/** Фигура спереди на холсте 100×200 (масштаб задаёт вызывающий) — для схемы замеров. */
+fun Canvas.drawBodyFront(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, female: Boolean) =
+    drawFigure(back = false, colorOf = colorOf, bodyColor = bodyColor, gapColor = gapColor, selected = null, selectedColor = 0, female = female)
 
 /** Женский силуэт на схемах — по настройке «Схема мышц». */
 val LocalFemaleBody = staticCompositionLocalOf { false }

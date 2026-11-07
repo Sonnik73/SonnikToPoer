@@ -18,6 +18,8 @@ data class BackupFile(
     val templates: List<TemplateEntity> = emptyList(),
     val templateExercises: List<TemplateExerciseEntity> = emptyList(),
     val equipment: List<EquipmentEntity> = emptyList(),
+    /** С 1.38; в копиях старых версий поля нет — замеров просто нет. */
+    val measurements: List<MeasurementEntity> = emptyList(),
 )
 
 class InvalidBackupException(message: String) : Exception(message)

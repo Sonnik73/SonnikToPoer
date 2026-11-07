@@ -303,6 +303,7 @@ class Repository(
                 templates = dao.allTemplates(),
                 templateExercises = dao.allTemplateExercises(),
                 equipment = dao.allEquipment(),
+                measurements = dao.allMeasurements(),
             )
         )
     }
@@ -318,6 +319,7 @@ class Repository(
             dao.clearTemplates()
             dao.clearExercises()
             dao.clearEquipment()
+            dao.clearMeasurements()
             dao.insertEquipment(backup.equipment)
             dao.insertExercises(backup.exercises)
             dao.insertWorkouts(backup.workouts)
@@ -325,9 +327,19 @@ class Repository(
             dao.insertSets(backup.sets)
             dao.insertTemplates(backup.templates)
             dao.insertTemplateExercises(backup.templateExercises)
+            dao.insertMeasurements(backup.measurements)
         }
     }
+
+    // ---- Замеры тела ----
+
+    /** Сохраняет замеры одной датой; пустые поля ([values] без значения) пропускаются. */
+    suspend fun saveMeasurements(values: Map<MeasurementPart, Double>, takenAt: Long = now()) {
+        dao.insertMeasurements(values.filterValues { it > 0 }.map { (part, cm) -> MeasurementEntity(takenAt = takenAt, part = part.name, valueCm = cm) })
+    }
+
+    suspend fun deleteMeasurementsAt(takenAt: Long) = dao.deleteMeasurementsAt(takenAt)
 }
 
 /** Таблицы, изменения которых видны приложениям экосистемы. */
-private val TRAINING_TABLES = arrayOf("workouts", "workout_exercises", "sets", "exercises")
+private val TRAINING_TABLES = arrayOf("workouts", "workout_exercises", "sets", "exercises", "measurements")

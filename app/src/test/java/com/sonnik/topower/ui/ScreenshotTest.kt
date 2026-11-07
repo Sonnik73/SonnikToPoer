@@ -28,6 +28,7 @@ import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.domain.ReleaseInfo
 import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.ExerciseEntity
+import com.sonnik.topower.data.MeasurementPart
 import com.sonnik.topower.data.Repository
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
@@ -199,7 +200,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.37")
+        waitText("Версия 1.38")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -293,6 +294,19 @@ class ScreenshotTest {
     @Test fun bodyQuestion() = shoot("34-body-question") {
         ApplicationProvider.getApplicationContext<SonnikApp>().settings.setBodyTypeAsked(false)
         waitText("Ваш пол")
+    }
+
+    @Test fun measurements() = shoot("36-measurements") {
+        waitText("Можно тренировать", substring = true)
+        listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
+        waitText("Замеры тела")
+    }
+
+    @Test fun measureDialog() = shoot("37-measure-dialog") {
+        waitText("Можно тренировать", substring = true)
+        listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
+        click("Провести замеры", inList = true)
+        waitText("Прошлый раз: 37.2 см", substring = true)
     }
 
     @Test fun settings() = shoot("08-settings") {
@@ -452,6 +466,15 @@ suspend fun seedDemoData(repo: Repository, settings: AppSettings) {
             ) + if (i == 5) listOf(squat to List(3) { s(reps = 20) }) else emptyList(),
         )
     }
+    // Замеры тела: месяц назад и два дня назад.
+    repo.saveMeasurements(
+        mapOf(MeasurementPart.BICEPS to 36.0, MeasurementPart.FOREARM to 29.5, MeasurementPart.CHEST to 101.0, MeasurementPart.WAIST to 84.0),
+        takenAt = now - 30 * day,
+    )
+    repo.saveMeasurements(
+        mapOf(MeasurementPart.BICEPS to 37.2, MeasurementPart.FOREARM to 30.0, MeasurementPart.CHEST to 103.5, MeasurementPart.WAIST to 82.5),
+        takenAt = now - 2 * day,
+    )
     // Ноги — полтора дня назад: на схеме промежуточный цвет между красным и зелёным.
     workout(
         start = now - 36 * 3_600_000L,

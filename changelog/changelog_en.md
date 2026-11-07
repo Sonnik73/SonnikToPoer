@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.38
+- Body measurements: a figure on the home screen with dashed lines — biceps, forearm, chest, waist — showing the latest values and change; Measure now saves girths in cm with the date, plus a history with a chart
+
 ## 1.37
 - A more feminine female muscle map: slimmer waist, wider hips, narrower shoulders, fuller chest, long hair with a bun
 

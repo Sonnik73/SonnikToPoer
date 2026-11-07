@@ -17,8 +17,9 @@ import com.sonnik.topower.domain.Muscle
         TemplateEntity::class,
         TemplateExerciseEntity::class,
         EquipmentEntity::class,
+        MeasurementEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -98,4 +99,15 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
-val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+/** v8: замеры тела (обхваты в сантиметрах с датой). */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `measurements` (`id` TEXT NOT NULL, `takenAt` INTEGER NOT NULL, " +
+                "`part` TEXT NOT NULL, `valueCm` REAL NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_measurements_takenAt` ON `measurements` (`takenAt`)")
+    }
+}
+
+val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)

@@ -48,6 +48,7 @@ import com.sonnik.topower.R
 import com.sonnik.topower.data.TemplateSummary
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ScreenScaffold
+import com.sonnik.topower.ui.measurements.MeasurementsCard
 import com.sonnik.topower.ui.muscles.MuscleStatusCard
 import com.sonnik.topower.ui.muscles.muscleName
 import com.sonnik.topower.ui.muscles.rememberNow
@@ -115,6 +116,7 @@ fun WorkoutHomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item { MuscleStatusCard() }
+            item { MeasurementsCard() }
             if (active.isNotEmpty()) {
                 item { SectionTitle(stringResource(R.string.active_workouts)) }
                 items(active, key = { "active-" + it.id }) { workout ->
