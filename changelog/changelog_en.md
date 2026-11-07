@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.37
+- A more feminine female muscle map: slimmer waist, wider hips, narrower shoulders, fuller chest, long hair with a bun
+
 ## 1.36
 - A female muscle map: the app asks once on first launch, and you can switch in Settings → Appearance — figure, proportions and chest shape change on the maps, the widget and the share card
 

@@ -49,13 +49,13 @@ private val FIGURE_LOCK = Any()
 
 /** Ширина женской фигуры относительно мужской на высоте y (опорные точки, между ними — линейно). */
 private val FEMALE_WIDTH = listOf(
-    0f to 0.94f, 20f to 0.94f, 26f to 0.9f, 42f to 0.91f, 55f to 0.9f, 66f to 0.86f, 80f to 0.88f,
-    92f to 1.02f, 104f to 1.07f, 118f to 1.04f, 140f to 1f, 160f to 0.97f, 200f to 0.97f,
+    0f to 0.93f, 18f to 0.93f, 22f to 0.86f, 28f to 0.86f, 44f to 0.88f, 56f to 0.86f, 66f to 0.8f, 76f to 0.8f,
+    88f to 0.96f, 100f to 1.12f, 108f to 1.12f, 120f to 1.07f, 140f to 1.01f, 160f to 0.95f, 200f to 0.92f,
 )
 
 private fun femaleWidth(x: Float, y: Float): Float {
     // Руки от плеча до кисти сужаются вместе с плечами и не меняют форму.
-    if (kotlin.math.abs(x - 50f) > 19.5f && y in 28f..102f) return 0.9f
+    if (kotlin.math.abs(x - 50f) > 19.5f && y in 28f..102f) return 0.86f
     val i = FEMALE_WIDTH.indexOfFirst { it.first >= y }.coerceAtLeast(1)
     val (y0, k0) = FEMALE_WIDTH[i - 1]
     val (y1, k1) = FEMALE_WIDTH[i]
@@ -311,7 +311,7 @@ private fun frontFigure() = figure {
     sym(Muscle.FRONT_DELTS, 105f, listOf(pt(34, 30), pt(29.5, 31), pt(27.6, 35.5), pt(27.8, 41.5), pt(30, 45), pt(33, 41), pt(34.5, 35.5)), fan = pt(29.6, 44.5))
     if (buildingFemale) {
         // Женская грудь — круглее и ниже.
-        sym(Muscle.CHEST, 20f, listOf(pt(49.2, 33.5), pt(44, 32), pt(38.6, 33.2), pt(35.2, 37.6), pt(34.6, 43.4), pt(36.8, 49), pt(41.2, 52.2), pt(45.6, 52), pt(49.2, 50)), fan = pt(34.4, 39.5))
+        sym(Muscle.CHEST, 20f, listOf(pt(49.4, 34), pt(44.5, 32.6), pt(39, 33.4), pt(35.2, 37.6), pt(34.2, 43.6), pt(35.8, 49.6), pt(39.8, 53.6), pt(44.8, 54.4), pt(48.4, 52.6), pt(49.4, 49)), fan = pt(34.6, 40))
     } else {
         sym(Muscle.CHEST, 20f, listOf(pt(49.2, 32), pt(44, 30.8), pt(38.5, 31.2), pt(34.8, 34.5), pt(33.6, 40), pt(35.5, 45.5), pt(40, 49), pt(45, 50), pt(49.2, 49)), fan = pt(33.8, 38.5))
     }
@@ -320,9 +320,11 @@ private fun frontFigure() = figure {
     sym(Muscle.FOREARMS, 100f, listOf(pt(26.5, 63.5), pt(22, 64.8), pt(19.3, 72), pt(17.6, 82), pt(17.2, 90), pt(20, 90.8), pt(22.4, 82), pt(25, 73), pt(27, 67.5)))
     sym(Muscle.BRACHIORADIALIS, 105f, listOf(pt(24.2, 62.8), pt(21.4, 64.4), pt(19.4, 69.5), pt(18.6, 76.5), pt(19.8, 78.6), pt(21.8, 72.8), pt(24, 67.2), pt(25.4, 64.6)))
     sym(Muscle.OBLIQUES, 55f, listOf(pt(42.8, 52.5), pt(38.5, 51), pt(35.5, 54.5), pt(35.2, 64), pt(36, 76), pt(36.5, 86), pt(39, 92), pt(42.8, 93.5), pt(43.3, 80), pt(43.2, 64)))
-    sym(Muscle.SERRATUS, 160f, listOf(pt(37.4, 45.2), pt(34.8, 45.8), pt(33.5, 47.6), pt(34.6, 48.6), pt(37.6, 47.8)))
-    sym(Muscle.SERRATUS, 160f, listOf(pt(37.8, 48.8), pt(34.8, 49.4), pt(33.7, 51.4), pt(35, 52.2), pt(38.1, 51.3)))
-    sym(Muscle.SERRATUS, 160f, listOf(pt(38.2, 52.4), pt(35.2, 53), pt(34.4, 55), pt(35.8, 55.7), pt(38.5, 54.7)))
+    // У женской фигуры зубчатая ниже — под грудью.
+    val serratusShift = if (buildingFemale) 3.2 else 0.0
+    sym(Muscle.SERRATUS, 160f, listOf(pt(37.4, 45.2 + serratusShift), pt(34.8, 45.8 + serratusShift), pt(33.5, 47.6 + serratusShift), pt(34.6, 48.6 + serratusShift), pt(37.6, 47.8 + serratusShift)))
+    sym(Muscle.SERRATUS, 160f, listOf(pt(37.8, 48.8 + serratusShift), pt(34.8, 49.4 + serratusShift), pt(33.7, 51.4 + serratusShift), pt(35, 52.2 + serratusShift), pt(38.1, 51.3 + serratusShift)))
+    sym(Muscle.SERRATUS, 160f, listOf(pt(38.2, 52.4 + serratusShift), pt(35.2, 53 + serratusShift), pt(34.4, 55 + serratusShift), pt(35.8, 55.7 + serratusShift), pt(38.5, 54.7 + serratusShift)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 51.5), pt(45.2, 51.6), pt(44, 54), pt(44, 58), pt(45, 59.6), pt(49.3, 59.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 61.2), pt(45, 61.2), pt(43.9, 63.5), pt(43.9, 68), pt(45, 69.6), pt(49.3, 69.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 71.2), pt(45, 71.2), pt(43.9, 73.5), pt(43.9, 78), pt(45, 79.6), pt(49.3, 79.6)))
@@ -343,6 +345,8 @@ private fun frontFigure() = figure {
     vein(listOf(pt(43.2, 84), pt(43.6, 89), pt(44.8, 94), pt(46.6, 100)))
     // Ключицы, грудина, пупок и складка над коленом — мелкие детали поверх.
     crease(listOf(pt(46.6, 27.6), pt(42, 28.4), pt(37.6, 29.8)))
+    // Складка под грудью.
+    if (buildingFemale) crease(listOf(pt(36.2, 50.6), pt(39.8, 54.6), pt(44.8, 55.4), pt(48.6, 53.6)))
     crease(listOf(pt(50, 33), pt(50, 47.5)), symmetric = false)
     crease(listOf(pt(49.6, 87.2), pt(50, 88.2), pt(50.4, 87.2)), symmetric = false)
     crease(listOf(pt(41.5, 145.6), pt(43.8, 146.6), pt(46, 145.8)))
@@ -386,10 +390,21 @@ private val BACK_F by lazy(FIGURE_LOCK) { female { backFigure() } }
 
 /** Волосы: спереди — за головой (видны по бокам и у шеи), сзади — поверх затылка. */
 private val HAIR_FRONT by lazy(FIGURE_LOCK) {
-    female { APath().apply { spline(listOf(pt(50, 1.5), pt(44, 3.5), pt(41.2, 10), pt(41, 18), pt(42.4, 25), pt(45.5, 27), pt(50, 25.5), pt(54.5, 27), pt(57.6, 25), pt(59, 18), pt(58.8, 10), pt(56, 3.5))) } }
+    female {
+        APath().apply {
+            // Длинные волосы до плеч: за головой и шеей видны по бокам лица и над плечами.
+            spline(listOf(pt(50, 2), pt(43.5, 3.8), pt(40.4, 9.5), pt(39.6, 17), pt(38.6, 24), pt(38.4, 29.5), pt(41.4, 31.2), pt(44, 28.6), pt(46, 24.6), pt(50, 23.6), pt(54, 24.6), pt(56, 28.6), pt(58.6, 31.2), pt(61.6, 29.5), pt(61.4, 24), pt(60.4, 17), pt(59.6, 9.5), pt(56.5, 3.8)))
+            oval(50f, 3.6f, 3.4f, 2.8f) // пучок
+        }
+    }
 }
 private val HAIR_BACK by lazy(FIGURE_LOCK) {
-    female { APath().apply { spline(listOf(pt(50, 1.5), pt(44, 3.5), pt(41.2, 10), pt(41.3, 17), pt(43, 22.5), pt(47, 23.8), pt(50, 22.6), pt(53, 23.8), pt(57, 22.5), pt(58.7, 17), pt(58.8, 10), pt(56, 3.5))) } }
+    female {
+        APath().apply {
+            spline(listOf(pt(50, 2), pt(43.6, 3.8), pt(40.8, 10), pt(40.6, 17), pt(41.4, 22.4), pt(44, 25), pt(47.4, 24.6), pt(50, 23.2), pt(52.6, 24.6), pt(56, 25), pt(58.6, 22.4), pt(59.4, 17), pt(59.2, 10), pt(56.4, 3.8)))
+            oval(50f, 3.2f, 3.6f, 3f)
+        }
+    }
 }
 
 private fun figureOf(back: Boolean, female: Boolean = false) = when {
@@ -426,6 +441,7 @@ private const val VEIN_HIGHLIGHT_WIDTH = 0.2f
 private const val RIM_WIDTH = 1.5f
 private const val CREASE_WIDTH = 0.35f
 private val FiberColor = Color.Black.copy(alpha = 0.1f).toArgb()
+private val HairColor = Color(0xFF6D4C41)
 private val RimColor = Color.Black.copy(alpha = 0.13f).toArgb()
 private val CreaseColor = Color.Black.copy(alpha = 0.16f).toArgb()
 private val VeinColor = Color(0xFF3C2F5A).copy(alpha = 0.42f).toArgb()
@@ -452,7 +468,8 @@ private fun Canvas.drawFigure(
     val figure = figureOf(back, female)
     val silhouette = if (female) SILHOUETTE_F else SILHOUETTE
     val fill = Paint(Paint.ANTI_ALIAS_FLAG)
-    val hair = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = lerp(Color(bodyColor), Color.Black, 0.2f).toArgb() }
+    // Волосы — тёплого каштанового оттенка поверх цвета тела, чтобы подходили и к светлой, и к тёмной теме.
+    val hair = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = lerp(Color(bodyColor), HairColor, 0.55f).toArgb() }
     if (female && !back) drawPath(HAIR_FRONT, hair)
     // Контур: обводка под заливкой видна только снаружи силуэта.
     val outline = strokePaint(lerp(Color(bodyColor), Color.Black, 0.1f).toArgb(), OUTLINE_WIDTH)
