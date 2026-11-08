@@ -3,7 +3,7 @@
 ## 1.41
 - Fixes: note, body weight, watch data and finishing a workout no longer overwrite each other
 - Save as template and History no longer count warm-up sets
-- Invalid numbers (“1.2.3”, too large) are highlighted in red instead of silently dropped; minus only in extra weight of bodyweight exercises
+- Invalid numbers (“1.2.3”, too large) are highlighted in red instead of silently dropped
 - The rest timer keeps counting after the app is unloaded or the phone restarts
 - Updates download the regular build, not the F-Droid one; the widget and backup restore no longer stutter the screen
 
