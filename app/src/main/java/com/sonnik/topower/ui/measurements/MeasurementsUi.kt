@@ -43,6 +43,7 @@ import com.sonnik.topower.R
 import com.sonnik.topower.data.MeasurementEntity
 import com.sonnik.topower.data.MeasurementPart
 import com.sonnik.topower.domain.formatNumber
+import com.sonnik.topower.domain.isValidNumber
 import com.sonnik.topower.domain.parseDecimal
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.common.ChartPoint
@@ -232,6 +233,7 @@ fun MeasureDialog(
 ) {
     var texts by rememberSaveable { mutableStateOf(MeasurementPart.entries.associate { it.name to "" }) }
     val values = MeasurementPart.entries.mapNotNull { p -> parseDecimal(texts[p.name].orEmpty())?.takeIf { it > 0 }?.let { p to it } }.toMap()
+    val allValid = MeasurementPart.entries.all { isValidNumber(texts[it.name].orEmpty()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.measure_now)) },
@@ -254,7 +256,7 @@ fun MeasureDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(values); onDismiss() }, enabled = values.isNotEmpty()) { Text(stringResource(R.string.save)) }
+            TextButton(onClick = { onSave(values); onDismiss() }, enabled = values.isNotEmpty() && allValid) { Text(stringResource(R.string.save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )

@@ -74,6 +74,7 @@
     <string name="time_sec">Sec</string>
     <string name="distance_label">Distance, km</string>
     <string name="set_empty_error">Fill in at least one field</string>
+    <string name="set_invalid_error">Fix the fields highlighted in red: they are not numbers</string>
     <string name="working_weight">Working weight: %s kg</string>
     <string name="delete_set">Delete set</string>
 

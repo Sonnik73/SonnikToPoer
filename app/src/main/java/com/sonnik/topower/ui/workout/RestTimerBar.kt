@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.data.AppSettings
 import com.sonnik.topower.domain.formatDuration
+import com.sonnik.topower.timer.RestTimer
 import com.sonnik.topower.ui.LocalRepository
 import com.sonnik.topower.ui.LocalRestTimer
 import kotlinx.coroutines.delay
@@ -43,7 +44,7 @@ import kotlinx.coroutines.delay
 private val BAR_HEIGHT = 56.dp
 
 /** Время, после которого панель «Отдых окончен» скрывается сама. */
-private const val DONE_VISIBLE_MS = 60_000L
+private const val DONE_VISIBLE_MS = RestTimer.STALE_MS
 
 /**
  * Компактная панель отсчёта отдыха внизу экрана тренировки: кнопки ±15 с, время и «Пропустить» в одну строку. Изменение длительности кнопками ±15 с

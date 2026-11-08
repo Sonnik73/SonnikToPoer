@@ -69,6 +69,7 @@
     <string name="time_sec">Сек</string>
     <string name="distance_label">Расстояние, км</string>
     <string name="set_empty_error">Заполните хотя бы одно поле</string>
+    <string name="set_invalid_error">Исправьте поля, подсвеченные красным: там не число</string>
     <string name="working_weight">Рабочий вес: %s кг</string>
     <string name="delete_set">Удалить подход</string>
 

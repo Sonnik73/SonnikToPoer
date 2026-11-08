@@ -226,6 +226,8 @@ private class MuscleShape(val path: APath, val fibers: APath, val bounds: RectF)
 
 private fun shape(points: List<Pt>, fiberDeg: Float, fan: Pt?): MuscleShape {
     val path = APath().apply { spline(points) }
+    // computeBounds(RectF) без флага есть только с API 34, а приложение работает с API 26.
+    @Suppress("DEPRECATION")
     val bounds = RectF().also { path.computeBounds(it, true) }
     val outline = splineSamples(points)
     return MuscleShape(path, if (fan != null) fanFibers(outline, fan) else longFibers(outline, fiberDeg), bounds)

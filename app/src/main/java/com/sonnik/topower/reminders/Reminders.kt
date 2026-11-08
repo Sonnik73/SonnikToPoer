@@ -158,6 +158,7 @@ class BootReceiver : BroadcastReceiver() {
         val result = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                app.restTimer.rescheduleAfterBoot()
                 app.reminders.reschedule(muscleStatuses(app.repository.dao.muscleWork()), app.repository.dao.lastWorkoutStart())
             } finally {
                 result.finish()

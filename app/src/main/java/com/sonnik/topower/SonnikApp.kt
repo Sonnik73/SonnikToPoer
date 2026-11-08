@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class SonnikApp : Application() {
@@ -56,8 +57,11 @@ class SonnikApp : Application() {
                 settings.femaleBody, // виджет перерисовывается и при смене схемы мышц
             ) { _, rows, last, _ -> muscleStatuses(rows) to last }
                 .collectLatest { (statuses, last) ->
-                    reminders.reschedule(statuses, last)
-                    MuscleWidget.update(this@SonnikApp, statuses)
+                    // Картинка виджета рисуется не в главном потоке, чтобы сохранение подхода не подтормаживало.
+                    withContext(Dispatchers.Default) {
+                        reminders.reschedule(statuses, last)
+                        MuscleWidget.update(this@SonnikApp, statuses)
+                    }
                 }
         }
     }

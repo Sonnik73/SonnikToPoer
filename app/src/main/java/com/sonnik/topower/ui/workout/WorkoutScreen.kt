@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -29,8 +31,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -48,8 +48,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,18 +63,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.data.EquipmentEntity
+import com.sonnik.topower.data.Repository
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.data.WorkoutEntity
 import com.sonnik.topower.data.WorkoutExerciseFull
 import com.sonnik.topower.domain.SetRecord
 import com.sonnik.topower.domain.formatNumber
+import com.sonnik.topower.domain.parseDecimal
 import com.sonnik.topower.domain.setScore
 import com.sonnik.topower.timer.RestTimer
 import com.sonnik.topower.ui.LocalAppSettings
-import com.sonnik.topower.ui.LocalRestTimer
-import com.sonnik.topower.ui.stats.config
-import com.sonnik.topower.domain.parseDecimal
 import com.sonnik.topower.ui.LocalRepository
+import com.sonnik.topower.ui.LocalRestTimer
 import com.sonnik.topower.ui.common.ConfirmDialog
 import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.ui.common.ScreenScaffold
@@ -83,6 +83,7 @@ import com.sonnik.topower.ui.common.formatDateTime
 import com.sonnik.topower.ui.common.formatSet
 import com.sonnik.topower.ui.exercises.ExercisePickerDialog
 import com.sonnik.topower.ui.muscles.RecoveryDialog
+import com.sonnik.topower.ui.stats.config
 
 /** Состояние открытого диалога подхода: [set] == null — новый подход. */
 private data class SetDialogState(val item: WorkoutExerciseFull, val set: SetEntity?)
@@ -158,7 +159,7 @@ private fun WorkoutActions(
             if (workout.finishedAt != null) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.resume_workout)) },
-                    onClick = { menu = false; repo.launch { resumeWorkout(workout) } },
+                    onClick = { menu = false; repo.launch { resumeWorkout(workout.id) } },
                 )
             }
             DropdownMenuItem(
@@ -185,12 +186,12 @@ private fun WorkoutActions(
             finishing = true,
             onSave = { v ->
                 restTimer.stop()
-                repo.launch { finishWorkout(workout.withWatch(v)) }
+                repo.launch { saveWatch(workout.id, v); finishWorkout(workout.id) }
                 onBack()
             },
             onSkip = {
                 restTimer.stop()
-                repo.launch { finishWorkout(workout) }
+                repo.launch { finishWorkout(workout.id) }
                 onBack()
             },
             onDismiss = { setFinishing(false) },
@@ -281,7 +282,7 @@ private fun WorkoutContent(
                     value = bodyWeightText,
                     onValueChange = { text ->
                         bodyWeightText = text
-                        repo.launch { updateWorkout(latestWorkout.copy(bodyWeight = parseDecimal(text))) }
+                        repo.launch { setWorkoutBodyWeight(workout.id, parseDecimal(text)?.takeIf { it > 0 }) }
                     },
                     label = stringResource(R.string.body_weight_label),
                     modifier = Modifier.fillMaxWidth(),
@@ -365,7 +366,7 @@ private fun WorkoutContent(
                 value = noteText,
                 onValueChange = { text ->
                     noteText = text
-                    repo.launch { updateWorkout(latestWorkout.copy(note = text)) }
+                    repo.launch { setWorkoutNote(workout.id, text) }
                 },
                 label = { Text(stringResource(R.string.workout_note)) },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -485,7 +486,7 @@ private fun WorkoutContent(
         WatchDataDialog(
             workout = workout,
             finishing = false,
-            onSave = { v -> repo.launch { updateWorkout(latestWorkout.withWatch(v)) } },
+            onSave = { v -> repo.launch { saveWatch(workout.id, v) } },
             onSkip = {},
             onDismiss = { editingWatch = false },
         )
@@ -697,12 +698,8 @@ fun TechniqueDialog(name: String, technique: String, onDismiss: () -> Unit) {
     )
 }
 
-private fun WorkoutEntity.withWatch(v: WatchValues) = copy(
-    maxHeartRate = v.maxHeartRate,
-    avgHeartRate = v.avgHeartRate,
-    watchDurationSec = v.durationSec,
-    calories = v.calories,
-)
+private suspend fun Repository.saveWatch(workoutId: String, v: WatchValues) =
+    setWorkoutWatch(workoutId, v.maxHeartRate, v.avgHeartRate, v.durationSec, v.calories)
 
 /** Одинаковые подряд подходы сворачиваются: «2 × 12 кг · 11 повт. ×3; 2 × 12 кг · 9 повт.». */
 private fun compactSets(sets: List<String>): String {

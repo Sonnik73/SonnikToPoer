@@ -1,5 +1,12 @@
 # What's new in SonnikToPower
 
+## 1.41
+- Fixes: note, body weight, watch data and finishing a workout no longer overwrite each other
+- Save as template and History no longer count warm-up sets
+- Invalid numbers (“1.2.3”, too large) are highlighted in red instead of silently dropped; minus only in extra weight of bodyweight exercises
+- The rest timer keeps counting after the app is unloaded or the phone restarts
+- Updates download the regular build, not the F-Droid one; the widget and backup restore no longer stutter the screen
+
 ## 1.40
 - During a workout, an exercise with all planned sets done collapses into one line with its name and “3 of 3”; tap to expand, or ↑ to collapse again
 

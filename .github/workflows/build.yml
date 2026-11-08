@@ -11,16 +11,16 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
 
       - name: Prepare signing key
         env:
@@ -89,7 +89,7 @@ jobs:
           awk '/^## /{n++} n==1' changelog/changelog_ru.md > release-notes.md
 
       # APK и так прикладывается к релизу; квота хранилища артефактов не должна ронять сборку.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         continue-on-error: true
         with:
           name: SonnikToPower-${{ env.APP_VERSION }}-build${{ github.run_number }}

@@ -58,7 +58,6 @@ import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.common.SectionTitle
-import com.sonnik.topower.ui.exercises.CheckRow
 
 @Composable
 fun InventoryScreen() {

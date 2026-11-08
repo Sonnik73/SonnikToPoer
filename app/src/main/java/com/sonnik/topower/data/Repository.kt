@@ -9,10 +9,12 @@ import com.sonnik.topower.domain.computeMuscleStatus
 import com.sonnik.topower.domain.generateWorkout
 import com.sonnik.topower.domain.restedMuscles
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * Единая точка доступа к данным. Короткие операции записи запускаются в [scope] приложения,
@@ -139,17 +141,20 @@ class Repository(
         workout.id
     }
 
-    suspend fun updateWorkout(workout: WorkoutEntity) {
-        dao.upsertWorkout(workout.copy(updatedAt = now()))
+    suspend fun setWorkoutNote(workoutId: String, note: String) = dao.setWorkoutNote(workoutId, note, now())
+
+    suspend fun setWorkoutBodyWeight(workoutId: String, bodyWeight: Double?) =
+        dao.setWorkoutBodyWeight(workoutId, bodyWeight, now())
+
+    suspend fun setWorkoutWatch(workoutId: String, maxHr: Int?, avgHr: Int?, durationSec: Int?, calories: Int?) =
+        dao.setWorkoutWatch(workoutId, maxHr, avgHr, durationSec, calories, now())
+
+    suspend fun finishWorkout(workoutId: String) {
+        val t = now()
+        dao.setWorkoutFinished(workoutId, t, t)
     }
 
-    suspend fun finishWorkout(workout: WorkoutEntity) {
-        dao.upsertWorkout(workout.copy(finishedAt = now(), updatedAt = now()))
-    }
-
-    suspend fun resumeWorkout(workout: WorkoutEntity) {
-        dao.upsertWorkout(workout.copy(finishedAt = null, updatedAt = now()))
-    }
+    suspend fun resumeWorkout(workoutId: String) = dao.setWorkoutFinished(workoutId, null, now())
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
@@ -252,7 +257,7 @@ class Repository(
         dao.upsertTemplateExercises(list.mapIndexed { i, it -> it.copy(position = i, updatedAt = now()) })
     }
 
-    /** Создаёт шаблон из состава тренировки; плановое число подходов = фактическому. */
+    /** Создаёт шаблон из состава тренировки; плановое число подходов = фактическому рабочему (без разминки). */
     suspend fun saveWorkoutAsTemplate(workoutId: String, name: String): String = db.withTransaction {
         val template = TemplateEntity(name = name.trim())
         dao.upsertTemplate(template)
@@ -261,7 +266,7 @@ class Repository(
                 templateId = template.id,
                 exerciseId = we.exerciseId,
                 position = i,
-                plannedSets = maxOf(dao.nextSetPosition(we.id), we.plannedSets ?: 0, 1),
+                plannedSets = maxOf(dao.workingSetCount(we.id), we.plannedSets ?: 0, 1),
             )
         }
         dao.upsertTemplateExercises(items)
@@ -310,7 +315,8 @@ class Repository(
 
     /** Полностью заменяет данные содержимым резервной копии. */
     suspend fun importBackup(text: String) {
-        val backup = BackupCodec.decode(text)
+        // Разбор большой копии — не в главном потоке, иначе экран замирает.
+        val backup = withContext(Dispatchers.Default) { BackupCodec.decode(text) }
         db.withTransaction {
             dao.clearSets()
             dao.clearWorkoutExercises()

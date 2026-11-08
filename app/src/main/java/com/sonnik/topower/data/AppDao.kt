@@ -54,7 +54,7 @@ interface AppDao {
         """SELECT w.*,
               (SELECT COUNT(*) FROM workout_exercises we WHERE we.workoutId = w.id) AS exerciseCount,
               (SELECT COUNT(*) FROM sets s JOIN workout_exercises we ON s.workoutExerciseId = we.id
-                 WHERE we.workoutId = w.id) AS setCount,
+                 WHERE we.workoutId = w.id AND s.isWarmup = 0) AS setCount,
               (SELECT GROUP_CONCAT(e.name, ', ') FROM workout_exercises we
                  JOIN exercises e ON e.id = we.exerciseId WHERE we.workoutId = w.id) AS exerciseNames
            FROM workouts w ORDER BY w.startedAt DESC"""
@@ -75,6 +75,24 @@ interface AppDao {
 
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteWorkout(id: String)
+
+    // Поля тренировки меняются по одному: правка заметки не должна затирать вес тела, данные часов
+    // или завершение, сохранённые чуть раньше из другой копии тренировки.
+
+    @Query("UPDATE workouts SET note = :note, updatedAt = :now WHERE id = :id")
+    suspend fun setWorkoutNote(id: String, note: String, now: Long)
+
+    @Query("UPDATE workouts SET bodyWeight = :bodyWeight, updatedAt = :now WHERE id = :id")
+    suspend fun setWorkoutBodyWeight(id: String, bodyWeight: Double?, now: Long)
+
+    @Query(
+        """UPDATE workouts SET maxHeartRate = :maxHr, avgHeartRate = :avgHr, watchDurationSec = :durationSec,
+              calories = :calories, updatedAt = :now WHERE id = :id"""
+    )
+    suspend fun setWorkoutWatch(id: String, maxHr: Int?, avgHr: Int?, durationSec: Int?, calories: Int?, now: Long)
+
+    @Query("UPDATE workouts SET finishedAt = :finishedAt, updatedAt = :now WHERE id = :id")
+    suspend fun setWorkoutFinished(id: String, finishedAt: Long?, now: Long)
 
     @Query("SELECT bodyWeight FROM workouts WHERE bodyWeight IS NOT NULL ORDER BY startedAt DESC LIMIT 1")
     suspend fun lastBodyWeight(): Double?
@@ -103,6 +121,9 @@ interface AppDao {
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM sets WHERE workoutExerciseId = :workoutExerciseId")
     suspend fun nextSetPosition(workoutExerciseId: String): Int
 
+    @Query("SELECT COUNT(*) FROM sets WHERE workoutExerciseId = :workoutExerciseId AND isWarmup = 0")
+    suspend fun workingSetCount(workoutExerciseId: String): Int
+
     @Upsert
     suspend fun upsertSet(set: SetEntity)
 
@@ -110,26 +131,12 @@ interface AppDao {
     suspend fun deleteSet(set: SetEntity)
 
     @Query(
-        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
-                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
-           FROM sets s
-           JOIN workout_exercises we ON s.workoutExerciseId = we.id
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           WHERE e.id = :exerciseId
-           ORDER BY w.startedAt, we.position, s.position"""
+        SETS_WITH_CONTEXT + " WHERE e.id = :exerciseId ORDER BY w.startedAt, we.position, s.position"
     )
     fun observeSetsForExercise(exerciseId: String): Flow<List<SetWithContext>>
 
     @Query(
-        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
-                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
-           FROM sets s
-           JOIN workout_exercises we ON s.workoutExerciseId = we.id
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           WHERE e.id = :exerciseId
-           ORDER BY w.startedAt, we.position, s.position"""
+        SETS_WITH_CONTEXT + " WHERE e.id = :exerciseId ORDER BY w.startedAt, we.position, s.position"
     )
     suspend fun setsForExercise(exerciseId: String): List<SetWithContext>
 
@@ -137,36 +144,19 @@ interface AppDao {
     suspend fun setExerciseRest(id: String, restSec: Int?, now: Long)
 
     @Query(
-        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
-                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
-           FROM sets s
-           JOIN workout_exercises we ON s.workoutExerciseId = we.id
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           WHERE e.id = :exerciseId AND w.id != :excludeWorkoutId AND w.startedAt < :before
-           ORDER BY w.startedAt DESC, we.position, s.position"""
+        SETS_WITH_CONTEXT +
+            " WHERE e.id = :exerciseId AND w.id != :excludeWorkoutId AND w.startedAt < :before" +
+            " ORDER BY w.startedAt DESC, we.position, s.position"
     )
     suspend fun previousSetsForExercise(exerciseId: String, excludeWorkoutId: String, before: Long): List<SetWithContext>
 
     @Query(
-        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
-                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
-           FROM sets s
-           JOIN workout_exercises we ON s.workoutExerciseId = we.id
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           ORDER BY w.startedAt"""
+        SETS_WITH_CONTEXT + " ORDER BY w.startedAt"
     )
     fun observeAllSets(): Flow<List<SetWithContext>>
 
     @Query(
-        """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
-                  e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
-           FROM sets s
-           JOIN workout_exercises we ON s.workoutExerciseId = we.id
-           JOIN workouts w ON w.id = we.workoutId
-           JOIN exercises e ON e.id = we.exerciseId
-           ORDER BY w.startedAt, we.position, s.position"""
+        SETS_WITH_CONTEXT + " ORDER BY w.startedAt, we.position, s.position"
     )
     suspend fun allSetsWithContext(): List<SetWithContext>
 
@@ -295,6 +285,15 @@ interface AppDao {
     @Query("DELETE FROM equipment") suspend fun clearEquipment()
     @Query("DELETE FROM measurements") suspend fun clearMeasurements()
 }
+
+/** Подходы вместе с тренировкой и упражнением; условия и порядок добавляет каждый запрос. */
+private const val SETS_WITH_CONTEXT =
+    """SELECT s.*, w.id AS workoutId, w.startedAt AS workoutDate, w.bodyWeight AS bodyWeight,
+              e.id AS exerciseId, e.useBodyWeight AS useBodyWeight
+       FROM sets s
+       JOIN workout_exercises we ON s.workoutExerciseId = we.id
+       JOIN workouts w ON w.id = we.workoutId
+       JOIN exercises e ON e.id = we.exerciseId"""
 
 private const val MUSCLE_WORK =
     """SELECT we.workoutId AS workoutId, COALESCE(w.finishedAt, w.startedAt) AS time,

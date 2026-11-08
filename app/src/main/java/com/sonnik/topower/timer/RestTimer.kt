@@ -37,7 +37,9 @@ data class RestState(
  * присылает уведомление со звуком и вибрацией.
  */
 class RestTimer(private val context: Context) {
-    private val _state = MutableStateFlow<RestState?>(null)
+    // Отдых запоминается: если система выгрузит приложение или телефон перезагрузится, отсчёт продолжится.
+    private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private val _state = MutableStateFlow(load())
     val state: StateFlow<RestState?> = _state.asStateFlow()
 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
@@ -48,8 +50,36 @@ class RestTimer(private val context: Context) {
 
     fun start(exerciseId: String, exerciseName: String, seconds: Int) {
         val state = RestState(exerciseId, exerciseName, System.currentTimeMillis() + seconds * 1000L, seconds)
-        _state.value = state
+        set(state)
         schedule(state)
+    }
+
+    /** После перезагрузки будильники пропадают: ставим заново, если отдых ещё идёт. */
+    fun rescheduleAfterBoot(now: Long = System.currentTimeMillis()) {
+        val current = _state.value ?: return
+        if (current.endAt > now) schedule(current) else stop()
+    }
+
+    private fun set(state: RestState?) {
+        _state.value = state
+        prefs.edit().apply {
+            if (state == null) {
+                clear()
+            } else {
+                putString(KEY_ID, state.exerciseId)
+                putString(KEY_NAME, state.exerciseName)
+                putLong(KEY_END, state.endAt)
+                putInt(KEY_TOTAL, state.totalSec)
+            }
+        }.apply()
+    }
+
+    /** Сохранённый отдых, если он закончился не больше [STALE_MS] назад; более старый не показываем. */
+    private fun load(now: Long = System.currentTimeMillis()): RestState? {
+        val id = prefs.getString(KEY_ID, null) ?: return null
+        val endAt = prefs.getLong(KEY_END, 0L)
+        if (endAt + STALE_MS < now) return null
+        return RestState(id, prefs.getString(KEY_NAME, null).orEmpty(), endAt, prefs.getInt(KEY_TOTAL, 0))
     }
 
     /** Меняет длительность текущего отдыха на [deltaSec]; возвращает новую полную длительность. */
@@ -58,14 +88,14 @@ class RestTimer(private val context: Context) {
         val total = (current.totalSec + deltaSec).coerceIn(AppSettings.MIN_REST_SEC, AppSettings.MAX_REST_SEC)
         val endAt = current.endAt + (total - current.totalSec) * 1000L
         val updated = current.copy(endAt = endAt, totalSec = total)
-        _state.value = updated
+        set(updated)
         if (endAt > System.currentTimeMillis()) schedule(updated) else stop()
         return total
     }
 
     /** Останавливает отсчёт и убирает уведомление. */
     fun stop() {
-        _state.value = null
+        set(null)
         alarmManager.cancel(alarmIntent())
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
     }
@@ -113,6 +143,13 @@ class RestTimer(private val context: Context) {
         const val CHANNEL_RUNNING = "rest_running"
         const val CHANNEL_DONE = "rest_done"
         const val NOTIFICATION_ID = 1001
+        private const val PREFS = "rest_timer"
+        private const val KEY_ID = "exercise_id"
+        private const val KEY_NAME = "exercise_name"
+        private const val KEY_END = "end_at"
+        private const val KEY_TOTAL = "total_sec"
+        /** Столько панель «Отдых окончен» видна после конца отдыха (как в RestTimerBar). */
+        const val STALE_MS = 60_000L
 
         fun canNotify(context: Context): Boolean =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||

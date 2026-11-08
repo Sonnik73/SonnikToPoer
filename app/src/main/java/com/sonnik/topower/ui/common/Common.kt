@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sonnik.topower.R
+import com.sonnik.topower.domain.isValidNumber
 import com.sonnik.topower.data.EquipmentEntity
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetEntity
@@ -214,15 +214,22 @@ fun NumberField(
     modifier: Modifier = Modifier,
     decimal: Boolean = true,
     supportingText: String? = null,
+    allowNegative: Boolean = false,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = { text ->
-            val allowed = if (decimal) "0123456789.,-" else "0123456789"
+            val allowed = when {
+                decimal && allowNegative -> "0123456789.,-"
+                decimal -> "0123456789.,"
+                else -> "0123456789"
+            }
             onValueChange(text.filter { it in allowed })
         },
         label = { Text(label, maxLines = 1) },
         singleLine = true,
+        // Неразборчивое число («1.2.3», слишком большое) подсвечивается, а не пропадает молча.
+        isError = !isValidNumber(value, decimal, allowNegative),
         modifier = modifier,
         supportingText = if (supportingText != null) {
             { Text(supportingText) }

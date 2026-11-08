@@ -116,13 +116,19 @@ class UpdateChecker(private val context: Context) {
         private const val KEY_LAST = "last_check"
         private const val KEY_SKIPPED = "skipped"
 
-        /** Ответ GitHub о выпуске → [ReleaseInfo]: первый .apk среди файлов, текст без заголовка версии. */
+        /**
+         * Ответ GitHub о выпуске → [ReleaseInfo]: .apk обычной сборки, текст без заголовка версии.
+         * Сборка для F-Droid (`-fdroid` в имени) лежит в том же выпуске, но без обновлений и Диска — её не предлагаем.
+         */
         fun parseRelease(json: String): ReleaseInfo {
             val o = JSONObject(json)
             val assets = o.optJSONArray("assets")
             val apk = (0 until (assets?.length() ?: 0))
                 .map { assets!!.getJSONObject(it) }
-                .firstOrNull { it.optString("name").endsWith(".apk", ignoreCase = true) }
+                .firstOrNull {
+                    val name = it.optString("name")
+                    name.endsWith(".apk", ignoreCase = true) && !name.contains("fdroid", ignoreCase = true)
+                }
             return ReleaseInfo(
                 version = o.getString("tag_name"),
                 pageUrl = o.optString("html_url").ifBlank { Updates.RELEASES_PAGE },

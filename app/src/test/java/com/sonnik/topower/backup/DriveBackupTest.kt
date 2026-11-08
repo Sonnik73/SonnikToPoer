@@ -124,6 +124,7 @@ class DriveBackupTest {
             """{"tag_name":"v1.28","html_url":"https://github.com/x/releases/tag/v1.28","body":"## 1.28\n- Обновления",
                "published_at":"2026-11-01T10:00:00Z",
                "assets":[{"name":"notes.txt","browser_download_url":"t","size":3},
+                         {"name":"SonnikToPower-fdroid-1.28.apk","browser_download_url":"https://x/f.apk","size":7000000},
                          {"name":"SonnikToPower-1.28.apk","browser_download_url":"https://x/a.apk","size":7586445}]}"""
         )
         assertEquals("1.28", r.label)

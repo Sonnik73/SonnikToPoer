@@ -33,6 +33,7 @@ import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.data.SetEntity
 import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.domain.parseDecimal
+import com.sonnik.topower.domain.isValidNumber
 import com.sonnik.topower.domain.parseInt
 import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.ui.exercises.CheckRow
@@ -84,11 +85,12 @@ fun SetDialog(
     var seconds by rememberSaveable { mutableStateOf(prefill?.durationSec?.let { (it % 60).toString() }.orEmpty()) }
     var distance by rememberSaveable { mutableStateOf(prefill?.distanceKm?.let(::formatNumber).orEmpty()) }
     var warmup by rememberSaveable { mutableStateOf(if (isNew) false else prefill?.isWarmup ?: false) }
-    var selected by remember {
+    var selected by rememberSaveable {
         mutableStateOf(listOfNotNull(prefill?.equipmentId, prefill?.equipment2Id).filter { it in byId })
     }
     var pair by rememberSaveable { mutableStateOf(prefill?.pair ?: false) }
     var showError by rememberSaveable { mutableStateOf(false) }
+    var showInvalid by rememberSaveable { mutableStateOf(false) }
 
     // Клавиатура открыта из окна диалога: без явного скрытия она остаётся на экране тренировки.
     val keyboard = LocalSoftwareKeyboardController.current
@@ -214,6 +216,8 @@ fun SetDialog(
                         label = stringResource(
                             if (exercise.useBodyWeight) R.string.extra_weight_label else R.string.weight_label
                         ),
+                        // Отрицательный доп. вес — помощь (например, гравитрон), только для упражнений с весом тела.
+                        allowNegative = exercise.useBodyWeight,
                         supportingText = when {
                             exercise.useBodyWeight && bodyWeight != null ->
                                 stringResource(R.string.working_weight, formatNumber(bodyWeight + extra))
@@ -259,7 +263,13 @@ fun SetDialog(
                     )
                 }
                 CheckRow(warmup, stringResource(R.string.warmup), { warmup = it })
-                if (showError) {
+                if (showInvalid) {
+                    Text(
+                        stringResource(R.string.set_invalid_error),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                } else if (showError) {
                     Text(
                         stringResource(R.string.set_empty_error),
                         color = MaterialTheme.colorScheme.error,
@@ -275,10 +285,18 @@ fun SetDialog(
         },
         confirmButton = {
             TextButton(onClick = {
+                // Видимые поля с неразборчивым числом: такой подход не сохраняем, а просим исправить.
+                val invalid = (exercise.trackReps && !isValidNumber(reps, decimal = false)) ||
+                    (showWeight && !usesBands && !isValidNumber(weight, allowNegative = exercise.useBodyWeight)) ||
+                    (exercise.trackTime && !(isValidNumber(minutes, decimal = false) && isValidNumber(seconds, decimal = false))) ||
+                    (exercise.trackDistance && !isValidNumber(distance))
+                showInvalid = invalid
                 val values = collect()
                 val empty = values.reps == null && values.weight == null &&
                     values.durationSec == null && values.distanceKm == null
-                if (empty) {
+                if (invalid) {
+                    showError = false
+                } else if (empty) {
                     showError = true
                 } else {
                     close { onSave(values) }
