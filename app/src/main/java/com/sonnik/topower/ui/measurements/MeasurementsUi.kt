@@ -77,10 +77,10 @@ fun firstMeasurements(items: List<MeasurementEntity>): Map<MeasurementPart, Meas
         items.filter { it.part == part.name }.minByOrNull { it.takenAt }?.let { part to it }
     }.toMap()
 
-/** Во сколько раз изменение обхвата усиливается на схеме: +3 % в сантиметрах — +12 % в ширине. */
-private const val SHAPE_GAIN = 4f
-private const val SHAPE_MIN = 0.7f
-private const val SHAPE_MAX = 1.4f
+/** Во сколько раз изменение обхвата усиливается на схеме: +3 % в сантиметрах — +18 % в ширине. */
+private const val SHAPE_GAIN = 6f
+private const val SHAPE_MIN = 0.65f
+private const val SHAPE_MAX = 1.5f
 
 /**
  * Обхваты для схемы «стало»: отношение последнего замера к первому, усиленное в [SHAPE_GAIN] раз,

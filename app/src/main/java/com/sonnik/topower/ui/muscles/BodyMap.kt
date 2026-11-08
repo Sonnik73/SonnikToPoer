@@ -642,7 +642,7 @@ private fun Canvas.drawFigure(
  */
 fun measurementLine(part: MeasurementPart, female: Boolean, shape: BodyShape? = null): Pair<PointF, PointF> = synchronized(FIGURE_LOCK) {
     fun line() = when (part) {
-        MeasurementPart.BICEPS -> pt(21.6, 53) to pt(31, 53)
+        MeasurementPart.BICEPS -> pt(21.6, 53) to pt(30.2, 53) // внутренний край — ещё рука, не корпус
         MeasurementPart.FOREARM -> pt(18.8, 70) to pt(26.8, 70)
         MeasurementPart.CHEST -> pt(31.2, 41) to pt(68.8, 41)
         MeasurementPart.WAIST -> pt(35, 74) to pt(65, 74)

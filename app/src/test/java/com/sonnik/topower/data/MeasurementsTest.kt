@@ -59,9 +59,9 @@ class MeasurementsTest {
             first.mapValues { it.value.valueCm },
             latestMeasurements(all.sortedBy { it.takenAt }).mapValues { it.value.valueCm },
         )
-        assertEquals(1.2f, shape.biceps, 1e-3f) // +5 % × 4
-        assertEquals(0.9f, shape.waist, 1e-3f) // −2.5 % × 4
-        assertEquals(1.4f, shape.calf, 1e-3f) // опечатка 380 вместо 38 — не больше предела
+        assertEquals(1.3f, shape.biceps, 1e-3f) // +5 % × 6
+        assertEquals(0.85f, shape.waist, 1e-3f) // −2.5 % × 6
+        assertEquals(1.5f, shape.calf, 1e-3f) // опечатка 380 вместо 38 — не больше предела
         assertEquals(1f, shape.chest, 1e-3f) // груди не мерили
     }
 
