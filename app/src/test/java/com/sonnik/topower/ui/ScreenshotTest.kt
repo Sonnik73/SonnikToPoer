@@ -216,7 +216,7 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.41")
+        waitText("Версия 1.42")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
@@ -316,6 +316,13 @@ class ScreenshotTest {
         waitText("Можно тренировать", substring = true)
         listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
         waitText("Замеры тела")
+    }
+
+    @Test fun measurementsBefore() = shoot("39-measurements-before") {
+        waitText("Можно тренировать", substring = true)
+        listWith("Можно тренировать").performScrollToNode(hasText("Провести замеры"))
+        compose.onAllNodesWithText("Было", substring = true)[0].performClick()
+        waitText("Было", substring = true)
     }
 
     @Test fun settings() = shoot("08-settings") {

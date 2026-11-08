@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.42
+- Body measurements: a Before / Now switch — the figure shows how your girths changed since the first measurement (exaggerated to be visible), labels show cm and the change since the start
+
 ## 1.41
 - Fixes: note, body weight, watch data and finishing a workout no longer overwrite each other
 - Save as template and History no longer count warm-up sets

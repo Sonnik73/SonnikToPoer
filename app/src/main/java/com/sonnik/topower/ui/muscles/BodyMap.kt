@@ -66,7 +66,90 @@ private fun femaleWidth(x: Float, y: Float): Float {
 private fun pt(x: Number, y: Number): PointF {
     val px = x.toFloat()
     val py = y.toFloat()
-    return if (buildingFemale) PointF(50f + (px - 50f) * femaleWidth(px, py), py) else PointF(px, py)
+    val fw = if (buildingFemale) femaleWidth(px, py) else 1f
+    val fx = 50f + (px - 50f) * fw
+    val shape = buildingShape ?: return PointF(fx, py)
+    return PointF(shapedX(shape, px, py, fx, fw), py)
+}
+
+/**
+ * Обхваты фигуры относительно обычной: 1 — без изменений, 1.1 — на 10 % шире на схеме.
+ * Строится из замеров (см. MeasurementsUi) — на карточке замеров «было / стало».
+ */
+data class BodyShape(
+    val biceps: Float = 1f,
+    val forearm: Float = 1f,
+    val chest: Float = 1f,
+    val waist: Float = 1f,
+    val hips: Float = 1f,
+    val thigh: Float = 1f,
+    val calf: Float = 1f,
+)
+
+/** Фигура с изменёнными обхватами строится так же, как женская: точки пересчитываются в [pt]. */
+private var buildingShape: BodyShape? = null
+
+private fun <T> shaped(shape: BodyShape, block: () -> T): T {
+    buildingShape = shape
+    try {
+        return block()
+    } finally {
+        buildingShape = null
+    }
+}
+
+/** Значение на высоте [y] по опорным точкам (между ними — линейно, за краями — крайние значения). */
+private fun interpolate(table: List<Pair<Float, Float>>, y: Float): Float {
+    if (y <= table.first().first) return table.first().second
+    if (y >= table.last().first) return table.last().second
+    val i = table.indexOfFirst { it.first >= y }
+    val (y0, v0) = table[i - 1]
+    val (y1, v1) = table[i]
+    return v0 + (v1 - v0) * (y - y0) / (y1 - y0)
+}
+
+/** Середина левой руки на высоте y: относительно неё рука становится толще или тоньше. */
+private val ARM_AXIS = listOf(28f to 29f, 40f to 26.8f, 52f to 25.5f, 60f to 24.5f, 68f to 22.5f, 80f to 20.3f, 92f to 18.3f, 104f to 18f)
+private const val LEG_AXIS = 41.5f
+/** Половина ширины плеч и расстояние от середины тела до оси ноги — на столько сдвигаются руки и ноги. */
+private const val SHOULDER_HALF = 19f
+private const val HIP_TO_LEG = 50f - LEG_AXIS
+
+/**
+ * X точки фигуры с обхватами [s]. [px], [py] — исходная точка (по ней видно, рука это, нога или корпус),
+ * [fx] — уже пересчитанная для женской фигуры, [fw] — её коэффициент ширины.
+ * Корпус расширяется от середины тела; руки и ноги — от своей оси и сдвигаются вместе с плечами и бёдрами,
+ * чтобы не отрываться от корпуса.
+ */
+private fun shapedX(s: BodyShape, px: Float, py: Float, fx: Float, fw: Float): Float {
+    if (kotlin.math.abs(px - 50f) < 0.01f) return fx // точки на середине тела остаются на ней
+    val side = if (px < 50f) -1f else 1f
+    fun axis(leftX: Float) = 50f + ((if (side < 0) leftX else 100f - leftX) - 50f) * fw
+    return when {
+        kotlin.math.abs(px - 50f) > 19.5f && py in 28f..106f -> {
+            val k = interpolate(
+                listOf(36f to 1f, 44f to s.biceps, 58f to s.biceps, 64f to (s.biceps + s.forearm) / 2, 70f to s.forearm, 86f to s.forearm, 94f to 1f),
+                py,
+            )
+            val a = axis(interpolate(ARM_AXIS, py))
+            a + (fx - a) * k + (s.chest - 1f) * SHOULDER_HALF * fw * side
+        }
+        py >= 100f -> {
+            val k = interpolate(
+                listOf(100f to s.hips, 112f to s.thigh, 136f to s.thigh, 148f to (s.thigh + s.calf) / 2, 158f to s.calf, 172f to s.calf, 186f to 1f),
+                py,
+            )
+            val a = axis(LEG_AXIS)
+            a + (fx - a) * k + (s.hips - 1f) * HIP_TO_LEG * fw * side
+        }
+        else -> {
+            val k = interpolate(
+                listOf(22f to 1f, 32f to s.chest, 50f to s.chest, 60f to (s.chest + s.waist) / 2, 68f to s.waist, 80f to s.waist, 92f to s.hips),
+                py,
+            )
+            50f + (fx - 50f) * k
+        }
+    }
 }
 
 private fun <T> female(block: () -> T): T {
@@ -410,6 +493,21 @@ private val HAIR_BACK by lazy(FIGURE_LOCK) {
     }
 }
 
+/** Последние построенные фигуры с обхватами: на карточке их две («было» и «стало»), перестраивать каждый кадр незачем. */
+private class ShapedFront(val silhouette: List<APath>, val figure: Figure)
+
+private val SHAPED_CACHE = object : LinkedHashMap<Pair<BodyShape, Boolean>, ShapedFront>(8, 0.75f, true) {
+    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<BodyShape, Boolean>, ShapedFront>?) = size > 4
+}
+
+private fun shapedFront(shape: BodyShape, female: Boolean): ShapedFront = synchronized(FIGURE_LOCK) {
+    SHAPED_CACHE.getOrPut(shape to female) {
+        shaped(shape) {
+            if (female) female { ShapedFront(silhouette(), frontFigure()) } else ShapedFront(silhouette(), frontFigure())
+        }
+    }
+}
+
 private fun figureOf(back: Boolean, female: Boolean = false) = when {
     female && back -> BACK_F
     female -> FRONT_F
@@ -467,9 +565,11 @@ private fun Canvas.drawFigure(
     selected: Muscle?,
     selectedColor: Int,
     female: Boolean = false,
+    shape: BodyShape? = null,
 ) {
-    val figure = figureOf(back, female)
-    val silhouette = if (female) SILHOUETTE_F else SILHOUETTE
+    val custom = shape?.takeIf { !back && it != BodyShape() }?.let { shapedFront(it, female) }
+    val figure = custom?.figure ?: figureOf(back, female)
+    val silhouette = custom?.silhouette ?: if (female) SILHOUETTE_F else SILHOUETTE
     val fill = Paint(Paint.ANTI_ALIAS_FLAG)
     // Волосы — тёплого каштанового оттенка поверх цвета тела, чтобы подходили и к светлой, и к тёмной теме.
     val hair = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = lerp(Color(bodyColor), HairColor, 0.55f).toArgb() }
@@ -540,7 +640,7 @@ private fun Canvas.drawFigure(
  * Линия замера на фигуре спереди в координатах схемы 100×200: плечо, предплечье, бедро и икра —
  * на левой (по экрану) руке и ноге, грудь, талия и ягодицы — поперёк корпуса. Для женской фигуры — в её пропорциях.
  */
-fun measurementLine(part: MeasurementPart, female: Boolean): Pair<PointF, PointF> = synchronized(FIGURE_LOCK) {
+fun measurementLine(part: MeasurementPart, female: Boolean, shape: BodyShape? = null): Pair<PointF, PointF> = synchronized(FIGURE_LOCK) {
     fun line() = when (part) {
         MeasurementPart.BICEPS -> pt(21.6, 53) to pt(31, 53)
         MeasurementPart.FOREARM -> pt(18.8, 70) to pt(26.8, 70)
@@ -550,12 +650,16 @@ fun measurementLine(part: MeasurementPart, female: Boolean): Pair<PointF, PointF
         MeasurementPart.THIGH -> pt(33.3, 117) to pt(49.4, 117)
         MeasurementPart.CALF -> pt(35.1, 161) to pt(46.4, 161)
     }
-    if (female) female { line() } else line()
+    fun build() = if (female) female { line() } else line()
+    if (shape != null) shaped(shape) { build() } else build()
 }
 
-/** Фигура спереди на холсте 100×200 (масштаб задаёт вызывающий) — для схемы замеров. */
-fun Canvas.drawBodyFront(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, female: Boolean) =
-    drawFigure(back = false, colorOf = colorOf, bodyColor = bodyColor, gapColor = gapColor, selected = null, selectedColor = 0, female = female)
+/** Фигура спереди на холсте 100×200 (масштаб задаёт вызывающий) — для схемы замеров; [shape] — обхваты. */
+fun Canvas.drawBodyFront(colorOf: (Muscle) -> Int, bodyColor: Int, gapColor: Int, female: Boolean, shape: BodyShape? = null) =
+    drawFigure(
+        back = false, colorOf = colorOf, bodyColor = bodyColor, gapColor = gapColor,
+        selected = null, selectedColor = 0, female = female, shape = shape,
+    )
 
 /** Женский силуэт на схемах — по настройке «Схема мышц». */
 val LocalFemaleBody = staticCompositionLocalOf { false }

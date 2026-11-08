@@ -3,6 +3,7 @@ package com.sonnik.topower.ui.measurements
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,7 @@ import com.sonnik.topower.ui.common.NumberField
 import com.sonnik.topower.ui.common.SectionCard
 import com.sonnik.topower.ui.common.formatDate
 import com.sonnik.topower.ui.common.formatDateTime
+import com.sonnik.topower.ui.muscles.BodyShape
 import com.sonnik.topower.ui.muscles.LocalFemaleBody
 import com.sonnik.topower.ui.muscles.drawBodyFront
 import com.sonnik.topower.ui.muscles.measurementLine
@@ -68,6 +70,39 @@ fun latestMeasurements(items: List<MeasurementEntity>): Map<MeasurementPart, Lat
         val prev = list.getOrNull(list.size - 2)
         part to LatestMeasurement(last.valueCm, prev?.let { last.valueCm - it.valueCm }, last.takenAt)
     }.toMap()
+
+/** Первый замер каждого места — точка отсчёта для «было». [items] — в любом порядке. */
+fun firstMeasurements(items: List<MeasurementEntity>): Map<MeasurementPart, MeasurementEntity> =
+    MeasurementPart.entries.mapNotNull { part ->
+        items.filter { it.part == part.name }.minByOrNull { it.takenAt }?.let { part to it }
+    }.toMap()
+
+/** Во сколько раз изменение обхвата усиливается на схеме: +3 % в сантиметрах — +12 % в ширине. */
+private const val SHAPE_GAIN = 4f
+private const val SHAPE_MIN = 0.7f
+private const val SHAPE_MAX = 1.4f
+
+/**
+ * Обхваты для схемы «стало»: отношение последнего замера к первому, усиленное в [SHAPE_GAIN] раз,
+ * чтобы разница в сантиметр-другой была заметна. Опечатки не раздувают фигуру: коэффициент ограничен.
+ */
+fun bodyShape(first: Map<MeasurementPart, Double>, latest: Map<MeasurementPart, Double>): BodyShape {
+    fun k(part: MeasurementPart): Float {
+        val a = first[part]?.takeIf { it > 0 } ?: return 1f
+        val b = latest[part] ?: return 1f
+        val raw = 1f + ((b / a).toFloat() - 1f) * SHAPE_GAIN
+        return (kotlin.math.round(raw.coerceIn(SHAPE_MIN, SHAPE_MAX) * 100f) / 100f)
+    }
+    return BodyShape(
+        biceps = k(MeasurementPart.BICEPS),
+        forearm = k(MeasurementPart.FOREARM),
+        chest = k(MeasurementPart.CHEST),
+        waist = k(MeasurementPart.WAIST),
+        hips = k(MeasurementPart.HIPS),
+        thigh = k(MeasurementPart.THIGH),
+        calf = k(MeasurementPart.CALF),
+    )
+}
 
 fun partNameRes(part: MeasurementPart): Int = when (part) {
     MeasurementPart.BICEPS -> R.string.measure_biceps
@@ -91,12 +126,48 @@ fun MeasurementsCard(modifier: Modifier = Modifier) {
     val repo = LocalRepository.current
     val items by remember { repo.dao.observeMeasurements() }.collectAsStateWithLifecycle(initialValue = emptyList())
     val latest = remember(items) { latestMeasurements(items) }
+    val first = remember(items) { firstMeasurements(items) }
     var measuring by rememberSaveable { mutableStateOf(false) }
     var history by rememberSaveable { mutableStateOf(false) }
+    // «Было / стало» — когда замеров хотя бы два по дате.
+    val canCompare = items.map { it.takenAt }.distinct().size >= 2
+    var before by rememberSaveable { mutableStateOf(false) }
+    val showBefore = before && canCompare
 
     SectionCard(modifier) {
         Text(stringResource(R.string.measure_title), style = MaterialTheme.typography.titleMedium)
-        MeasurementFigure(latest)
+        if (canCompare) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = showBefore,
+                    onClick = { before = true },
+                    label = { Text(stringResource(R.string.measure_before, formatDate(items.minOf { it.takenAt }))) },
+                )
+                FilterChip(
+                    selected = !showBefore,
+                    onClick = { before = false },
+                    label = { Text(stringResource(R.string.measure_after, formatDate(items.maxOf { it.takenAt }))) },
+                )
+            }
+        }
+        val firstValues = first.mapValues { it.value.valueCm }
+        val latestValues = latest.mapValues { it.value.valueCm }
+        // «Стало»: изменение к первому замеру этого места, если с тех пор мерили ещё раз.
+        val sinceFirst = latest.mapNotNull { (part, l) ->
+            first[part]?.takeIf { it.takenAt != l.takenAt }?.let { part to l.valueCm - it.valueCm }
+        }.toMap()
+        val shape = remember(items) { bodyShape(firstValues, latestValues) }
+        Crossfade(targetState = showBefore, label = "measure-before-after") { b ->
+            if (b) MeasurementFigure(firstValues, emptyMap(), shape = null)
+            else MeasurementFigure(latestValues, sinceFirst, shape = shape.takeIf { canCompare })
+        }
+        if (canCompare && !showBefore) {
+            Text(
+                stringResource(R.string.measure_compare_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Text(
             latest.values.maxOfOrNull { it.takenAt }?.let { stringResource(R.string.measure_last, formatDate(it)) }
                 ?: stringResource(R.string.measure_empty),
@@ -125,9 +196,16 @@ fun MeasurementsCard(modifier: Modifier = Modifier) {
     }
 }
 
-/** Фигура с пунктирами замеров и выносными подписями: рука и нога — слева, грудь, талия и ягодицы — справа. */
+/**
+ * Фигура с пунктирами замеров и выносными подписями: рука и нога — слева, грудь, талия и ягодицы — справа.
+ * [values] — значения в подписях, [deltas] — изменения под ними, [shape] — обхваты фигуры («стало»).
+ */
 @Composable
-private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
+private fun MeasurementFigure(
+    values: Map<MeasurementPart, Double>,
+    deltas: Map<MeasurementPart, Double>,
+    shape: BodyShape?,
+) {
     val female = LocalFemaleBody.current
     val idle = if (isAppInDarkTheme) Color(0xFF4A515B) else Color(0xFFC3C9D1)
     val bodyColor = MaterialTheme.colorScheme.surfaceVariant
@@ -139,12 +217,12 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
     val noValue = stringResource(R.string.measure_no_value)
     val cmFormat = stringResource(R.string.measure_cm, "%s")
     val goodColor = Color(0xFF2E7D32)
-    fun valueText(part: MeasurementPart): String = latest[part]?.let { cmFormat.format(formatNumber(it.valueCm, 1)) } ?: noValue
-    fun deltaText(part: MeasurementPart): String? = latest[part]?.deltaCm?.takeIf { kotlin.math.abs(it) >= 0.05 }
+    fun valueText(part: MeasurementPart): String = values[part]?.let { cmFormat.format(formatNumber(it, 1)) } ?: noValue
+    fun deltaText(part: MeasurementPart): String? = deltas[part]?.takeIf { kotlin.math.abs(it) >= 0.05 }
         ?.let { (if (it > 0) "+" else "−") + formatNumber(kotlin.math.abs(it), 1) }
     /** Рост обхватов — хорошо, кроме талии: там наоборот. */
     fun deltaGood(part: MeasurementPart): Boolean {
-        val d = latest[part]?.deltaCm ?: return false
+        val d = deltas[part] ?: return false
         return if (part == MeasurementPart.WAIST) d < 0 else d > 0
     }
 
@@ -158,7 +236,7 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
             canvas.save()
             canvas.translate(left, 0f)
             canvas.scale(scale, scale)
-            canvas.drawBodyFront({ idle.toArgb() }, bodyColor.toArgb(), gapColor.toArgb(), female)
+            canvas.drawBodyFront({ idle.toArgb() }, bodyColor.toArgb(), gapColor.toArgb(), female, shape)
             canvas.restore()
 
             val dash = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -181,8 +259,8 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
             fun place(parts: List<MeasurementPart>): Map<MeasurementPart, Float> {
                 val ys = mutableMapOf<MeasurementPart, Float>()
                 var prev = Float.NEGATIVE_INFINITY
-                parts.sortedBy { measurementLine(it, female).first.y }.forEach { p ->
-                    val lineY = measurementLine(p, female).first.y * scale
+                parts.sortedBy { measurementLine(it, female, shape).first.y }.forEach { p ->
+                    val lineY = measurementLine(p, female, shape).first.y * scale
                     val y = maxOf(lineY - 8.dp.toPx(), prev + gap).coerceIn(14.dp.toPx(), size.height - 30.dp.toPx())
                     ys[p] = y
                     prev = y
@@ -196,7 +274,7 @@ private fun MeasurementFigure(latest: Map<MeasurementPart, LatestMeasurement>) {
                 if (w > side) textSize = base * side / w
             }
             MeasurementPart.entries.forEach { part ->
-                val (a, b) = measurementLine(part, female)
+                val (a, b) = measurementLine(part, female, shape)
                 val y = a.y * scale
                 canvas.drawLine(left + a.x * scale, y, left + b.x * scale, y, dash)
                 val onLeft = part in LEFT_PARTS

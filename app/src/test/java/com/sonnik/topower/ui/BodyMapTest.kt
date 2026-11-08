@@ -2,6 +2,9 @@ package com.sonnik.topower.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sonnik.topower.domain.Muscle
+import com.sonnik.topower.data.MeasurementPart
+import com.sonnik.topower.ui.muscles.BodyShape
+import com.sonnik.topower.ui.muscles.measurementLine
 import com.sonnik.topower.ui.muscles.muscleAt
 import com.sonnik.topower.ui.muscles.renderBodyBitmap
 import android.graphics.Bitmap
@@ -66,6 +69,21 @@ class BodyMapTest {
         File("build/screenshots").apply { mkdirs() }.resolve("35-widget-body-female.png").outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
+    }
+
+    /** Обхваты меняют ширину своего места: рука толще, талия уже, середина тела на месте. */
+    @Test fun shapeChangesGirths() {
+        val shape = BodyShape(biceps = 1.2f, waist = 0.9f, thigh = 1.1f)
+        fun width(part: MeasurementPart, s: BodyShape?, female: Boolean = false) =
+            measurementLine(part, female, s).let { (a, b) -> b.x - a.x }
+        assertTrue(width(MeasurementPart.BICEPS, shape) > width(MeasurementPart.BICEPS, null) * 1.15f)
+        assertTrue(width(MeasurementPart.WAIST, shape) < width(MeasurementPart.WAIST, null) * 0.95f)
+        assertTrue(width(MeasurementPart.THIGH, shape) > width(MeasurementPart.THIGH, null) * 1.05f)
+        assertEquals(width(MeasurementPart.CHEST, null), width(MeasurementPart.CHEST, shape), 1e-3f)
+        assertTrue(width(MeasurementPart.BICEPS, shape, female = true) > width(MeasurementPart.BICEPS, null, female = true) * 1.15f)
+        // Талия сужается симметрично относительно середины тела.
+        val (a, c) = measurementLine(MeasurementPart.WAIST, false, shape)
+        assertEquals(50f, (a.x + c.x) / 2, 1e-3f)
     }
 
     @Test fun tapOutsideMuscles() {

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.sonnik.topower.ui.measurements.bodyShape
+import com.sonnik.topower.ui.measurements.firstMeasurements
 import com.sonnik.topower.ui.measurements.latestMeasurements
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,24 @@ class MeasurementsTest {
 
         repo.deleteMeasurementsAt(2_000)
         assertEquals(listOf(1_000L, 1_000L), db.dao().allMeasurements().map { it.takenAt })
+    }
+
+    /** «Стало» на схеме: изменение к первому замеру, усиленное и ограниченное. */
+    @Test fun shapeFromFirstToLatest() = runBlocking {
+        repo.saveMeasurements(mapOf(MeasurementPart.BICEPS to 36.0, MeasurementPart.WAIST to 84.0, MeasurementPart.CALF to 38.0), takenAt = 1_000)
+        repo.saveMeasurements(mapOf(MeasurementPart.BICEPS to 37.0), takenAt = 2_000)
+        repo.saveMeasurements(mapOf(MeasurementPart.BICEPS to 37.8, MeasurementPart.WAIST to 81.9, MeasurementPart.CALF to 380.0), takenAt = 3_000)
+        val all = db.dao().allMeasurements()
+        val first = firstMeasurements(all)
+        assertEquals(1_000L, first.getValue(MeasurementPart.BICEPS).takenAt)
+        val shape = bodyShape(
+            first.mapValues { it.value.valueCm },
+            latestMeasurements(all.sortedBy { it.takenAt }).mapValues { it.value.valueCm },
+        )
+        assertEquals(1.2f, shape.biceps, 1e-3f) // +5 % × 4
+        assertEquals(0.9f, shape.waist, 1e-3f) // −2.5 % × 4
+        assertEquals(1.4f, shape.calf, 1e-3f) // опечатка 380 вместо 38 — не больше предела
+        assertEquals(1f, shape.chest, 1e-3f) // груди не мерили
     }
 
     @Test fun measurementsSurviveBackup() = runBlocking {
