@@ -114,6 +114,8 @@ private const val LEG_AXIS = 41.5f
 /** Половина ширины плеч и расстояние от середины тела до оси ноги — на столько сдвигаются руки и ноги. */
 private const val SHOULDER_HALF = 19f
 private const val HIP_TO_LEG = 50f - LEG_AXIS
+/** От оси руки до её внутреннего края. */
+private const val ARM_INNER_HALF = 4.5f
 
 /**
  * X точки фигуры с обхватами [s]. [px], [py] — исходная точка (по ней видно, рука это, нога или корпус),
@@ -132,7 +134,8 @@ private fun shapedX(s: BodyShape, px: Float, py: Float, fx: Float, fw: Float): F
                 py,
             )
             val a = axis(interpolate(ARM_AXIS, py))
-            a + (fx - a) * k + (s.chest - 1f) * SHOULDER_HALF * fw * side
+            // Толстая рука отодвигается от корпуса, а не наезжает на него.
+            a + (fx - a) * k + ((s.chest - 1f) * SHOULDER_HALF + maxOf(0f, k - 1f) * ARM_INNER_HALF) * fw * side
         }
         py >= 100f -> {
             val k = interpolate(
@@ -140,7 +143,9 @@ private fun shapedX(s: BodyShape, px: Float, py: Float, fx: Float, fw: Float): F
                 py,
             )
             val a = axis(LEG_AXIS)
-            a + (fx - a) * k + (s.hips - 1f) * HIP_TO_LEG * fw * side
+            // Нога сдвигается наружу настолько, чтобы её внутренний край не заходил за середину тела:
+            // бедро могло вырасти без ягодиц.
+            a + (fx - a) * k + (maxOf(s.hips, k) - 1f) * HIP_TO_LEG * fw * side
         }
         else -> {
             val k = interpolate(

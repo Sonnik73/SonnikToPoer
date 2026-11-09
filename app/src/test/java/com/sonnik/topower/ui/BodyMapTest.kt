@@ -86,6 +86,18 @@ class BodyMapTest {
         assertEquals(50f, (a.x + c.x) / 2, 1e-3f)
     }
 
+    /** Бедро выросло без ягодиц, бицепс — без груди: нога не заходит за середину тела, рука — на корпус. */
+    @Test fun thickLimbsDoNotOverlapBody() {
+        val shape = BodyShape(biceps = 1.5f, thigh = 1.5f)
+        for (female in listOf(false, true)) {
+            val (_, thighInner) = measurementLine(MeasurementPart.THIGH, female, shape)
+            assertTrue("thigh $female: ${thighInner.x}", thighInner.x <= 50f)
+            val (_, armInner) = measurementLine(MeasurementPart.BICEPS, female, shape)
+            val (_, armInnerBefore) = measurementLine(MeasurementPart.BICEPS, female, null)
+            assertTrue("arm $female: ${armInner.x}", armInner.x <= armInnerBefore.x + 0.01f)
+        }
+    }
+
     @Test fun tapOutsideMuscles() {
         assertNull(muscleAt(back = false, x = 5f, y = 5f))
         assertNull(muscleAt(back = true, x = 50f, y = 13f))

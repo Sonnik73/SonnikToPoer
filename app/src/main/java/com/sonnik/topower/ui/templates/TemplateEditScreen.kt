@@ -67,6 +67,7 @@ fun TemplateEditScreen(
     var renaming by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var picking by remember { mutableStateOf(false) }
+    var starting by remember { mutableStateOf(false) }
 
     ScreenScaffold(
         title = template?.name ?: stringResource(R.string.template_title),
@@ -98,7 +99,19 @@ fun TemplateEditScreen(
         ) {
             item {
                 Button(
-                    onClick = { scope.launch { openWorkout(repo.startWorkout(templateId)) } },
+                    onClick = {
+                        // Повторное нажатие не создаёт вторую тренировку.
+                        if (!starting) {
+                            starting = true
+                            scope.launch {
+                                try {
+                                    openWorkout(repo.startWorkout(templateId))
+                                } finally {
+                                    starting = false
+                                }
+                            }
+                        }
+                    },
                     enabled = items.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth(),
                 ) {

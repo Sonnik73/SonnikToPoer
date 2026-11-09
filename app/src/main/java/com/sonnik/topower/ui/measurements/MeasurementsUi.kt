@@ -136,17 +136,21 @@ fun MeasurementsCard(modifier: Modifier = Modifier) {
 
     SectionCard(modifier) {
         Text(stringResource(R.string.measure_title), style = MaterialTheme.typography.titleMedium)
+        // Дата на переключателе — только если все значения этого вида сняты в один день:
+        // иначе, например, талию впервые померили позже бицепса, и общая дата была бы неверной.
+        val beforeDate = first.values.map { it.takenAt }.distinct().singleOrNull()
+        val afterDate = latest.values.map { it.takenAt }.distinct().singleOrNull()
         if (canCompare) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = showBefore,
                     onClick = { before = true },
-                    label = { Text(stringResource(R.string.measure_before, formatDate(items.minOf { it.takenAt }))) },
+                    label = { Text(beforeDate?.let { stringResource(R.string.measure_before, formatDate(it)) } ?: stringResource(R.string.measure_before_plain)) },
                 )
                 FilterChip(
                     selected = !showBefore,
                     onClick = { before = false },
-                    label = { Text(stringResource(R.string.measure_after, formatDate(items.maxOf { it.takenAt }))) },
+                    label = { Text(afterDate?.let { stringResource(R.string.measure_after, formatDate(it)) } ?: stringResource(R.string.measure_after_plain)) },
                 )
             }
         }

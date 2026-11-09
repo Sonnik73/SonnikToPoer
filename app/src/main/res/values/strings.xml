@@ -565,5 +565,7 @@
     <string name="measure_hint">Use a tape measure at the same time of day, ideally in the morning. Biceps and forearm at the widest point of the flexed arm, chest on an exhale at the fullest line, waist at the narrowest point, hips at the fullest point of the glutes, thigh just below the glute fold, calf at the widest point. Empty fields are not saved.</string>
     <string name="measure_before">Before · %s</string>
     <string name="measure_after">Now · %s</string>
+    <string name="measure_before_plain">Before</string>
+    <string name="measure_after_plain">Now</string>
     <string name="measure_compare_hint">The figure is schematic: girth changes since the first measurement are exaggerated to be visible</string>
 </resources>

@@ -129,13 +129,15 @@ fun AppRoot() {
         scope.launch { pager.animateScrollToPage(tab.ordinal) }
     }
 
-    val openSettings: () -> Unit = { nav.navigate(Routes.SETTINGS) { launchSingleTop = true } }
-    WhatsNewOnUpdate(openChangelog = { nav.navigate(Routes.CHANGELOG) })
+    // Двойное нажатие не должно открывать один и тот же экран дважды.
+    fun open(route: String) = nav.navigate(route) { launchSingleTop = true }
+    val openSettings: () -> Unit = { open(Routes.SETTINGS) }
+    WhatsNewOnUpdate(openChangelog = { open(Routes.CHANGELOG) })
     BodyTypeQuestion()
     // Новая версия на GitHub: проверка при входе (не чаще раза в 6 часов) и окна ручной проверки.
     val updates = (LocalContext.current.applicationContext as SonnikApp).updates
     LaunchedEffect(Unit) { if (Flavor.UPDATE_CHECKS) updates.checkIfDue() }
-    UpdateDialogs(updates, openChangelog = { nav.navigate(Routes.CHANGELOG) })
+    UpdateDialogs(updates, openChangelog = { open(Routes.CHANGELOG) })
 
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
         Scaffold(
@@ -155,12 +157,12 @@ fun AppRoot() {
                     HorizontalPager(state = pager, beyondViewportPageCount = 1) { page ->
                         when (Tab.entries[page]) {
                             Tab.Workout -> WorkoutHomeScreen(
-                                openWorkout = { nav.navigate(Routes.workout(it)) },
-                                openTemplate = { nav.navigate(Routes.template(it)) },
+                                openWorkout = { open(Routes.workout(it)) },
+                                openTemplate = { open(Routes.template(it)) },
                             )
-                            Tab.History -> HistoryScreen(openWorkout = { nav.navigate(Routes.workout(it)) })
-                            Tab.Stats -> StatsScreen(openExercise = { nav.navigate(Routes.exerciseStats(it)) })
-                            Tab.Exercises -> ExercisesScreen(openStats = { nav.navigate(Routes.exerciseStats(it)) })
+                            Tab.History -> HistoryScreen(openWorkout = { open(Routes.workout(it)) })
+                            Tab.Stats -> StatsScreen(openExercise = { open(Routes.exerciseStats(it)) })
+                            Tab.Exercises -> ExercisesScreen(openStats = { open(Routes.exerciseStats(it)) })
                             Tab.Inventory -> InventoryScreen()
                         }
                     }
@@ -168,7 +170,7 @@ fun AppRoot() {
                 composable(Routes.SETTINGS) {
                     SettingsScreen(
                     onBack = { nav.popBackStack() },
-                    openChangelog = { nav.navigate(Routes.CHANGELOG) },
+                    openChangelog = { open(Routes.CHANGELOG) },
                 )
                 }
                 composable(Routes.CHANGELOG) {
@@ -178,7 +180,7 @@ fun AppRoot() {
                     WorkoutScreen(
                         workoutId = entry.arguments?.getString("id").orEmpty(),
                         onBack = { nav.popBackStack() },
-                        openStats = { nav.navigate(Routes.exerciseStats(it)) },
+                        openStats = { open(Routes.exerciseStats(it)) },
                     )
                 }
                 composable(Routes.TEMPLATE) { entry ->
@@ -188,6 +190,7 @@ fun AppRoot() {
                         openWorkout = { id ->
                             nav.navigate(Routes.workout(id)) {
                                 popUpTo(Routes.WORKOUT_HOME)
+                                launchSingleTop = true
                             }
                         },
                     )

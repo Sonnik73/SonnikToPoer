@@ -12,6 +12,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,6 +53,45 @@ class WorkoutDataTest {
         val resumed = db.dao().getWorkout(id)!!
         assertNull(resumed.finishedAt)
         assertEquals("Хорошо пошло", resumed.note)
+    }
+
+    /** Завершение — временем последнего подхода: забытая или открытая заново тренировка не «закончена только что». */
+    @Test fun finishUsesLastSetTime() = runBlocking {
+        val exercise = ExerciseEntity(name = "Жим")
+        db.dao().insertExercises(listOf(exercise))
+        val week = 7 * 86_400_000L
+        val start = System.currentTimeMillis() - week
+        val old = WorkoutEntity(startedAt = start)
+        db.dao().upsertWorkout(old)
+        repo.addExercisesToWorkout(old.id, listOf(exercise.id))
+        val item = db.dao().getWorkoutExercises(old.id).single()
+        db.dao().upsertSet(SetEntity(workoutExerciseId = item.id, position = 0, reps = 8, createdAt = start + 600_000))
+        db.dao().upsertSet(SetEntity(workoutExerciseId = item.id, position = 1, reps = 8, createdAt = start + 1_800_000))
+
+        repo.finishWorkout(old.id)
+        assertEquals(start + 1_800_000, db.dao().getWorkout(old.id)!!.finishedAt)
+        // «Продолжить» и снова «Завершить» без новых подходов — время то же.
+        repo.resumeWorkout(old.id)
+        repo.finishWorkout(old.id)
+        assertEquals(start + 1_800_000, db.dao().getWorkout(old.id)!!.finishedAt)
+
+        // Без подходов — текущее время.
+        val empty = repo.startWorkout(null)
+        val before = System.currentTimeMillis()
+        repo.finishWorkout(empty)
+        assertTrue(db.dao().getWorkout(empty)!!.finishedAt!! >= before)
+    }
+
+    /** В истории упражнения перечислены в порядке тренировки, а не добавления. */
+    @Test fun historyNamesFollowWorkoutOrder() = runBlocking {
+        val a = ExerciseEntity(name = "Жим")
+        val b = ExerciseEntity(name = "Тяга")
+        db.dao().insertExercises(listOf(a, b))
+        val id = repo.startWorkout(null)
+        repo.addExercisesToWorkout(id, listOf(a.id, b.id))
+        val first = db.dao().getWorkoutExercises(id).first()
+        repo.moveWorkoutExercise(id, first.id, 1)
+        assertEquals("Тяга, Жим", db.dao().observeWorkoutSummaries().first().single().exerciseNames)
     }
 
     private suspend fun workoutWithSets(warmups: Int, working: Int): String {

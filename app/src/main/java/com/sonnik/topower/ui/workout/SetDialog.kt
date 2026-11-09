@@ -76,6 +76,8 @@ fun SetDialog(
     val isBand = equipmentType?.isBand == true
     val byId = equipment.associateBy { it.id }
     val showWeight = exercise.trackWeight || exercise.useBodyWeight || equipmentType != null
+    // Минус — помощь в упражнениях с весом тела; и в старых подходах, где он уже записан.
+    val allowNegativeWeight = exercise.useBodyWeight || (prefill?.weight ?: 0.0) < 0
 
     var reps by rememberSaveable { mutableStateOf(prefill?.reps?.toString().orEmpty()) }
     var weight by rememberSaveable {
@@ -217,7 +219,7 @@ fun SetDialog(
                             if (exercise.useBodyWeight) R.string.extra_weight_label else R.string.weight_label
                         ),
                         // Отрицательный доп. вес — помощь (например, гравитрон), только для упражнений с весом тела.
-                        allowNegative = exercise.useBodyWeight,
+                        allowNegative = allowNegativeWeight,
                         supportingText = when {
                             exercise.useBodyWeight && bodyWeight != null ->
                                 stringResource(R.string.working_weight, formatNumber(bodyWeight + extra))
@@ -287,7 +289,7 @@ fun SetDialog(
             TextButton(onClick = {
                 // Видимые поля с неразборчивым числом: такой подход не сохраняем, а просим исправить.
                 val invalid = (exercise.trackReps && !isValidNumber(reps, decimal = false)) ||
-                    (showWeight && !usesBands && !isValidNumber(weight, allowNegative = exercise.useBodyWeight)) ||
+                    (showWeight && !usesBands && !isValidNumber(weight, allowNegative = allowNegativeWeight)) ||
                     (exercise.trackTime && !(isValidNumber(minutes, decimal = false) && isValidNumber(seconds, decimal = false))) ||
                     (exercise.trackDistance && !isValidNumber(distance))
                 showInvalid = invalid

@@ -101,8 +101,18 @@ fun WorkoutHomeScreen(
     // Самые готовые к тренировке — сверху; шаблоны без мышц — в конце.
     val sortedTemplates = templates.sortedByDescending { readiness[it.template.id] ?: -1f }
 
+    // Пока тренировка создаётся, повторное нажатие не создаёт вторую.
+    var starting by remember { mutableStateOf(false) }
     fun start(templateId: String?) {
-        scope.launch { openWorkout(repo.startWorkout(templateId)) }
+        if (starting) return
+        starting = true
+        scope.launch {
+            try {
+                openWorkout(repo.startWorkout(templateId))
+            } finally {
+                starting = false
+            }
+        }
     }
 
     ScreenScaffold(title = stringResource(R.string.nav_workout), showSettings = true) { padding ->

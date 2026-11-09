@@ -93,7 +93,7 @@ class FileBackup(
     suspend fun write(force: Boolean = false, now: Long = System.currentTimeMillis()): Boolean = lock.withLock {
         val s = _state.value
         val uri = s.uri?.let(Uri::parse) ?: return@withLock true
-        if (!force && s.lastAt != 0L && !BackupPolicy.autoDue(s.lastAt, EcosystemChanges.lastChangedAt(context))) {
+        if (!force && s.lastAt != 0L && !BackupPolicy.autoDue(s.lastAt, EcosystemChanges.lastBackupDataChangedAt(context))) {
             return@withLock true
         }
         try {
@@ -112,7 +112,8 @@ class FileBackup(
     /** Копия из файла [uri], если это копия SonnikToPower с тренировками или упражнениями; иначе null. */
     suspend fun readBackup(uri: Uri): String? {
         val text = runCatching { io.read(uri)?.toString(Charsets.UTF_8) }.getOrNull()?.takeIf { it.isNotBlank() } ?: return null
-        val backup = runCatching { BackupCodec.decode(text) }.getOrNull() ?: return null
+        // Разбор большой копии — не в главном потоке.
+        val backup = withContext(Dispatchers.Default) { runCatching { BackupCodec.decode(text) }.getOrNull() } ?: return null
         return text.takeIf { backup.workouts.isNotEmpty() || backup.exercises.isNotEmpty() }
     }
 

@@ -23,6 +23,8 @@ import kotlinx.coroutines.withContext
 class Repository(
     private val db: AppDatabase,
     private val scope: CoroutineScope,
+    /** Настройки приложения: уровень набора упражнений хранится в копии и восстанавливается из неё. */
+    private val settings: AppSettings? = null,
 ) {
     val dao: AppDao = db.dao()
     private val seedLock = Mutex()
@@ -30,9 +32,14 @@ class Repository(
     fun launch(block: suspend Repository.() -> Unit): Job = scope.launch { block() }
 
     /** Вызывает [onChange] (в фоновом потоке) после любой записи в тренировки, подходы или упражнения. */
-    fun observeTrainingChanges(onChange: () -> Unit) {
+    fun observeTrainingChanges(onChange: () -> Unit) = observe(TRAINING_TABLES, onChange)
+
+    /** То же для шаблонов и инвентаря: приложениям экосистемы они не видны, но входят в резервную копию. */
+    fun observeOtherChanges(onChange: () -> Unit) = observe(OTHER_BACKUP_TABLES, onChange)
+
+    private fun observe(tables: Array<String>, onChange: () -> Unit) {
         db.invalidationTracker.addObserver(
-            object : InvalidationTracker.Observer(TRAINING_TABLES) {
+            object : InvalidationTracker.Observer(tables) {
                 override fun onInvalidated(tables: Set<String>) = onChange()
             }
         )
@@ -149,9 +156,16 @@ class Repository(
     suspend fun setWorkoutWatch(workoutId: String, maxHr: Int?, avgHr: Int?, durationSec: Int?, calories: Int?) =
         dao.setWorkoutWatch(workoutId, maxHr, avgHr, durationSec, calories, now())
 
+    /**
+     * Завершает тренировку временем последнего подхода, а не моментом нажатия: тренировка, которую
+     * забыли завершить или открыли заново через неделю, не считается законченной только что —
+     * от этого времени идёт восстановление мышц. Без подходов — текущее время.
+     */
     suspend fun finishWorkout(workoutId: String) {
         val t = now()
-        dao.setWorkoutFinished(workoutId, t, t)
+        val startedAt = dao.getWorkout(workoutId)?.startedAt ?: return
+        val finishedAt = (dao.lastSetCreatedAt(workoutId) ?: t).coerceIn(startedAt, maxOf(startedAt, t))
+        dao.setWorkoutFinished(workoutId, finishedAt, t)
     }
 
     suspend fun resumeWorkout(workoutId: String) = dao.setWorkoutFinished(workoutId, null, now())
@@ -309,6 +323,7 @@ class Repository(
                 templateExercises = dao.allTemplateExercises(),
                 equipment = dao.allEquipment(),
                 measurements = dao.allMeasurements(),
+                exercisePack = settings?.exercisePack,
             )
         )
     }
@@ -335,6 +350,11 @@ class Repository(
             dao.insertTemplateExercises(backup.templateExercises)
             dao.insertMeasurements(backup.measurements)
         }
+        // Копия из старой версии: добавляем наборы упражнений и новые мышцы, которых в ней ещё не было.
+        settings?.let { s ->
+            s.exercisePack = backup.exercisePack ?: inferExercisePack(backup.exercises)
+            seedDefaultsIfNeeded(s, russian = java.util.Locale.getDefault().language == "ru")
+        }
     }
 
     // ---- Замеры тела ----
@@ -346,6 +366,23 @@ class Repository(
 
     suspend fun deleteMeasurementsAt(takenAt: Long) = dao.deleteMeasurementsAt(takenAt)
 }
+
+/**
+ * Уровень набора упражнений для копии, где он не записан (до 1.43): по тому, что в ней уже есть.
+ * Так удалённые пользователем упражнения набора не возвращаются, если набор в копии был.
+ */
+internal fun inferExercisePack(exercises: List<ExerciseEntity>): Int {
+    val names = exercises.map { it.name.trim().lowercase() }.toSet()
+    fun has(pack: List<DefaultExercise>) = pack.any { it.nameRu.lowercase() in names || it.nameEn.lowercase() in names }
+    return when {
+        has(EXERCISE_PACK_4) -> 4
+        exercises.any { it.technique.isNotBlank() } -> 3
+        has(EXERCISE_PACK_2) -> 2
+        else -> 1
+    }
+}
+
+private val OTHER_BACKUP_TABLES = arrayOf("templates", "template_exercises", "equipment")
 
 /** Таблицы, изменения которых видны приложениям экосистемы. */
 private val TRAINING_TABLES = arrayOf("workouts", "workout_exercises", "sets", "exercises", "measurements")

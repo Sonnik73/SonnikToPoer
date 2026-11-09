@@ -73,6 +73,10 @@ class FileBackupTest {
         assertEquals(2, io.writes)
         backup.write(force = true, now = 14_000L)
         assertEquals(3, io.writes)
+        // Правка шаблонов или инвентаря тоже требует новой копии.
+        EcosystemChanges.onOtherDataChanged(context, now = 15_000L)
+        backup.write(now = 16_000L)
+        assertEquals(4, io.writes)
     }
 
     @Test fun lostAccessIsReported() = runBlocking {

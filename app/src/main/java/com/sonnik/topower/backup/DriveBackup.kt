@@ -63,7 +63,7 @@ class DriveBackup(
     /** Автокопия из фона: только при подключении и если данные менялись после прошлой копии. */
     suspend fun backupIfChanged(): Boolean {
         val s = _state.value
-        if (!s.connected || !BackupPolicy.autoDue(s.lastBackupAt, EcosystemChanges.lastChangedAt(context))) return true
+        if (!s.connected || !BackupPolicy.autoDue(s.lastBackupAt, EcosystemChanges.lastBackupDataChangedAt(context))) return true
         return backupNow()
     }
 

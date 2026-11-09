@@ -1,5 +1,12 @@
 # What's new in SonnikToPower
 
+## 1.43
+- A double tap no longer creates two workouts or opens a screen twice
+- A workout is finished at the time of its last set: a forgotten or reopened workout no longer skews muscle recovery
+- Restoring an old backup now adds the newer exercises and muscles
+- Backups also refresh after editing templates or equipment
+- Before / Now: legs and arms no longer overlap the body; dialogs stay open on rotation
+
 ## 1.42
 - Body measurements: a Before / Now switch — the figure shows how your girths changed since the first measurement (exaggerated to be visible), labels show cm and the change since the start
 

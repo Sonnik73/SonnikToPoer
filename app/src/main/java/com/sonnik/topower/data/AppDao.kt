@@ -55,8 +55,8 @@ interface AppDao {
               (SELECT COUNT(*) FROM workout_exercises we WHERE we.workoutId = w.id) AS exerciseCount,
               (SELECT COUNT(*) FROM sets s JOIN workout_exercises we ON s.workoutExerciseId = we.id
                  WHERE we.workoutId = w.id AND s.isWarmup = 0) AS setCount,
-              (SELECT GROUP_CONCAT(e.name, ', ') FROM workout_exercises we
-                 JOIN exercises e ON e.id = we.exerciseId WHERE we.workoutId = w.id) AS exerciseNames
+              (SELECT GROUP_CONCAT(name, ', ') FROM (SELECT e.name AS name FROM workout_exercises we
+                 JOIN exercises e ON e.id = we.exerciseId WHERE we.workoutId = w.id ORDER BY we.position)) AS exerciseNames
            FROM workouts w ORDER BY w.startedAt DESC"""
     )
     fun observeWorkoutSummaries(): Flow<List<WorkoutSummary>>
@@ -120,6 +120,13 @@ interface AppDao {
 
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM sets WHERE workoutExerciseId = :workoutExerciseId")
     suspend fun nextSetPosition(workoutExerciseId: String): Int
+
+    /** Когда в тренировке записан последний подход; null — подходов нет. */
+    @Query(
+        """SELECT MAX(s.createdAt) FROM sets s JOIN workout_exercises we ON s.workoutExerciseId = we.id
+           WHERE we.workoutId = :workoutId"""
+    )
+    suspend fun lastSetCreatedAt(workoutId: String): Long?
 
     @Query("SELECT COUNT(*) FROM sets WHERE workoutExerciseId = :workoutExerciseId AND isWarmup = 0")
     suspend fun workingSetCount(workoutExerciseId: String): Int
@@ -216,8 +223,8 @@ interface AppDao {
     @Query(
         """SELECT t.*,
               (SELECT COUNT(*) FROM template_exercises te WHERE te.templateId = t.id) AS exerciseCount,
-              (SELECT GROUP_CONCAT(e.name, ', ') FROM template_exercises te
-                 JOIN exercises e ON e.id = te.exerciseId WHERE te.templateId = t.id) AS exerciseNames
+              (SELECT GROUP_CONCAT(name, ', ') FROM (SELECT e.name AS name FROM template_exercises te
+                 JOIN exercises e ON e.id = te.exerciseId WHERE te.templateId = t.id ORDER BY te.position)) AS exerciseNames
            FROM templates t ORDER BY t.name COLLATE NOCASE"""
     )
     fun observeTemplateSummaries(): Flow<List<TemplateSummary>>

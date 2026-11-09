@@ -26,7 +26,7 @@ import java.util.Locale
 class SonnikApp : Application() {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    val repository: Repository by lazy { Repository(AppDatabase.build(this), appScope) }
+    val repository: Repository by lazy { Repository(AppDatabase.build(this), appScope, settings) }
     val settings: AppSettings by lazy { AppSettings(this) }
     val restTimer: RestTimer by lazy { RestTimer(this) }
     val reminders: Reminders by lazy { Reminders(this, settings) }
@@ -46,6 +46,10 @@ class SonnikApp : Application() {
         // Файл копии на Диске перезаписывается вскоре после изменений.
         repository.observeTrainingChanges {
             EcosystemChanges.onDataChanged(this)
+            if (fileBackup.state.value.enabled) FileBackupWorker.requestSoon(this)
+        }
+        repository.observeOtherChanges {
+            EcosystemChanges.onOtherDataChanged(this)
             if (fileBackup.state.value.enabled) FileBackupWorker.requestSoon(this)
         }
         // Уведомления перепланируются при любом изменении тренировок или их настроек.

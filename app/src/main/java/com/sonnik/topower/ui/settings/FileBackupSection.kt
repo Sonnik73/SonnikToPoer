@@ -29,6 +29,8 @@ import com.sonnik.topower.backup.FileBackupWorker
 import com.sonnik.topower.data.BackupCodec
 import com.sonnik.topower.ui.common.formatDateTime
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 private const val FILE_NAME = "SonnikToPower.json"
 private val JSON_TYPES = arrayOf("application/json", "text/plain", "application/octet-stream")
@@ -69,7 +71,7 @@ fun ColumnScope.FileBackupSection() {
                 FileBackupWorker.attach(context, uri)
                 toast(attachedText)
             } else {
-                val backup = BackupCodec.decode(text)
+                val backup = withContext(Dispatchers.Default) { BackupCodec.decode(text) }
                 found = FoundBackup(uri, text, backup.exportedAt, backup.workouts.size)
             }
         }

@@ -554,5 +554,7 @@
     <string name="measure_hint">Мерьте сантиметровой лентой в одно и то же время, лучше утром. Бицепс и предплечье — в самом широком месте напряжённой руки, грудь — на выдохе по самой выступающей линии, талия — в самом узком месте, ягодицы — по самой выступающей точке, бедро — под ягодичной складкой, икра — в самом широком месте. Пустые поля не сохранятся.</string>
     <string name="measure_before">Было · %s</string>
     <string name="measure_after">Стало · %s</string>
+    <string name="measure_before_plain">Было</string>
+    <string name="measure_after_plain">Стало</string>
     <string name="measure_compare_hint">Схема условная: изменения обхватов с первого замера усилены, чтобы их было видно</string>
 </resources>

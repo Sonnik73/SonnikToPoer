@@ -155,4 +155,39 @@ class ExercisePackTest {
             db.close()
         }
     }
+
+    /** Копия из старой версии: после восстановления добавляются наборы и мышцы, которых в ней не было. */
+    @Test fun oldBackupGetsNewPacksAfterRestore() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).allowMainThreadQueries().build()
+        try {
+            val settings = AppSettings(context)
+            settings.defaultsSeeded = true
+            settings.exercisePack = 4
+            val repo = Repository(db, CoroutineScope(Dispatchers.Unconfined), settings)
+            val old = BackupCodec.encode(
+                BackupFile(exercises = listOf(ExerciseEntity(name = "Молотки с гантелями", muscles = "BICEPS,FOREARMS"), ExerciseEntity(name = "Моё")))
+            )
+            repo.importBackup(old)
+            val byName = db.dao().allExercises().associateBy { it.name }
+            assertEquals("BICEPS,BRACHIALIS,BRACHIORADIALIS", byName.getValue("Молотки с гантелями").muscles)
+            assertTrue("Подъёмы носков стоя у стены" in byName)
+            assertTrue("Моё" in byName)
+            assertEquals(4, settings.exercisePack)
+
+            // Новая копия помнит уровень набора: удалённое пользователем упражнение не возвращается.
+            repo.deleteOrArchiveExercise(byName.getValue("Подъёмы носков стоя у стены"))
+            val fresh = repo.exportBackup()
+            repo.importBackup(fresh)
+            assertTrue(db.dao().allExercises().none { it.name == "Подъёмы носков стоя у стены" })
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test fun packLevelIsInferredFromOldBackup() {
+        assertEquals(1, inferExercisePack(listOf(ExerciseEntity(name = "Моё"))))
+        assertEquals(3, inferExercisePack(listOf(ExerciseEntity(name = "Моё", technique = "Так"))))
+        assertEquals(4, inferExercisePack(listOf(ExerciseEntity(name = EXERCISE_PACK_4.first().nameRu))))
+    }
 }

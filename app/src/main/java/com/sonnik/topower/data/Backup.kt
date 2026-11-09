@@ -20,6 +20,8 @@ data class BackupFile(
     val equipment: List<EquipmentEntity> = emptyList(),
     /** С 1.38; в копиях старых версий поля нет — замеров просто нет. */
     val measurements: List<MeasurementEntity> = emptyList(),
+    /** С 1.43: какие наборы упражнений по умолчанию уже добавлены; null — копия старой версии. */
+    val exercisePack: Int? = null,
 )
 
 class InvalidBackupException(message: String) : Exception(message)
