@@ -171,15 +171,17 @@ class ExercisePackTest {
             repo.importBackup(old)
             val byName = db.dao().allExercises().associateBy { it.name }
             assertEquals("BICEPS,BRACHIALIS,BRACHIORADIALIS", byName.getValue("Молотки с гантелями").muscles)
-            assertTrue("Подъёмы носков стоя у стены" in byName)
+            // Название — на языке телефона (в тестах он может быть любым).
+            val added = EXERCISE_PACK_4.first { it.nameRu == "Подъёмы носков стоя у стены" }
+            val addedName = listOf(added.nameRu, added.nameEn).first { it in byName }
             assertTrue("Моё" in byName)
             assertEquals(4, settings.exercisePack)
 
             // Новая копия помнит уровень набора: удалённое пользователем упражнение не возвращается.
-            repo.deleteOrArchiveExercise(byName.getValue("Подъёмы носков стоя у стены"))
+            repo.deleteOrArchiveExercise(byName.getValue(addedName))
             val fresh = repo.exportBackup()
             repo.importBackup(fresh)
-            assertTrue(db.dao().allExercises().none { it.name == "Подъёмы носков стоя у стены" })
+            assertTrue(db.dao().allExercises().none { it.name == addedName })
         } finally {
             db.close()
         }

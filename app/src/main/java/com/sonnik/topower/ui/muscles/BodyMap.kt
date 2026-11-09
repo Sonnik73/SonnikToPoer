@@ -115,7 +115,7 @@ private const val LEG_AXIS = 41.5f
 private const val SHOULDER_HALF = 19f
 private const val HIP_TO_LEG = 50f - LEG_AXIS
 /** От оси руки до её внутреннего края. */
-private const val ARM_INNER_HALF = 4.5f
+private const val ARM_INNER_HALF = 5.5f
 
 /**
  * X точки фигуры с обхватами [s]. [px], [py] — исходная точка (по ней видно, рука это, нога или корпус),
