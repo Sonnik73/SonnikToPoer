@@ -166,25 +166,28 @@ data class Stat(val label: String, val value: String, val icon: ImageVector? = n
 @Composable
 fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
     Card(modifier = modifier) {
-        Column(Modifier.padding(12.dp).fillMaxWidth()) {
+        // Значок — в правом верхнем углу, чтобы плитка не становилась выше.
+        Box(Modifier.padding(12.dp).fillMaxWidth()) {
+            Column {
+                Text(
+                    value,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             if (icon != null) {
                 Box(
                     Modifier
-                        .padding(bottom = 6.dp)
-                        .size(28.dp)
+                        .align(Alignment.TopEnd)
+                        .size(26.dp)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                 }
             }
-            Text(
-                value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

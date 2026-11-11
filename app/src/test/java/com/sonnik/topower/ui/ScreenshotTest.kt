@@ -141,6 +141,7 @@ class ScreenshotTest {
 
     @Test fun allMuscles() = shoot("31-all-muscles") {
         waitText("Можно тренировать", substring = true)
+        listWith("Можно тренировать").performScrollToNode(hasText("Можно тренировать", substring = true))
         compose.onAllNodesWithText("Как работают мышцы")[0].performClick()
         waitText("Сводит руки перед собой", substring = true)
     }
