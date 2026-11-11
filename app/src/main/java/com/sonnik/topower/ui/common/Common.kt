@@ -2,6 +2,14 @@
 
 package com.sonnik.topower.ui.common
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.sonnik.topower.ui.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,7 +89,7 @@ fun ScreenScaffold(
         bottomBar = bottomBar,
         topBar = {
             TopAppBar(
-                title = { Text(title, maxLines = 1) },
+                title = { Text(title, maxLines = 1, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
@@ -133,10 +142,42 @@ fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
     }
 }
 
+/**
+ * Карточка приложения: как в Material 3, но в светлой теме с мягкой тенью, чтобы карточки
+ * отделялись от фона. В тёмной теме тени не видно — там их различает цвет.
+ */
 @Composable
-fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
+fun Card(
+    modifier: Modifier = Modifier,
+    colors: CardColors = CardDefaults.cardColors(),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    androidx.compose.material3.Card(
+        modifier = modifier,
+        colors = colors,
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isAppInDarkTheme) 0.dp else 1.5.dp),
+        content = content,
+    )
+}
+
+/** Плитка статистики: подпись, значение и значок. */
+data class Stat(val label: String, val value: String, val icon: ImageVector? = null)
+
+@Composable
+fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
     Card(modifier = modifier) {
         Column(Modifier.padding(12.dp).fillMaxWidth()) {
+            if (icon != null) {
+                Box(
+                    Modifier
+                        .padding(bottom = 6.dp)
+                        .size(28.dp)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                }
+            }
             Text(
                 value,
                 style = MaterialTheme.typography.titleLarge,
@@ -150,9 +191,10 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
 
 /** Ряд плиток статистики одинаковой ширины. */
 @Composable
-fun StatRow(vararg tiles: Pair<String, String>) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        tiles.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
+fun StatRow(vararg tiles: Stat) {
+    // Плитки одной высоты, даже если подпись у одной из них в две строки.
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        tiles.forEach { StatTile(it.label, it.value, Modifier.weight(1f).fillMaxHeight(), it.icon) }
     }
 }
 

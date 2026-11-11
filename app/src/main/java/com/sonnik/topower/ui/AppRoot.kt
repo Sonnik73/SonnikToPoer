@@ -1,5 +1,6 @@
 package com.sonnik.topower.ui
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -246,7 +247,7 @@ private fun BottomBar(current: Tab?, onSelect: (Tab) -> Unit) {
             ) {
                 Tab.entries.forEach { tab ->
                     val selected = tab == current
-                    val color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     Column(
                         Modifier
                             .weight(1f)
@@ -260,14 +261,17 @@ private fun BottomBar(current: Tab?, onSelect: (Tab) -> Unit) {
                             Modifier
                                 .size(width = 52.dp, height = 28.dp)
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
+                                .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(tab.icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
                         }
                         Text(
                             stringResource(tab.label),
-                            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                letterSpacing = 0.sp,
+                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                            ),
                             color = color,
                             maxLines = 1,
                             softWrap = false,

@@ -1,5 +1,16 @@
 package com.sonnik.topower.ui.workout
 
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.pluralStringResource
+import com.sonnik.topower.domain.weekStart
+import com.sonnik.topower.domain.weekStreak
+import com.sonnik.topower.ui.theme.isAppInDarkTheme
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +32,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import com.sonnik.topower.ui.common.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -123,6 +134,7 @@ fun WorkoutHomeScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            item { WeekHero(onStart = { start(null) }) }
             item { MuscleStatusCard() }
             item { MeasurementsCard() }
             if (active.isNotEmpty()) {
@@ -144,15 +156,6 @@ fun WorkoutHomeScreen(
                             }
                         }
                     }
-                }
-            }
-
-            item { SectionTitle(stringResource(R.string.start_workout_title)) }
-            item {
-                Button(onClick = { start(null) }, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.start_empty_workout))
                 }
             }
 
@@ -278,6 +281,63 @@ private fun TemplateCard(
                 }
                 FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }
             }
+        }
+    }
+}
+
+/**
+ * Шапка главного экрана: тренировки на этой неделе, серия недель подряд, давность последней
+ * тренировки и кнопка «Начать тренировку» (пустая тренировка; по шаблону — из списка ниже).
+ */
+@Composable
+private fun WeekHero(onStart: () -> Unit) {
+    val repo = LocalRepository.current
+    val dates by remember { repo.dao.observeWorkoutDates() }.collectAsStateWithLifecycle(emptyList())
+    val now = rememberNow()
+    val zone = ZoneId.systemDefault()
+    val today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate()
+    val days = dates.map { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
+    val thisWeek = days.count { weekStart(it) == weekStart(today) }
+    val streak = weekStreak(dates, today, zone)
+    val lastDaysAgo = days.maxOrNull()?.let { ChronoUnit.DAYS.between(it, today).toInt().coerceAtLeast(0) }
+
+    // В светлой теме — основной цвет палитры, в тёмной — его приглушённый вариант.
+    val dark = isAppInDarkTheme
+    val base = if (dark) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary
+    val content = if (dark) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimary
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .background(Brush.linearGradient(listOf(base, lerp(base, Color.Black, 0.3f))))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(stringResource(R.string.home_week_title), style = MaterialTheme.typography.labelLarge, color = content.copy(alpha = 0.8f))
+        Text(
+            pluralStringResource(R.plurals.home_week_workouts, thisWeek, thisWeek),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = content,
+        )
+        val details = listOfNotNull(
+            if (streak >= 2) stringResource(R.string.home_streak, streak) else null,
+            when (lastDaysAgo) {
+                null -> stringResource(R.string.home_no_workouts)
+                0 -> stringResource(R.string.home_last_today)
+                1 -> stringResource(R.string.home_last_yesterday)
+                else -> stringResource(R.string.home_last_days, lastDaysAgo)
+            },
+        ).joinToString(" · ")
+        Text(details, style = MaterialTheme.typography.bodyMedium, color = content.copy(alpha = 0.85f))
+        Button(
+            onClick = onStart,
+            colors = ButtonDefaults.buttonColors(containerColor = content, contentColor = base),
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+        ) {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.start_workout_title), fontWeight = FontWeight.SemiBold)
         }
     }
 }

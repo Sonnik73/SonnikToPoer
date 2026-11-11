@@ -1,5 +1,12 @@
 package com.sonnik.topower.ui.stats
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Place
+import com.sonnik.topower.ui.common.AppIcons
+import com.sonnik.topower.ui.common.Stat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -101,15 +108,15 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             item { PeriodChips(period, onSelect = { period = it }) }
             item {
                 StatRow(
-                    stringResource(R.string.stat_total_workouts) to inPeriod.totalWorkouts.toString(),
-                    stringResource(R.string.stat_this_week) to overall.workoutsThisWeek.toString(),
-                    stringResource(R.string.stat_this_month) to overall.workoutsThisMonth.toString(),
+                    Stat(stringResource(R.string.stat_total_workouts), inPeriod.totalWorkouts.toString(), AppIcons.Dumbbell),
+                    Stat(stringResource(R.string.stat_this_week), overall.workoutsThisWeek.toString(), Icons.Filled.DateRange),
+                    Stat(stringResource(R.string.stat_this_month), overall.workoutsThisMonth.toString(), Icons.Filled.DateRange),
                 )
             }
             item {
                 StatRow(
-                    stringResource(R.string.stat_total_sets) to inPeriod.totalSets.toString(),
-                    stringResource(R.string.stat_tonnage) to formatNumber(inPeriod.totalTonnage, 0),
+                    Stat(stringResource(R.string.stat_total_sets), inPeriod.totalSets.toString(), Icons.Filled.Check),
+                    Stat(stringResource(R.string.stat_tonnage), formatNumber(inPeriod.totalTonnage, 0), AppIcons.Weight),
                 )
             }
             // Данные со смарт-часов: сумма ккал, средняя длительность и средний максимальный пульс.
@@ -119,21 +126,27 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             if (calories.isNotEmpty() || durations.isNotEmpty() || maxHrs.isNotEmpty()) {
                 item {
                     StatRow(
-                        stringResource(R.string.stat_calories) to (if (calories.isEmpty()) "—" else calories.sum().toString()),
-                        stringResource(R.string.stat_avg_duration) to
-                            (if (durations.isEmpty()) "—" else formatHoursMinutes(durations.average().toInt())),
-                        stringResource(R.string.stat_avg_max_hr) to
-                            (if (maxHrs.isEmpty()) "—" else maxHrs.average().toInt().toString()),
+                        Stat(stringResource(R.string.stat_calories), if (calories.isEmpty()) "—" else calories.sum().toString(), AppIcons.Flame),
+                        Stat(
+                            stringResource(R.string.stat_avg_duration),
+                            if (durations.isEmpty()) "—" else formatHoursMinutes(durations.average().toInt()),
+                            AppIcons.Clock,
+                        ),
+                        Stat(
+                            stringResource(R.string.stat_avg_max_hr),
+                            if (maxHrs.isEmpty()) "—" else maxHrs.average().toInt().toString(),
+                            Icons.Filled.Favorite,
+                        ),
                     )
                 }
             }
             val extraTiles = buildList {
-                if (inPeriod.totalDistanceKm > 0) add(R.string.stat_distance to formatNumber(inPeriod.totalDistanceKm))
-                if (inPeriod.totalDurationSec > 0) add(R.string.stat_duration to formatDuration(inPeriod.totalDurationSec.toInt()))
+                if (inPeriod.totalDistanceKm > 0) add(Triple(R.string.stat_distance, formatNumber(inPeriod.totalDistanceKm), Icons.Filled.Place))
+                if (inPeriod.totalDurationSec > 0) add(Triple(R.string.stat_duration, formatDuration(inPeriod.totalDurationSec.toInt()), AppIcons.Clock))
             }
             if (extraTiles.isNotEmpty()) {
                 item {
-                    StatRow(*extraTiles.map { (label, value) -> stringResource(label) to value }.toTypedArray())
+                    StatRow(*extraTiles.map { (label, value, icon) -> Stat(stringResource(label), value, icon) }.toTypedArray())
                 }
             }
             item {

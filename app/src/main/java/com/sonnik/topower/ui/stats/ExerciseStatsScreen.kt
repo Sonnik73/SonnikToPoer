@@ -1,5 +1,9 @@
 package com.sonnik.topower.ui.stats
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import com.sonnik.topower.ui.common.AppIcons
+import com.sonnik.topower.ui.common.Stat
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -84,8 +88,8 @@ fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
             }
             item {
                 StatRow(
-                    stringResource(R.string.stat_workouts) to stats.workoutCount.toString(),
-                    stringResource(R.string.stat_sets) to stats.setCount.toString(),
+                    Stat(stringResource(R.string.stat_workouts), stats.workoutCount.toString(), AppIcons.Dumbbell),
+                    Stat(stringResource(R.string.stat_sets), stats.setCount.toString(), Icons.Filled.Check),
                 )
             }
 
@@ -106,9 +110,9 @@ fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
                 }
                 item {
                     StatRow(
-                        stringResource(R.string.stat_start) to formatMetric(summary.metric, summary.first.value),
-                        stringResource(R.string.stat_max) to formatMetric(summary.metric, summary.best.value),
-                        stringResource(R.string.stat_last) to formatMetric(summary.metric, summary.last.value),
+                        Stat(stringResource(R.string.stat_start), formatMetric(summary.metric, summary.first.value)),
+                        Stat(stringResource(R.string.stat_max), formatMetric(summary.metric, summary.best.value)),
+                        Stat(stringResource(R.string.stat_last), formatMetric(summary.metric, summary.last.value)),
                     )
                 }
                 item {

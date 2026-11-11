@@ -1,5 +1,8 @@
 package com.sonnik.topower.ui.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -200,6 +203,9 @@ val isAppInDarkTheme: Boolean
     @ReadOnlyComposable
     get() = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
+/** Карточки и плитки — с более мягкими углами, чем по умолчанию. */
+private val AppShapes = Shapes(medium = RoundedCornerShape(18.dp), large = RoundedCornerShape(22.dp))
+
 @Composable
 fun SonnikTheme(
     mode: ThemeMode = ThemeMode.SYSTEM,
@@ -207,5 +213,5 @@ fun SonnikTheme(
     pureBlack: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(colorScheme = colorSchemeFor(palette, isDarkTheme(mode), pureBlack), content = content)
+    MaterialTheme(colorScheme = colorSchemeFor(palette, isDarkTheme(mode), pureBlack), shapes = AppShapes, content = content)
 }

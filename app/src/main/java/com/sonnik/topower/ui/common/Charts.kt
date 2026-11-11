@@ -1,5 +1,6 @@
 package com.sonnik.topower.ui.common
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -160,6 +161,15 @@ fun LineChart(
                 moveTo(offsets.first().x, offsets.first().y)
                 offsets.drop(1).forEach { lineTo(it.x, it.y) }
             }
+            // Мягкая заливка под линией.
+            val area = Path().apply {
+                moveTo(offsets.first().x, offsets.first().y)
+                offsets.drop(1).forEach { lineTo(it.x, it.y) }
+                lineTo(offsets.last().x, top + h)
+                lineTo(offsets.first().x, top + h)
+                close()
+            }
+            drawPath(area, Brush.verticalGradient(listOf(lineColor.copy(alpha = 0.22f), lineColor.copy(alpha = 0f)), top, top + h))
             drawPath(path, lineColor, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
             offsets.forEachIndexed { i, o ->
                 drawCircle(lineColor, radius = (if (i == selected) 6 else 4).dp.toPx(), center = o)
@@ -215,11 +225,12 @@ fun BarChart(
             val barWidth = slot * 0.6f
             val anchors = values.mapIndexed { i, v ->
                 val barHeight = (size.height - top) * v / maxValue
+                val color = if (i == selected) selectedColor else barColor
                 drawRoundRect(
-                    color = if (i == selected) selectedColor else barColor,
+                    brush = Brush.verticalGradient(listOf(color, color.copy(alpha = 0.6f)), size.height - barHeight, size.height),
                     topLeft = Offset(slot * i + (slot - barWidth) / 2, size.height - barHeight),
                     size = Size(barWidth, barHeight),
-                    cornerRadius = CornerRadius(3.dp.toPx()),
+                    cornerRadius = CornerRadius(minOf(6.dp.toPx(), barHeight / 2)),
                 )
                 Offset(slot * i + slot / 2, size.height - barHeight)
             }

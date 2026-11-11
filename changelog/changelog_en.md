@@ -1,5 +1,11 @@
 # What's new in SonnikToPower
 
+## 1.44
+- New app icon: a tilted dumbbell on a blue gradient
+- Home: a header with this week’s workouts, your week streak and a Start workout button
+- Statistics: icons on the tiles, charts with gradients
+- Cards with a soft shadow and rounder corners, a more visible active tab
+
 ## 1.43
 - A double tap no longer creates two workouts or opens a screen twice
 - A workout is finished at the time of its last set: a forgotten or reopened workout no longer skews muscle recovery
