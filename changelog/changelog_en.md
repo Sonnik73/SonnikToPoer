@@ -1,5 +1,9 @@
 # What's new in SonnikToPower
 
+## 1.45
+- Updates install from within the app: the APK downloads in the background with progress, and “Install” opens the system installer — no browser needed
+- An already downloaded update is offered for install on the next app start
+
 ## 1.44
 - New app icon: a tilted dumbbell on a blue gradient
 - Home: a header with this week’s workouts, your week streak and a Start workout button

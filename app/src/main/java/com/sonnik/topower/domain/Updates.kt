@@ -57,4 +57,16 @@ object Updates {
 
     /** Размер в мегабайтах с одним знаком: 7 586 445 → «7.2». */
     fun megabytes(bytes: Long): String = "%.1f".format(java.util.Locale.ROOT, bytes / 1024.0 / 1024.0)
+
+    /** «4.2 МБ», «850 КБ» — прогресс скачивания мелкими шагами читается в килобайтах. */
+    fun size(bytes: Long): String = when {
+        bytes >= 1024 * 1024 -> "${megabytes(bytes)} МБ"
+        else -> "${(bytes + 1023) / 1024} КБ"
+    }
+
+    /** Имя скачанного файла обновления: «v1.44» → «SonnikToPower-1.44.apk». Посторонние символы из тега выкидываются. */
+    fun apkName(version: String): String {
+        val digits = version.trim().removePrefix("v").removePrefix("V").filter { it.isDigit() || it == '.' }.trim('.')
+        return "SonnikToPower-${digits.ifEmpty { "update" }}.apk"
+    }
 }

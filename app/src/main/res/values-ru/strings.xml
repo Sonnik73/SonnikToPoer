@@ -446,7 +446,12 @@
     <string name="update_released">Вышла</string>
     <string name="update_size">Размер</string>
     <string name="update_mb">%s МБ</string>
-    <string name="update_install_hint">APK скачается с GitHub — откройте его и подтвердите установку поверх текущей версии. Все данные сохранятся.</string>
+    <string name="update_install_hint">APK скачается с GitHub в фоне; когда будет готов — откроется системный установщик. Подтвердите установку поверх текущей версии, все данные сохранятся.</string>
+    <string name="update_downloading">Скачиваем…</string>
+    <string name="update_of">из %s</string>
+    <string name="update_ready">Скачано (%s МБ). Нажмите «Установить» — откроется системный установщик, данные сохранятся.</string>
+    <string name="update_failed_download">Не получилось скачать. Проверьте интернет и попробуйте ещё раз.</string>
+    <string name="update_install">Установить</string>
     <string name="update_checking">Проверяем обновления…</string>
     <string name="update_up_to_date">Обновлений нет</string>
     <string name="update_failed">Не удалось проверить</string>

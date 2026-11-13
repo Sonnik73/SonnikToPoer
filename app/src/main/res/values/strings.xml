@@ -455,7 +455,12 @@
     <string name="update_released">Released</string>
     <string name="update_size">Size</string>
     <string name="update_mb">%s MB</string>
-    <string name="update_install_hint">The APK downloads from GitHub — open it and confirm installing over the current version. All data is kept.</string>
+    <string name="update_install_hint">The APK downloads from GitHub in the background; when ready, the system installer opens. Confirm installing over the current version — all data is kept.</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_of">of %s</string>
+    <string name="update_ready">Downloaded (%s MB). Tap “Install” — the system installer opens; all data is kept.</string>
+    <string name="update_failed_download">Could not download. Check the internet and try again.</string>
+    <string name="update_install">Install</string>
     <string name="update_checking">Checking for updates…</string>
     <string name="update_up_to_date">No updates</string>
     <string name="update_failed">Could not check</string>

@@ -1,0 +1,2 @@
+• Updates install from within the app: the APK downloads in the background with progress, and “Install” opens the system installer — no browser needed
+• An already downloaded update is offered for install on the next app start

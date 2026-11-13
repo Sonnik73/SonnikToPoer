@@ -43,4 +43,15 @@ class UpdatesTest {
         assertEquals("- Один\n- Два", Updates.cleanNotes("## 1.28\n- Один\n- Два\n"))
         assertEquals("7.2", Updates.megabytes(7_586_445))
     }
+
+    @Test fun downloadProgressInKilobytesThenMegabytes() {
+        assertEquals("850 КБ", Updates.size(850 * 1024))
+        assertEquals("1.0 МБ", Updates.size(1024 * 1024))
+    }
+
+    @Test fun apkFileNameFromTag() {
+        assertEquals("SonnikToPower-1.45.apk", Updates.apkName("v1.45"))
+        assertEquals("SonnikToPower-1.45.apk", Updates.apkName("1.45"))
+        assertEquals("SonnikToPower-update.apk", Updates.apkName("nightly"))
+    }
 }

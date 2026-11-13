@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import com.sonnik.topower.domain.Updates
 import com.sonnik.topower.ui.common.formatDate
 import com.sonnik.topower.updates.UpdateCheckState
 import com.sonnik.topower.updates.UpdateChecker
+import com.sonnik.topower.updates.UpdateDownloadState
 import com.sonnik.topower.updates.UpdateFailure
 import kotlinx.coroutines.launch
 
@@ -40,11 +42,14 @@ fun UpdateDialogs(checker: UpdateChecker, openChangelog: () -> Unit) {
     val scope = rememberCoroutineScope()
     val offer by checker.offer.collectAsStateWithLifecycle()
     val check by checker.check.collectAsStateWithLifecycle()
+    val download by checker.download.collectAsStateWithLifecycle()
     offer?.let { release ->
         UpdateOfferDialog(
             release = release,
             current = checker.currentVersion,
-            onDownload = { checker.download(release) },
+            download = download,
+            onDownload = { checker.startDownload(release) },
+            onInstall = { checker.installDownloaded(release) },
             onSkip = { checker.skip(release) },
             onLater = { checker.offer.value = null },
         )
@@ -83,25 +88,42 @@ private fun VersionCard(rows: List<Pair<String, String>>) {
     }
 }
 
-/** «Новая версия»: было → стало, дата и размер, что нового, «Скачать». */
+/** «Новая версия»: было → стало, дата и размер, что нового, скачивание и кнопка «Установить». */
 @Composable
-fun UpdateOfferDialog(release: ReleaseInfo, current: String, onDownload: () -> Unit, onSkip: () -> Unit, onLater: () -> Unit) {
+fun UpdateOfferDialog(
+    release: ReleaseInfo,
+    current: String,
+    download: UpdateDownloadState,
+    onDownload: () -> Unit,
+    onInstall: () -> Unit,
+    onSkip: () -> Unit,
+    onLater: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onLater,
         title = { Text(stringResource(R.string.update_new_title)) },
-        text = { UpdateOfferContent(release, current) },
-        confirmButton = { Button(onClick = onDownload) { Text(stringResource(R.string.update_download)) } },
+        text = { UpdateOfferContent(release, current, download) },
+        confirmButton = {
+            when (download) {
+                is UpdateDownloadState.Downloading -> TextButton(onClick = onLater) { Text(stringResource(R.string.update_hide)) }
+                is UpdateDownloadState.Ready -> Button(onClick = onInstall) { Text(stringResource(R.string.update_install)) }
+                is UpdateDownloadState.Failed -> Button(onClick = onDownload) { Text(stringResource(R.string.update_retry)) }
+                UpdateDownloadState.Idle -> Button(onClick = onDownload) { Text(stringResource(R.string.update_download)) }
+            }
+        },
         dismissButton = {
             Row {
                 TextButton(onClick = onSkip) { Text(stringResource(R.string.update_skip)) }
-                TextButton(onClick = onLater) { Text(stringResource(R.string.update_later)) }
+                if (download !is UpdateDownloadState.Downloading) {
+                    TextButton(onClick = onLater) { Text(stringResource(R.string.update_later)) }
+                }
             }
         },
     )
 }
 
 @Composable
-fun UpdateOfferContent(release: ReleaseInfo, current: String) {
+fun UpdateOfferContent(release: ReleaseInfo, current: String, download: UpdateDownloadState = UpdateDownloadState.Idle) {
     Column(
         Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -118,11 +140,35 @@ fun UpdateOfferContent(release: ReleaseInfo, current: String) {
             Text(stringResource(R.string.whats_new), style = MaterialTheme.typography.titleSmall)
             Text(release.notes.replace(Regex("(?m)^- "), "• "), style = MaterialTheme.typography.bodyMedium)
         }
-        Text(
-            stringResource(R.string.update_install_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        when (download) {
+            is UpdateDownloadState.Downloading -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                LinearProgressIndicator(
+                    progress = { download.total?.let { (download.bytes.toFloat() / it).coerceIn(0f, 1f) } ?: 0.1f },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    stringResource(R.string.update_downloading) + " " + Updates.size(download.bytes) +
+                        (download.total?.let { " " + stringResource(R.string.update_of, Updates.size(it)) } ?: ""),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            is UpdateDownloadState.Ready -> Text(
+                stringResource(R.string.update_ready, Updates.megabytes(download.bytes)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            is UpdateDownloadState.Failed -> Text(
+                stringResource(R.string.update_failed_download),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+            UpdateDownloadState.Idle -> Text(
+                stringResource(R.string.update_install_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

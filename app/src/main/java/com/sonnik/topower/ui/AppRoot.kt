@@ -137,7 +137,13 @@ fun AppRoot() {
     BodyTypeQuestion()
     // Новая версия на GitHub: проверка при входе (не чаще раза в 6 часов) и окна ручной проверки.
     val updates = (LocalContext.current.applicationContext as SonnikApp).updates
-    LaunchedEffect(Unit) { if (Flavor.UPDATE_CHECKS) updates.checkIfDue() }
+    LaunchedEffect(Unit) {
+        if (Flavor.UPDATE_CHECKS) {
+            // Скачанное в прошлый раз обновление сначала доводим до установщика, потом проверяем новый выпуск.
+            updates.offerPendingInstall()
+            updates.checkIfDue()
+        }
+    }
     UpdateDialogs(updates, openChangelog = { open(Routes.CHANGELOG) })
 
     CompositionLocalProvider(LocalOpenSettings provides openSettings) {
