@@ -1,5 +1,14 @@
 # What's new in SonnikToPower
 
+## 1.46
+- Statistics: “41 780 kg” instead of “41780” — easier to read
+- Charts: labels only on key points, no crowded “12 kg 12 kg 12 kg”
+- Measurements: changes colored green or orange by direction
+- Workout: more compact exercise cards, recovery hours in the menu
+- History: month headers and a “Repeat” button
+- Templates: the recovering-muscles list no longer breaks the card
+- Set input: ± buttons for weight and reps — no keyboard
+
 ## 1.45
 - Updates install from within the app: the APK downloads in the background with progress, and “Install” opens the system installer — no browser needed
 - An already downloaded update is offered for install on the next app start

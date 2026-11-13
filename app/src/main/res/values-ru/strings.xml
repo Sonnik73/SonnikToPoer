@@ -307,7 +307,6 @@
     <string name="recovery_hard">Тяжело — 72 ч</string>
     <string name="recovery_max">На пределе — 96 ч</string>
     <string name="recovery_menu">Насколько тяжело было</string>
-    <string name="recovery_line">Восстановление: %d ч</string>
     <string name="muscles_full_recovery">Полное восстановление через %s</string>
     <string name="muscles_legend_fresh">Только что</string>
     <string name="muscles_guide">Названия мышц</string>
@@ -345,6 +344,10 @@
     <string name="volume_sets">%d подх.</string>
     <string name="template_ready">Все мышцы готовы</string>
     <string name="template_recovering">Ещё восстанавливаются: %s</string>
+    <string name="recovering_more">ещё %1$d</string>
+    <string name="repeat_workout">Повторить тренировку</string>
+    <string name="increase">Увеличить</string>
+    <string name="decrease">Уменьшить</string>
     <string name="hours_short">%d ч</string>
     <plurals name="reminder_idle_text">
         <item quantity="one">Вы не тренировались %d день</item>

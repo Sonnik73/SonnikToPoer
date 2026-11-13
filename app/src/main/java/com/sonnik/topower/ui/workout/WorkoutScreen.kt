@@ -592,25 +592,23 @@ private fun ExerciseCard(
             }
 
             ProgressLines(progress, exercise, equipment, plateauSessions)
-            entry.item.recoveryHours?.let { hours ->
-                Text(
-                    stringResource(R.string.recovery_line, hours),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
-                )
-            }
 
-            if (previous.isNotEmpty()) {
-                val text = compactSets(previous.map { formatSet(it, exercise, null, equipment) })
-                Text(
-                    stringResource(R.string.previous_time, text),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
-                )
+            // Часы восстановления не показываем: строка статична, а значение доступно
+            // в меню карточки («Восстановление») — карточка подходов компактнее.
+            if (previous.isNotEmpty() || target != null) {
+                Row(Modifier.fillMaxWidth().padding(end = 12.dp, bottom = 4.dp)) {
+                    if (previous.isNotEmpty()) {
+                        val text = compactSets(previous.map { formatSet(it, exercise, null, equipment) })
+                        Text(
+                            stringResource(R.string.previous_time, text),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                    }
+                    target?.let { TargetLine(it, exercise, equipment, compact = true) }
+                }
             }
-            target?.let { TargetLine(it, exercise, equipment) }
 
             sets.forEachIndexed { i, set ->
                 Row(

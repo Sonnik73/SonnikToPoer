@@ -221,6 +221,7 @@ private fun MeasurementFigure(
     val noValue = stringResource(R.string.measure_no_value)
     val cmFormat = stringResource(R.string.measure_cm, "%s")
     val goodColor = Color(0xFF2E7D32)
+    val warnColor = Color(0xFFC25E00)
     fun valueText(part: MeasurementPart): String = values[part]?.let { cmFormat.format(formatNumber(it, 1)) } ?: noValue
     fun deltaText(part: MeasurementPart): String? = deltas[part]?.takeIf { kotlin.math.abs(it) >= 0.05 }
         ?.let { (if (it > 0) "+" else "−") + formatNumber(kotlin.math.abs(it), 1) }
@@ -297,7 +298,8 @@ private fun MeasurementFigure(
                 valueTextPaint.fit(valueText(part), 14.sp.toPx())
                 canvas.drawText(valueText(part), textX, ly + 15.dp.toPx(), valueTextPaint)
                 deltaText(part)?.let { d ->
-                    deltaPaint.color = (if (deltaGood(part)) goodColor else mutedColor).toArgb()
+                    // В нужную сторону — зелёный, в обратную — оранжевый, без изменения — ничего.
+                    deltaPaint.color = (if (deltaGood(part)) goodColor else warnColor).toArgb()
                     deltaPaint.fit(d, 12.sp.toPx())
                     canvas.drawText(d, textX, ly + 30.dp.toPx(), deltaPaint)
                 }

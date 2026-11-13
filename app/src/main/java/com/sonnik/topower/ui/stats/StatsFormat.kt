@@ -9,6 +9,7 @@ import com.sonnik.topower.data.SetWithContext
 import com.sonnik.topower.domain.ExerciseConfig
 import com.sonnik.topower.domain.Metric
 import com.sonnik.topower.domain.SetRecord
+import com.sonnik.topower.domain.formatBig
 import com.sonnik.topower.domain.formatDuration
 import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.ui.common.formatSet
@@ -50,7 +51,7 @@ fun metricLabel(metric: Metric): String = stringResource(
 @Composable
 fun formatMetric(metric: Metric, value: Double): String = when (metric) {
     Metric.WEIGHT, Metric.E1RM -> stringResource(R.string.fmt_kg, formatNumber(value, 1))
-    Metric.VOLUME -> stringResource(R.string.fmt_kg, formatNumber(value, 0))
+    Metric.VOLUME -> stringResource(R.string.fmt_kg, formatBig(value))
     Metric.REPS -> formatNumber(value, 0)
     Metric.TIME -> formatDuration(value.toInt())
     Metric.DISTANCE -> stringResource(R.string.fmt_km, formatNumber(value))

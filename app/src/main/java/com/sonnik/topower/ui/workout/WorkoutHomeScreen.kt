@@ -268,15 +268,23 @@ private fun TemplateCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.tertiary,
                         )
-                        else -> Text(
-                            stringResource(
-                                R.string.template_recovering,
-                                blocking.map { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) }
-                                    .joinToString(", "),
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        else -> {
+                            // Не больше трёх мышц в строке: длинный список ломает высоту карточки,
+                            // остальные — «ещё N» (полный список открывается на схеме мышц).
+                            val shown = blocking.take(3)
+                            val hidden = blocking.size - shown.size
+                            Text(
+                                stringResource(
+                                    R.string.template_recovering,
+                                    shown.map { muscleName(it.muscle) + " " + stringResource(R.string.hours_short, it.hoursLeft(now)) }
+                                        .joinToString(", ") + if (hidden > 0) " " + stringResource(R.string.recovering_more, hidden) else "",
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
                 FilledTonalButton(onClick = onStart) { Text(stringResource(R.string.start)) }

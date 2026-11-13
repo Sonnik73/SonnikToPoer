@@ -320,7 +320,6 @@
     <string name="recovery_hard">Hard — 72 h</string>
     <string name="recovery_max">To the limit — 96 h</string>
     <string name="recovery_menu">How hard was it</string>
-    <string name="recovery_line">Recovery: %d h</string>
     <string name="muscles_full_recovery">Full recovery in %s</string>
     <string name="muscles_legend_fresh">Just trained</string>
     <string name="muscles_guide">Muscle names</string>
@@ -358,6 +357,10 @@
     <string name="volume_sets">%d sets</string>
     <string name="template_ready">All muscles ready</string>
     <string name="template_recovering">Still recovering: %s</string>
+    <string name="recovering_more">+%1$d more</string>
+    <string name="repeat_workout">Repeat workout</string>
+    <string name="increase">Increase</string>
+    <string name="decrease">Decrease</string>
     <string name="hours_short">%d h</string>
     <plurals name="reminder_idle_text">
         <item quantity="one">You haven\'t trained for %d day</item>

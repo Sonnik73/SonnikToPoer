@@ -80,9 +80,14 @@ fun targetFor(exercise: ExerciseEntity, previous: List<SetEntity>, equipment: Li
     return TargetUi(target, set, working.size)
 }
 
-/** Строка «Цель: …» под прошлой тренировкой. */
+/** Строка «Цель: …» под прошлой тренировкой. В компактном виде стоит в одной строке с «Прошлый раз». */
 @Composable
-fun TargetLine(target: TargetUi, exercise: ExerciseEntity, equipment: Map<String, EquipmentEntity>) {
+fun TargetLine(
+    target: TargetUi,
+    exercise: ExerciseEntity,
+    equipment: Map<String, EquipmentEntity>,
+    compact: Boolean = false,
+) {
     val sets = formatSet(target.set, exercise, null, equipment) + if (target.sets > 1) " ×${target.sets}" else ""
     val note = when (target.target.kind) {
         TargetKind.MORE_LOAD -> stringResource(R.string.target_more_load)
@@ -93,6 +98,6 @@ fun TargetLine(target: TargetUi, exercise: ExerciseEntity, equipment: Map<String
         stringResource(R.string.target_line, sets) + (note?.let { " — $it" } ?: ""),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(end = 12.dp, bottom = 4.dp),
+        modifier = if (compact) Modifier.padding(start = 8.dp) else Modifier.padding(end = 12.dp, bottom = 4.dp),
     )
 }

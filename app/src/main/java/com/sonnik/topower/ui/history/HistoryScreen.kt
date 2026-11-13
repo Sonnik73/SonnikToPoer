@@ -11,11 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.sonnik.topower.ui.common.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,15 +32,30 @@ import com.sonnik.topower.R
 import com.sonnik.topower.data.WorkoutSummary
 import com.sonnik.topower.domain.formatNumber
 import com.sonnik.topower.ui.LocalRepository
+import com.sonnik.topower.ui.common.AppIcons
 import com.sonnik.topower.ui.common.EmptyState
 import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.common.formatDayDateTime
 import com.sonnik.topower.ui.workout.watchSummary
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun HistoryScreen(openWorkout: (String) -> Unit) {
     val repo = LocalRepository.current
+    val scope = rememberCoroutineScope()
     val workouts by remember { repo.dao.observeWorkoutSummaries() }.collectAsStateWithLifecycle(initialValue = null)
+    // Повторное нажатие, пока тренировка создаётся, ничего не делает.
+    var repeating by remember { mutableStateOf(false) }
+    val repeat: (WorkoutSummary) -> Unit = { summary ->
+        if (!repeating && summary.workout.finishedAt != null) {
+            repeating = true
+            scope.launch {
+                try { openWorkout(repo.repeatWorkout(summary.workout.id)) } finally { repeating = false }
+            }
+        }
+    }
 
     ScreenScaffold(title = stringResource(R.string.nav_history), showSettings = true) { padding ->
         val list = workouts
@@ -48,8 +69,25 @@ fun HistoryScreen(openWorkout: (String) -> Unit) {
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(list, key = { it.workout.id }) { summary ->
-                    WorkoutCard(summary, onClick = { openWorkout(summary.workout.id) })
+                // Заголовки месяцев между карточками: месяц меняется — шапка «Ноябрь 2025».
+                val monthFormat = SimpleDateFormat("LLLL yyyy", Locale.getDefault())
+                var lastMonth: String? = null
+                list.forEach { summary ->
+                    val month = monthFormat.format(summary.workout.startedAt).replaceFirstChar { it.uppercase() }
+                    if (month != lastMonth) {
+                        lastMonth = month
+                        item(key = "month-$month") {
+                            Text(
+                                month,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+                    item(key = summary.workout.id) {
+                        WorkoutCard(summary, onOpen = { openWorkout(summary.workout.id) }, onRepeat = { repeat(summary) })
+                    }
                 }
             }
         }
@@ -57,15 +95,15 @@ fun HistoryScreen(openWorkout: (String) -> Unit) {
 }
 
 @Composable
-private fun WorkoutCard(summary: WorkoutSummary, onClick: () -> Unit) {
+private fun WorkoutCard(summary: WorkoutSummary, onOpen: () -> Unit, onRepeat: () -> Unit) {
     val w = summary.workout
     Card(
         Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onOpen)
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     formatDayDateTime(w.startedAt),
                     style = MaterialTheme.typography.titleMedium,
@@ -74,6 +112,14 @@ private fun WorkoutCard(summary: WorkoutSummary, onClick: () -> Unit) {
                 )
                 if (w.finishedAt == null) {
                     Text(stringResource(R.string.in_progress), color = MaterialTheme.colorScheme.primary)
+                } else {
+                    IconButton(onClick = onRepeat) {
+                        Icon(
+                            AppIcons.Repeat,
+                            contentDescription = stringResource(R.string.repeat_workout),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
             val details = listOfNotNull(

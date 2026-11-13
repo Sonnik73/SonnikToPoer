@@ -29,6 +29,21 @@ fun formatNumber(value: Double, maxDecimals: Int = 2): String {
         .let { if (it == "-0") "0" else it }
 }
 
+/**
+ * Большие числа для плиток статистики: целая часть разбивается на группы по 3 цифры
+ * узким неразрывным пробелом — «41780» → «41 780». Дробная часть (по [maxDecimals]) не группируется.
+ */
+fun formatBig(value: Double, maxDecimals: Int = 0): String {
+    if (value.isNaN() || value.isInfinite()) return "—"
+    val text = formatNumber(value, maxDecimals)
+    val dot = text.indexOf('.')
+    val (integer, fraction) = if (dot >= 0) text.substring(0, dot) to text.substring(dot) else text to ""
+    val sign = if (integer.startsWith("-")) "-" else ""
+    val digits = integer.removePrefix("-")
+    val grouped = digits.reversed().chunked(3).joinToString("\u202F").reversed()
+    return sign + grouped + fraction
+}
+
 /** Секунды в "m:ss" или "h:mm:ss". */
 fun formatDuration(totalSeconds: Int): String {
     val h = totalSeconds / 3600

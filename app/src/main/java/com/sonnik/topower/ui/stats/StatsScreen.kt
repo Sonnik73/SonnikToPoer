@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sonnik.topower.R
 import com.sonnik.topower.data.ExerciseEntity
 import com.sonnik.topower.domain.BucketUnit
+import com.sonnik.topower.domain.formatBig
 import com.sonnik.topower.domain.StatsPeriod
 import com.sonnik.topower.domain.activityBuckets
 import com.sonnik.topower.domain.computeOverallStats
@@ -115,8 +116,8 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             }
             item {
                 StatRow(
-                    Stat(stringResource(R.string.stat_total_sets), inPeriod.totalSets.toString(), Icons.Filled.Check),
-                    Stat(stringResource(R.string.stat_tonnage), formatNumber(inPeriod.totalTonnage, 0), AppIcons.Weight),
+                    Stat(stringResource(R.string.stat_total_sets), formatBig(inPeriod.totalSets.toDouble()), Icons.Filled.Check),
+                    Stat(stringResource(R.string.stat_tonnage), formatBig(inPeriod.totalTonnage), AppIcons.Weight),
                 )
             }
             // Данные со смарт-часов: сумма ккал, средняя длительность и средний максимальный пульс.
@@ -126,7 +127,7 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             if (calories.isNotEmpty() || durations.isNotEmpty() || maxHrs.isNotEmpty()) {
                 item {
                     StatRow(
-                        Stat(stringResource(R.string.stat_calories), if (calories.isEmpty()) "—" else calories.sum().toString(), AppIcons.Flame),
+                        Stat(stringResource(R.string.stat_calories), if (calories.isEmpty()) "—" else formatBig(calories.sum().toDouble()), AppIcons.Flame),
                         Stat(
                             stringResource(R.string.stat_avg_duration),
                             if (durations.isEmpty()) "—" else formatHoursMinutes(durations.average().toInt()),

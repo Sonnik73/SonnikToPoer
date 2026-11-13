@@ -148,6 +148,26 @@ class Repository(
         workout.id
     }
 
+    /**
+     * Новая тренировка с тем же набором упражнений и планом подходов, что и у [workoutId]
+     * («Повторить» в истории). Сами подходы не копируются — значения подставятся в окно
+     * добавления из прошлой тренировки, а восстановление мышц не сбрасывается.
+     */
+    suspend fun repeatWorkout(workoutId: String): String = db.withTransaction {
+        val workout = WorkoutEntity(bodyWeight = dao.lastBodyWeight())
+        dao.upsertWorkout(workout)
+        val items = dao.getWorkoutExercises(workoutId).mapIndexed { index, we ->
+            WorkoutExerciseEntity(
+                workoutId = workout.id,
+                exerciseId = we.exerciseId,
+                position = index,
+                plannedSets = we.plannedSets,
+            )
+        }
+        dao.upsertWorkoutExercises(items)
+        workout.id
+    }
+
     suspend fun setWorkoutNote(workoutId: String, note: String) = dao.setWorkoutNote(workoutId, note, now())
 
     suspend fun setWorkoutBodyWeight(workoutId: String, bodyWeight: Double?) =

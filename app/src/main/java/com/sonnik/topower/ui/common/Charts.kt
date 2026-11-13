@@ -91,11 +91,11 @@ private fun DrawScope.drawValueLabels(
 
 private fun nearestIndex(x: Float, xs: List<Float>): Int = xs.indices.minBy { abs(xs[it] - x) }
 
-/** Строка над графиком: значение и дата выбранной точки или подсказка «нажмите на точку». */
+/** Строка над графиком: значение и дата выбранной точки. Подсказка видна только до первого касания. */
 @Composable
-private fun SelectionLine(text: String?) {
+private fun SelectionLine(text: String?, showHint: Boolean) {
     Text(
-        text ?: stringResource(R.string.chart_tap_hint),
+        text ?: stringResource(R.string.chart_tap_hint).takeIf { showHint }.orEmpty(),
         style = MaterialTheme.typography.labelMedium,
         fontWeight = if (text != null) FontWeight.SemiBold else FontWeight.Normal,
         color = if (text != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -127,22 +127,28 @@ fun LineChart(
     val measurer = rememberTextMeasurer()
     val labelStyle = MaterialTheme.typography.labelSmall
     var selected by remember(points) { mutableStateOf<Int?>(null) }
+    // Подсказка «нажмите на график» показывается только до первого касания, потом строку занимает значение.
+    var touched by remember(points) { mutableStateOf(false) }
     val minY = points.minOf { it.y }
     val maxY = points.maxOf { it.y }
     val range = (maxY - minY).takeIf { it > 0.0 } ?: 1.0
     val maxIndex = points.indices.maxBy { points[it].y }
 
     Column(modifier.fillMaxWidth()) {
-        SelectionLine(selected?.let { labels[it] + " · " + formatDate(points[it].x) })
+        SelectionLine(selected?.let { labels[it] + " · " + formatDate(points[it].x) }, showHint = !touched)
         Canvas(
             Modifier
                 .fillMaxWidth()
                 .height(190.dp)
                 .pointerInput(points) {
-                    detectTapGestures { o -> selected = nearestIndex(o.x, pointXs(points.size, size.width.toFloat(), 8.dp.toPx())) }
+                    detectTapGestures {
+                        touched = true
+                        selected = nearestIndex(it.x, pointXs(points.size, size.width.toFloat(), 8.dp.toPx()))
+                    }
                 }
                 .pointerInput(points) {
                     detectHorizontalDragGestures { change, _ ->
+                        touched = true
                         selected = nearestIndex(change.position.x, pointXs(points.size, size.width.toFloat(), 8.dp.toPx()))
                     }
                 }
@@ -174,10 +180,20 @@ fun LineChart(
             offsets.forEachIndexed { i, o ->
                 drawCircle(lineColor, radius = (if (i == selected) 6 else 4).dp.toPx(), center = o)
             }
-            drawValueLabels(
-                measurer, labels, offsets, listOfNotNull(selected, points.lastIndex, maxIndex),
-                selected, labelStyle, labelColor, lineColor,
-            )
+            // Подписи только у ключевых точек — последней, максимальной и выбранной нажатием:
+            // подпись у каждой точки при ровном ходе сливается в «12 кг 12 кг 12 кг».
+            val labeled = listOfNotNull(selected, points.lastIndex, maxIndex).distinct()
+            val keyLayouts = labeled.map { i ->
+                measurer.measure(
+                    labels[i],
+                    labelStyle.copy(
+                        color = if (i == selected) lineColor else labelColor,
+                        fontWeight = if (i == selected) FontWeight.Bold else null,
+                    ),
+                )
+            }
+            placeLabels(keyLayouts, labeled.map { offsets[it] }, labeled.indices.toList(), top = 0f)
+                .forEach { (j, rect) -> drawText(keyLayouts[j], topLeft = rect.topLeft) }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(formatShortDate(points.first().x), style = MaterialTheme.typography.labelSmall)
@@ -208,14 +224,16 @@ fun BarChart(
     val labelStyle = MaterialTheme.typography.labelSmall
     val maxValue = values.max().coerceAtLeast(1)
     var selected by remember(values) { mutableStateOf<Int?>(null) }
+    var touched by remember(values) { mutableStateOf(false) }
     Column(modifier.fillMaxWidth()) {
-        SelectionLine(selected?.let { values[it].toString() + " · " + barLabels[it] })
+        SelectionLine(selected?.let { values[it].toString() + " · " + barLabels[it] }, showHint = !touched)
         Canvas(
             Modifier
                 .fillMaxWidth()
                 .height(130.dp)
                 .pointerInput(values) {
                     detectTapGestures { o ->
+                        touched = true
                         selected = (o.x / (size.width.toFloat() / values.size)).toInt().coerceIn(0, values.lastIndex)
                     }
                 }
