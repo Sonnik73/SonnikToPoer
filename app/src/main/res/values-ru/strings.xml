@@ -432,6 +432,7 @@
     <string name="palette_graphite">Графит</string>
     <string name="palette_forge">Кузница</string>
     <string name="palette_garrison">Гарнизон</string>
+    <string name="palette_cyberpunk">Киберпанк</string>
     <string name="palette_dynamic">Обои</string>
     <string name="widget_section">Виджет</string>
     <string name="widget_opacity">Прозрачность фона</string>

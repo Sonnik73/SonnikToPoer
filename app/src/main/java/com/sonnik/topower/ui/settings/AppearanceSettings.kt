@@ -184,5 +184,6 @@ private fun paletteLabel(palette: ThemePalette): Int = when (palette) {
     ThemePalette.GRAPHITE -> R.string.palette_graphite
     ThemePalette.FORGE -> R.string.palette_forge
     ThemePalette.GARRISON -> R.string.palette_garrison
+    ThemePalette.CYBERPUNK -> R.string.palette_cyberpunk
     ThemePalette.DYNAMIC -> R.string.palette_dynamic
 }

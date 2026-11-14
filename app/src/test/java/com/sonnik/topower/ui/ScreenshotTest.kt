@@ -262,6 +262,11 @@ class ScreenshotTest {
         waitText("Подтягивания", substring = true)
     }
 
+    @Test fun themeCyberpunkDark() = shoot("40-theme-cyberpunk-dark") {
+        theme(ThemePalette.CYBERPUNK, ThemeMode.DARK)
+        waitText("Можно тренировать", substring = true)
+    }
+
     @Test fun appearanceSettings() = shoot("25-appearance") {
         theme(ThemePalette.FOREST, ThemeMode.SYSTEM)
         compose.onAllNodesWithContentDescription("Настройки")[0].performClick()

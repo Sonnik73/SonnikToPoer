@@ -46,6 +46,9 @@ enum class ThemePalette(
     /** «Гарнизон»: олива, бронза и пергамент — в тон «Крепости». */
     GARRISON(Color(0xFF56682F), Color(0xFFBFD08A), Color(0xFF8C5A2B), Color(0xFFE2A66B), Color(0xFFA68A4E), tintStrength = 3f),
 
+    /** «Киберпанк»: неоновый жёлтый и циан Найт-Сити — в тёмном режиме цвета светятся на тёмном фоне. */
+    CYBERPUNK(Color(0xFF8A7000), Color(0xFFF9E30A), Color(0xFF00687E), Color(0xFF35D6E8), Color(0xFF0093A8), tintStrength = 2.5f),
+
     DYNAMIC(Color(0xFF2F5C8F), Color(0xFFA9C7F0), Color(0xFF2E7D5B), Color(0xFF8FD6AE), Color(0xFF2F5C8F));
 
     companion object {

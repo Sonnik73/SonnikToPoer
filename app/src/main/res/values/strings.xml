@@ -441,6 +441,7 @@
     <string name="palette_graphite">Graphite</string>
     <string name="palette_forge">Forge</string>
     <string name="palette_garrison">Garrison</string>
+    <string name="palette_cyberpunk">Cyberpunk</string>
     <string name="palette_dynamic">Wallpaper</string>
     <string name="widget_section">Widget</string>
     <string name="widget_opacity">Background transparency</string>

@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.47
+- New “Cyberpunk” palette: Night City neon yellow and cyan, glowing on the dark background
+
 ## 1.46
 - Statistics: “41 780 kg” instead of “41780” — easier to read
 - Charts: labels only on key points, no crowded “12 kg 12 kg 12 kg”
