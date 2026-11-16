@@ -21,12 +21,12 @@ val signingStoreFile = System.getenv("SIGNING_STORE_FILE")
 
 android {
     namespace = "com.sonnik.topower"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.sonnik.topower"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = appVersionCode
         versionName = appVersion
     }
@@ -52,7 +52,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 выкидывает неиспользуемый код и ресурсы: APK вдвое меньше. Правила для Room
+            // и kotlinx-serialization идут внутри самих библиотек, своих правил пока не понадобилось.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Воспроизводимая сборка: в APK не попадают сведения о git-коммите сборки.
             vcsInfo.include = false
             // Без ключа релиз собирается неподписанным — так его подписывает F-Droid.

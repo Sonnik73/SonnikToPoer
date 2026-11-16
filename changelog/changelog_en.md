@@ -1,5 +1,11 @@
 # What's new in SonnikToPower
 
+## 1.49
+- The app is four times smaller — 2.2 MB instead of 8.3: R8 shrinking enabled
+- Android SDK 36 and all libraries updated (Compose, Kotlin, Room)
+- UI tests now run on every CI build — screen regressions surface immediately
+- The “Repeat” button in history is more compact; hidden muscles in templates show “+3” instead of a trailing phrase
+
 ## 1.48
 - A more detailed muscle map: hands are palms with a thumb instead of ovals, feet with toes pointing out
 - Front traps run as a continuous slope from the neck to the shoulder; the neck gets sternocleidomastoid lines

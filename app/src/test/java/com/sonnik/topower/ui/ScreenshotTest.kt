@@ -67,8 +67,9 @@ class ScreenshotTest {
 
     @Before
     fun seed() {
-        // Скриншоты нужны только при ручном запуске сборки (SCREENSHOTS=1), релизную сборку не задерживают.
-        assumeTrue(System.getenv("SCREENSHOTS") == "1")
+        // Тесты интерфейса идут вместе с остальными — регрессии экранов видны в каждом CI-прогоне.
+        // SCREENSHOTS=1 — ещё и сохранять картинки; SCREENSHOTS=skip — отключить целиком (быстрая локальная сборка).
+        assumeTrue(System.getenv("SCREENSHOTS") != "skip")
         val app = ApplicationProvider.getApplicationContext<SonnikApp>()
         // Без запросов к GitHub: окна обновлений тесты показывают сами.
         app.updates.setEnabled(false)
@@ -419,7 +420,9 @@ class ScreenshotTest {
                 canvas.restore()
             }
             val dir = File("build/screenshots").apply { mkdirs() }
-            FileOutputStream(File(dir, "$name.png")).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            if (System.getenv("SCREENSHOTS") == "1") {
+                FileOutputStream(File(dir, "$name.png")).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            }
         }
     }
 }

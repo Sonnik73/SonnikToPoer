@@ -1,0 +1,4 @@
+• The app is four times smaller — 2.2 MB instead of 8.3: R8 shrinking enabled
+• Android SDK 36 and all libraries updated (Compose, Kotlin, Room)
+• UI tests now run on every CI build — screen regressions surface immediately
+• The “Repeat” button in history is more compact; hidden muscles in templates show “+3” instead of a trailing phrase
