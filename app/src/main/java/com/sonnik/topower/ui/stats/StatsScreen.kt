@@ -44,10 +44,12 @@ import com.sonnik.topower.ui.common.LineChart
 import com.sonnik.topower.ui.common.ScreenScaffold
 import com.sonnik.topower.ui.common.SectionCard
 import com.sonnik.topower.ui.common.SectionTitle
+import com.sonnik.topower.ui.common.StatDelta
 import com.sonnik.topower.ui.common.StatRow
 import com.sonnik.topower.ui.common.kg
 import com.sonnik.topower.ui.share.ShareResultsButton
 import com.sonnik.topower.ui.workout.formatHoursMinutes
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -76,17 +78,47 @@ fun StatsScreen(openExercise: (String) -> Unit) {
         }
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
-        // Всё, кроме плиток «На этой неделе» и «В этом месяце», считаем только за выбранный период.
+        // Всё считаем только за выбранный период; конечные периоды ещё и сравниваются с предыдущим таким же.
         val start = period.start(today, zone) ?: Long.MIN_VALUE
         val periodDates = remember(workoutDates, start) { workoutDates.filter { it >= start } }
         val periodSets = remember(sets, start) { sets.filter { it.workoutDate >= start } }
         val periodWorkouts = workouts.filter { it.startedAt >= start }
         val periodWeights = bodyWeights.filter { it.startedAt >= start }
-        val overall = remember(workoutDates, sets) {
-            computeOverallStats(workoutDates, sets.map { it.toRecord() }, today, zone)
-        }
         val inPeriod = remember(periodDates, periodSets) {
             computeOverallStats(periodDates, periodSets.map { it.toRecord() }, today, zone)
+        }
+        // Прошлый период того же размера: неделя — предыдущие 7 дней, год — предыдущий год.
+        val prevStart = period.days?.let { today.minusDays(2 * it - 1).atStartOfDay(zone).toInstant().toEpochMilli() }
+        val prevStats = remember(workoutDates, sets, prevStart, start) {
+            if (prevStart == null) null
+            else computeOverallStats(
+                workoutDates.filter { it in prevStart until start },
+                sets.filter { it.workoutDate in prevStart until start }.map { it.toRecord() },
+                today, zone,
+            )
+        }
+        // Плитки «Тренировок» и «Подходов» сравниваются штуками, тоннаж — процентами.
+        fun countDelta(cur: Int): StatDelta? {
+            val prev = prevStats?.totalWorkouts ?: return null
+            val d = cur - prev
+            if (d == 0) return null
+            return StatDelta((if (d > 0) "+" else "−") + kotlin.math.abs(d), d > 0)
+        }
+        fun percentDelta(cur: Double, prev: Double?): StatDelta? {
+            if (prev == null || prev <= 0.0) return null
+            val p = (cur - prev) / prev * 100.0
+            if (kotlin.math.abs(p) < 0.5) return null
+            return StatDelta((if (p > 0) "+" else "−") + formatNumber(kotlin.math.abs(p), 0) + " %", p > 0)
+        }
+        // Калории за прошлый период — из карточек тренировок (часы), для дельты плитки ккал.
+        val prevWorkoutCalories = prevStart?.let { ps ->
+            val c = workouts.filter { it.startedAt in ps until start }.mapNotNull { it.calories }
+            if (c.isEmpty()) null else c.sum().toDouble()
+        }
+        // Темп: тренировок в неделю. Для «всего времени» — от первой тренировки.
+        val weeks = period.days?.let { it / 7.0 } ?: run {
+            val firstDay = Instant.ofEpochMilli(workoutDates.min()).atZone(zone).toLocalDate()
+            maxOf(1.0, (today.toEpochDay() - firstDay.toEpochDay() + 1) / 7.0)
         }
         val (bucketUnit, buckets) = remember(workoutDates, period) { activityBuckets(workoutDates, period, today, zone) }
         val workoutsPerExercise = remember(periodSets) {
@@ -109,25 +141,56 @@ fun StatsScreen(openExercise: (String) -> Unit) {
             item { PeriodChips(period, onSelect = { period = it }) }
             item {
                 StatRow(
-                    Stat(stringResource(R.string.stat_total_workouts), inPeriod.totalWorkouts.toString(), AppIcons.Dumbbell),
-                    Stat(stringResource(R.string.stat_this_week), overall.workoutsThisWeek.toString(), Icons.Filled.DateRange),
-                    Stat(stringResource(R.string.stat_this_month), overall.workoutsThisMonth.toString(), Icons.Filled.DateRange),
+                    Stat(
+                        stringResource(R.string.stat_total_workouts),
+                        inPeriod.totalWorkouts.toString(),
+                        AppIcons.Dumbbell,
+                        countDelta(inPeriod.totalWorkouts),
+                    ),
+                    Stat(
+                        stringResource(R.string.stat_total_sets),
+                        formatBig(inPeriod.totalSets.toDouble()),
+                        Icons.Filled.Check,
+                        prevStats?.let { p ->
+                            val d = inPeriod.totalSets - p.totalSets
+                            if (d == 0) null else StatDelta((if (d > 0) "+" else "−") + kotlin.math.abs(d), d > 0)
+                        },
+                    ),
+                    Stat(
+                        stringResource(R.string.stat_tonnage),
+                        formatBig(inPeriod.totalTonnage),
+                        AppIcons.Weight,
+                        percentDelta(inPeriod.totalTonnage, prevStats?.totalTonnage),
+                    ),
                 )
+            }
+            // Темп и редкие метрики за тот же период (подписи — идентификаторы строк: stringResource вне item нельзя).
+            val extraTiles = buildList {
+                add(Triple(R.string.stat_avg_per_week, formatNumber(inPeriod.totalWorkouts / weeks, 1), Icons.Filled.DateRange))
+                if (inPeriod.totalDistanceKm > 0) {
+                    add(Triple(R.string.stat_distance, formatNumber(inPeriod.totalDistanceKm), Icons.Filled.Place))
+                }
+                if (inPeriod.totalDurationSec > 0) {
+                    add(Triple(R.string.stat_duration, formatDuration(inPeriod.totalDurationSec.toInt()), AppIcons.Clock))
+                }
             }
             item {
-                StatRow(
-                    Stat(stringResource(R.string.stat_total_sets), formatBig(inPeriod.totalSets.toDouble()), Icons.Filled.Check),
-                    Stat(stringResource(R.string.stat_tonnage), formatBig(inPeriod.totalTonnage), AppIcons.Weight),
-                )
+                StatRow(*extraTiles.map { (label, value, icon) -> Stat(stringResource(label), value, icon) }.toTypedArray())
             }
-            // Данные со смарт-часов: сумма ккал, средняя длительность и средний максимальный пульс.
+            // Данные со смарт-часов: сумма ккал, средняя длительность и средний пик пульса.
             val calories = periodWorkouts.mapNotNull { it.calories }
             val durations = periodWorkouts.mapNotNull { it.watchDurationSec }
             val maxHrs = periodWorkouts.mapNotNull { it.maxHeartRate }
             if (calories.isNotEmpty() || durations.isNotEmpty() || maxHrs.isNotEmpty()) {
+                item { SectionTitle(stringResource(R.string.stat_watch_data)) }
                 item {
                     StatRow(
-                        Stat(stringResource(R.string.stat_calories), if (calories.isEmpty()) "—" else formatBig(calories.sum().toDouble()), AppIcons.Flame),
+                        Stat(
+                            stringResource(R.string.stat_calories),
+                            if (calories.isEmpty()) "—" else formatBig(calories.sum().toDouble()),
+                            AppIcons.Flame,
+                            percentDelta(calories.sum().toDouble(), prevWorkoutCalories),
+                        ),
                         Stat(
                             stringResource(R.string.stat_avg_duration),
                             if (durations.isEmpty()) "—" else formatHoursMinutes(durations.average().toInt()),
@@ -139,15 +202,6 @@ fun StatsScreen(openExercise: (String) -> Unit) {
                             Icons.Filled.Favorite,
                         ),
                     )
-                }
-            }
-            val extraTiles = buildList {
-                if (inPeriod.totalDistanceKm > 0) add(Triple(R.string.stat_distance, formatNumber(inPeriod.totalDistanceKm), Icons.Filled.Place))
-                if (inPeriod.totalDurationSec > 0) add(Triple(R.string.stat_duration, formatDuration(inPeriod.totalDurationSec.toInt()), AppIcons.Clock))
-            }
-            if (extraTiles.isNotEmpty()) {
-                item {
-                    StatRow(*extraTiles.map { (label, value, icon) -> Stat(stringResource(label), value, icon) }.toTypedArray())
                 }
             }
             item {

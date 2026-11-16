@@ -160,11 +160,14 @@ fun Card(
     )
 }
 
-/** Плитка статистики: подпись, значение и значок. */
-data class Stat(val label: String, val value: String, val icon: ImageVector? = null)
+/** Изменение показателя к прошлому периоду: «+3» или «−12 %» и направление (рост / падение). */
+data class StatDelta(val text: String, val up: Boolean)
+
+/** Плитка статистики: подпись, значение, значок и изменение к прошлому периоду. */
+data class Stat(val label: String, val value: String, val icon: ImageVector? = null, val delta: StatDelta? = null)
 
 @Composable
-fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
+fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: ImageVector? = null, delta: StatDelta? = null) {
     Card(modifier = modifier) {
         // Значок — в правом верхнем углу, чтобы плитка не становилась выше.
         Box(Modifier.padding(12.dp).fillMaxWidth()) {
@@ -176,6 +179,14 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: 
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Динамика к прошлому периоду: рост — зелёным, падение — красным; без изменения — не показываем.
+                if (delta != null) {
+                    Text(
+                        (if (delta.up) "↑ " else "↓ ") + delta.text,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (delta.up) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+                    )
+                }
             }
             if (icon != null) {
                 Box(
@@ -197,7 +208,7 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier, icon: 
 fun StatRow(vararg tiles: Stat) {
     // Плитки одной высоты, даже если подпись у одной из них в две строки.
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        tiles.forEach { StatTile(it.label, it.value, Modifier.weight(1f).fillMaxHeight(), it.icon) }
+        tiles.forEach { StatTile(it.label, it.value, Modifier.weight(1f).fillMaxHeight(), it.icon, it.delta) }
     }
 }
 

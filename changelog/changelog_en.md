@@ -1,5 +1,11 @@
 # What's new in SonnikToPower
 
+## 1.50
+- Clearer statistics: the Workouts, Sets and Tonnage tiles now compare against the previous period — “↑ +3” or “↓ 12 %”
+- “This week” and “This month” tiles replaced by “Per week on average” over the selected period
+- Watch tiles are grouped under a “Watch data” heading; “Avg. max heart rate” renamed to “Avg peak HR”
+- Exercise stats explain that the estimated maximum is calculated with the Epley formula, not a set you did
+
 ## 1.49
 - The app is four times smaller — 2.2 MB instead of 8.3: R8 shrinking enabled
 - Android SDK 36 and all libraries updated (Compose, Kotlin, Room)

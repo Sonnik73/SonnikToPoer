@@ -125,8 +125,8 @@
     <!-- Stats -->
     <string name="stats_overview">Overview</string>
     <string name="stat_total_workouts">Workouts</string>
-    <string name="stat_this_week">This week</string>
-    <string name="stat_this_month">This month</string>
+    <string name="stat_avg_per_week">Per week on average</string>
+    <string name="stat_watch_data">Watch data</string>
     <string name="stat_total_sets">Working sets</string>
     <string name="stat_tonnage">Tonnage, kg</string>
     <string name="stat_distance">Distance, km</string>
@@ -148,6 +148,7 @@
     <string name="metric_weight">Weight</string>
     <string name="metric_reps">Reps</string>
     <string name="metric_e1rm">Est. 1RM</string>
+    <string name="metric_e1rm_hint">Estimated one-rep maximum (Epley formula) — calculated, not a set you actually did.</string>
     <string name="metric_volume">Volume</string>
     <string name="metric_time">Time</string>
     <string name="metric_distance">Distance</string>
@@ -269,7 +270,7 @@
     <string name="watch_calories_short">%d kcal</string>
     <string name="stat_calories">Kcal</string>
     <string name="stat_avg_duration">Avg. time</string>
-    <string name="stat_avg_max_hr">Avg. max heart rate</string>
+    <string name="stat_avg_max_hr">Avg peak HR</string>
 
     <!-- Changelog -->
     <string name="whats_new">What\'s new</string>

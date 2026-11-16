@@ -119,8 +119,8 @@
 
     <string name="stats_overview">Общая статистика</string>
     <string name="stat_total_workouts">Тренировок</string>
-    <string name="stat_this_week">На этой неделе</string>
-    <string name="stat_this_month">В этом месяце</string>
+    <string name="stat_avg_per_week">В среднем за неделю</string>
+    <string name="stat_watch_data">Данные с часов</string>
     <string name="stat_total_sets">Рабочих подходов</string>
     <string name="stat_tonnage">Тоннаж, кг</string>
     <string name="stat_distance">Дистанция, км</string>
@@ -142,6 +142,7 @@
     <string name="metric_weight">Вес</string>
     <string name="metric_reps">Повторения</string>
     <string name="metric_e1rm">Расч. максимум</string>
+    <string name="metric_e1rm_hint">Расчётный максимум на одно повторение (формула Эпли) — вычислен, а не выполнен подходом.</string>
     <string name="metric_volume">Объём</string>
     <string name="metric_time">Время</string>
     <string name="metric_distance">Дистанция</string>
@@ -258,7 +259,7 @@
     <string name="watch_calories_short">%d ккал</string>
     <string name="stat_calories">Ккал</string>
     <string name="stat_avg_duration">Ср. время</string>
-    <string name="stat_avg_max_hr">Ср. макс. пульс</string>
+    <string name="stat_avg_max_hr">Средний пик пульса</string>
 
     <string name="whats_new">Что нового</string>
     <string name="whats_new_in">Что нового в версии %s</string>

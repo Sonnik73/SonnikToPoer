@@ -114,6 +114,15 @@ fun ExerciseStatsScreen(exerciseId: String, onBack: () -> Unit) {
                         Stat(stringResource(R.string.stat_max), formatMetric(summary.metric, summary.best.value)),
                         Stat(stringResource(R.string.stat_last), formatMetric(summary.metric, summary.last.value)),
                     )
+                    // 1ПМ — расчётная величина; без пояснения цифра выглядит как реальный подход.
+                    if (summary.metric == Metric.E1RM) {
+                        Text(
+                            stringResource(R.string.metric_e1rm_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
                 }
                 item {
                     val gain = formatMetric(summary.metric, summary.gain)
