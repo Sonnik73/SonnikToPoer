@@ -217,7 +217,10 @@ class ScreenshotTest {
         waitText("Таймер отдыха")
         listWith("Таймер отдыха").performScrollToNode(hasText("Что нового"))
         click("Что нового")
-        waitText("Версия 1.44")
+        // Версию берём из gradle.properties — жёсткий номер в тесте забывали обновлять вместе с релизом.
+        val version = File("../gradle.properties").readLines()
+            .first { it.startsWith("appVersion=") }.substringAfter("=").trim()
+        waitText("Версия $version")
     }
 
     @Test fun exercises() = shoot("06-exercises") {
