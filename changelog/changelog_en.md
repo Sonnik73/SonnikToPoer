@@ -1,5 +1,10 @@
 # What's new in SonnikToPower
 
+## 1.48
+- A more detailed muscle map: hands are palms with a thumb instead of ovals, feet with toes pointing out
+- Front traps run as a continuous slope from the neck to the shoulder; the neck gets sternocleidomastoid lines
+- Serratus muscles follow the rib arcs at an angle; the quad’s medial head connects to the middle of the thigh
+
 ## 1.47
 - New “Cyberpunk” palette: Night City neon yellow and cyan, glowing on the dark background
 

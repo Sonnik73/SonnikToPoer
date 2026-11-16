@@ -56,7 +56,7 @@ private val FEMALE_WIDTH = listOf(
 
 private fun femaleWidth(x: Float, y: Float): Float {
     // Руки от плеча до кисти сужаются вместе с плечами и не меняют форму.
-    if (kotlin.math.abs(x - 50f) > 19.5f && y in 28f..102f) return 0.86f
+    if (kotlin.math.abs(x - 50f) > 19.5f && y in 28f..104f) return 0.86f
     val i = FEMALE_WIDTH.indexOfFirst { it.first >= y }.coerceAtLeast(1)
     val (y0, k0) = FEMALE_WIDTH[i - 1]
     val (y1, k1) = FEMALE_WIDTH[i]
@@ -390,14 +390,24 @@ private fun silhouette(): List<APath> = buildList {
         listOf(pt(35, 100), pt(33, 116), pt(34.5, 134), pt(37, 148), pt(46, 150), pt(48.5, 132), pt(49.5, 114), pt(50, 106)),
         listOf(pt(36.5, 146), pt(35, 160), pt(36.5, 176), pt(38.5, 190), pt(44.5, 190), pt(45.5, 174), pt(46.5, 160), pt(46, 148)),
     ).forEach { part { spline(it) }; part { spline(mirror(it)) } }
-    part { oval(18f, 99f, 3.6f, 5.5f) }
-    part { oval(82f, 99f, 3.6f, 5.5f) }
-    part { oval(41.5f, 194f, 6f, 3f) }
-    part { oval(58.5f, 194f, 6f, 3f) }
+    // Кисть: ладонь с большим пальцем к корпусу — овал выглядел как мяч.
+    val hand = listOf(
+        pt(18.4, 93.4), pt(20.8, 94.2), pt(22.2, 96.4), pt(22.4, 98.4), pt(21.2, 99.4),
+        pt(21.6, 101), pt(18.8, 102.6), pt(15.8, 101.8), pt(14.6, 98.6), pt(15.2, 95.4),
+    )
+    part { spline(hand) }
+    part { spline(mirror(hand)) }
+    // Стопа: пятка у голени, носки наружу — вместо плоского овала.
+    val foot = listOf(
+        pt(40.8, 188.8), pt(44.4, 190), pt(45.4, 193), pt(42.6, 195.2), pt(38.4, 195.4), pt(36.2, 192.6), pt(37.4, 189.8),
+    )
+    part { spline(foot) }
+    part { spline(mirror(foot)) }
 }
 
 private fun frontFigure() = figure {
-    sym(Muscle.TRAPS, 160f, listOf(pt(45, 25.5), pt(40, 28.2), pt(34.5, 30.2), pt(40, 30.8), pt(44.5, 29.5)))
+    // Трапеции спереди: непрерывный откос от шеи к плечу, а не оторванное пятно у шеи.
+    sym(Muscle.TRAPS, 155f, listOf(pt(46.6, 25), pt(41, 26.2), pt(35.8, 28), pt(31.8, 30.2), pt(33.8, 31.8), pt(38.8, 31.6), pt(44, 30.4), pt(46.8, 28.4)))
     sym(Muscle.SIDE_DELTS, 100f, listOf(pt(30, 30.5), pt(25.8, 32.2), pt(23.4, 37.5), pt(23.8, 44), pt(26.5, 43), pt(27.3, 36.5)), fan = pt(24.6, 43.6))
     sym(Muscle.FRONT_DELTS, 105f, listOf(pt(34, 30), pt(29.5, 31), pt(27.6, 35.5), pt(27.8, 41.5), pt(30, 45), pt(33, 41), pt(34.5, 35.5)), fan = pt(29.6, 44.5))
     if (buildingFemale) {
@@ -411,18 +421,19 @@ private fun frontFigure() = figure {
     sym(Muscle.FOREARMS, 100f, listOf(pt(26.5, 63.5), pt(22, 64.8), pt(19.3, 72), pt(17.6, 82), pt(17.2, 90), pt(20, 90.8), pt(22.4, 82), pt(25, 73), pt(27, 67.5)))
     sym(Muscle.BRACHIORADIALIS, 105f, listOf(pt(24.2, 62.8), pt(21.4, 64.4), pt(19.4, 69.5), pt(18.6, 76.5), pt(19.8, 78.6), pt(21.8, 72.8), pt(24, 67.2), pt(25.4, 64.6)))
     sym(Muscle.OBLIQUES, 55f, listOf(pt(42.8, 52.5), pt(38.5, 51), pt(35.5, 54.5), pt(35.2, 64), pt(36, 76), pt(36.5, 86), pt(39, 92), pt(42.8, 93.5), pt(43.3, 80), pt(43.2, 64)))
-    // У женской фигуры зубчатая ниже — под грудью.
+    // У женской фигуры зубчатая ниже — под грудью; пластины идут по косой, как межрёберные дуги.
     val serratusShift = if (buildingFemale) 3.2 else 0.0
-    sym(Muscle.SERRATUS, 160f, listOf(pt(37.4, 45.2 + serratusShift), pt(34.8, 45.8 + serratusShift), pt(33.5, 47.6 + serratusShift), pt(34.6, 48.6 + serratusShift), pt(37.6, 47.8 + serratusShift)))
-    sym(Muscle.SERRATUS, 160f, listOf(pt(37.8, 48.8 + serratusShift), pt(34.8, 49.4 + serratusShift), pt(33.7, 51.4 + serratusShift), pt(35, 52.2 + serratusShift), pt(38.1, 51.3 + serratusShift)))
-    sym(Muscle.SERRATUS, 160f, listOf(pt(38.2, 52.4 + serratusShift), pt(35.2, 53 + serratusShift), pt(34.4, 55 + serratusShift), pt(35.8, 55.7 + serratusShift), pt(38.5, 54.7 + serratusShift)))
+    sym(Muscle.SERRATUS, 155f, listOf(pt(38.8, 45.4 + serratusShift), pt(36, 46.6 + serratusShift), pt(34.6, 48.8 + serratusShift), pt(35.9, 49.4 + serratusShift), pt(39, 47.4 + serratusShift)))
+    sym(Muscle.SERRATUS, 155f, listOf(pt(39.2, 48.8 + serratusShift), pt(36, 50.2 + serratusShift), pt(34.8, 52.6 + serratusShift), pt(36.2, 53.1 + serratusShift), pt(39.5, 51 + serratusShift)))
+    sym(Muscle.SERRATUS, 155f, listOf(pt(39.6, 52.2 + serratusShift), pt(36.6, 53.8 + serratusShift), pt(35.6, 56.4 + serratusShift), pt(37, 56.8 + serratusShift), pt(39.9, 54.4 + serratusShift)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 51.5), pt(45.2, 51.6), pt(44, 54), pt(44, 58), pt(45, 59.6), pt(49.3, 59.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 61.2), pt(45, 61.2), pt(43.9, 63.5), pt(43.9, 68), pt(45, 69.6), pt(49.3, 69.6)))
     sym(Muscle.ABS, 0f, listOf(pt(49.3, 71.2), pt(45, 71.2), pt(43.9, 73.5), pt(43.9, 78), pt(45, 79.6), pt(49.3, 79.6)))
     sym(Muscle.ABS, 90f, listOf(pt(49.3, 81.2), pt(45, 81.2), pt(44, 84), pt(44.6, 90), pt(46.8, 95), pt(49.3, 97)))
     sym(Muscle.QUADS, 85f, listOf(pt(36.5, 104), pt(34, 114), pt(33.8, 126), pt(35.5, 138), pt(38.5, 146), pt(40.5, 140), pt(40.8, 124), pt(39.8, 110)))
     sym(Muscle.QUADS, 90f, listOf(pt(42.5, 104), pt(40.6, 113), pt(40.8, 127), pt(42, 139), pt(44.5, 143), pt(46.4, 130), pt(46.6, 115), pt(45.5, 107)))
-    sym(Muscle.QUADS, 70f, listOf(pt(46.8, 128), pt(44.8, 135), pt(43.8, 142), pt(45, 148.5), pt(48, 146.5), pt(48.8, 137)))
+    // Медиальная головка тянется от середины бедра к колену, а не висит отдельной каплей.
+    sym(Muscle.QUADS, 70f, listOf(pt(47.2, 120), pt(45.2, 130), pt(44, 140), pt(45.4, 148), pt(48.2, 144), pt(49, 130)))
     sym(Muscle.ADDUCTORS, 70f, listOf(pt(49.4, 104.5), pt(47.2, 108), pt(46.8, 116), pt(47, 125), pt(48.6, 123), pt(49.7, 113)))
     sym(Muscle.CALVES, 95f, listOf(pt(37.4, 152.5), pt(35.8, 160), pt(36.3, 169.5), pt(38, 175), pt(39.3, 167), pt(39, 157)))
     sym(Muscle.TIBIALIS, 92f, listOf(pt(41, 151.8), pt(39.6, 156.5), pt(39.7, 166), pt(40.7, 177), pt(42, 181), pt(42.6, 169), pt(42.5, 158), pt(42.2, 153)))
@@ -434,8 +445,9 @@ private fun frontFigure() = figure {
     vein(listOf(pt(23.6, 65), pt(21.8, 71), pt(20.2, 78), pt(19, 85), pt(18.4, 89.5)))
     vein(listOf(pt(21.8, 71), pt(23.6, 76), pt(23, 82), pt(21.6, 88)))
     vein(listOf(pt(43.2, 84), pt(43.6, 89), pt(44.8, 94), pt(46.6, 100)))
-    // Ключицы, грудина, пупок и складка над коленом — мелкие детали поверх.
+    // Ключицы, грудино-ключично-сосцевидные, грудина, пупок и складка над коленом — мелкие детали поверх.
     crease(listOf(pt(46.6, 27.6), pt(42, 28.4), pt(37.6, 29.8)))
+    crease(listOf(pt(47.6, 20.4), pt(46.8, 23.6), pt(48.4, 26.6)))
     // Складка под грудью.
     if (buildingFemale) crease(listOf(pt(36.2, 50.6), pt(39.8, 54.6), pt(44.8, 55.4), pt(48.6, 53.6)))
     crease(listOf(pt(50, 33), pt(50, 47.5)), symmetric = false)
