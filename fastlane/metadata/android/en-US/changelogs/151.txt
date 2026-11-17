@@ -1,0 +1,1 @@
+• The “Per week” tile label is shorter now — no two-line wrap, stat rows stay even

@@ -1,5 +1,8 @@
 # What's new in SonnikToPower
 
+## 1.51
+- The “Per week” tile label is shorter now — no two-line wrap, stat rows stay even
+
 ## 1.50
 - Clearer statistics: the Workouts, Sets and Tonnage tiles now compare against the previous period — “↑ +3” or “↓ 12 %”
 - “This week” and “This month” tiles replaced by “Per week on average” over the selected period

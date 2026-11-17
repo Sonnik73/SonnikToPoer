@@ -125,7 +125,7 @@
     <!-- Stats -->
     <string name="stats_overview">Overview</string>
     <string name="stat_total_workouts">Workouts</string>
-    <string name="stat_avg_per_week">Per week on average</string>
+    <string name="stat_avg_per_week">Per week</string>
     <string name="stat_watch_data">Watch data</string>
     <string name="stat_total_sets">Working sets</string>
     <string name="stat_tonnage">Tonnage, kg</string>

@@ -119,7 +119,7 @@
 
     <string name="stats_overview">Общая статистика</string>
     <string name="stat_total_workouts">Тренировок</string>
-    <string name="stat_avg_per_week">В среднем за неделю</string>
+    <string name="stat_avg_per_week">В неделю</string>
     <string name="stat_watch_data">Данные с часов</string>
     <string name="stat_total_sets">Рабочих подходов</string>
     <string name="stat_tonnage">Тоннаж, кг</string>
